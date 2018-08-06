@@ -5,12 +5,12 @@ namespace BlockchainSimulator.DataAccess.Model.Transaction
     public class Node : MerkleNode
     {
         [JsonProperty("leftNode")]
-        public Node LeftNode { get; }
+        public MerkleNode LeftNode { get; }
         
         [JsonProperty("rightNode")]
-        public Node RightNode { get; }
+        public MerkleNode RightNode { get; }
         
-        public Node(string hash, Node leftNode, Node rightNode) : base(hash)
+        public Node(string hash, MerkleNode leftNode, MerkleNode rightNode) : base(hash)
         {
             LeftNode = leftNode;
             RightNode = rightNode;

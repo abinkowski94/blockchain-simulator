@@ -15,10 +15,10 @@ namespace BlockchainSimulator.DataAccess.Model.Block
         [JsonProperty("transactionCounter")]
         public int TransactionCounter => Transactions.Count;
 
-        public Body(Node merkleTree)
+        public Body(HashSet<Transaction.Transaction> transactions, Node merkleTree)
         {
             MerkleTree = merkleTree;
-            Transactions = new HashSet<Transaction.Transaction>();
+            Transactions = transactions;
         }
     }
 }
