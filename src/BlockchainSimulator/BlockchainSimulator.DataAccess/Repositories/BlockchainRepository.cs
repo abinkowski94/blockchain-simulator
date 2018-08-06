@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using BlockchainSimulator.DataAccess.Converters;
 using BlockchainSimulator.DataAccess.Model;
 using Newtonsoft.Json;
 
@@ -13,12 +15,16 @@ namespace BlockchainSimulator.DataAccess.Repositories
             _fileRepository = fileRepository;
             _blockchainFileName = "blockchain.json";
         }
-        
+
         public Blockchain GetBlockchain()
         {
             var json = _fileRepository.GetFile(_blockchainFileName);
-            var result = JsonConvert.DeserializeObject<Blockchain>(json);
-            
+            var settings = new JsonSerializerSettings
+            {
+                Converters = new List<JsonConverter> {new BlockConverter(), new NodeConverter()}
+            };
+            var result = JsonConvert.DeserializeObject<Blockchain>(json, settings);
+
             return result;
         }
 
