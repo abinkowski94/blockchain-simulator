@@ -49,15 +49,14 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Providers
 
             // Act
             var result = _merkleTreeProvider.GetMerkleTree(transactions);
-
+            
             // Assert
             Assert.NotNull(result);
             Assert.Equal(resultHash, result.Hash);
         }
 
-        public static IEnumerable<object[]> Data => new List<object[]>
+        public static TheoryData<HashSet<Transaction>, string> Data => new TheoryData<HashSet<Transaction>, string>
         {
-            new object[]
             {
                 new HashSet<Transaction>
                 {
@@ -74,7 +73,6 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Providers
                 },
                 "b0e7e9a9000ed690ce9840216710d5b752b73dc1d87368d152edf03c14533c46"
             },
-            new object[]
             {
                 new HashSet<Transaction>
                 {
