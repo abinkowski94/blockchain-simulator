@@ -1,6 +1,6 @@
 namespace BlockchainSimulator.BusinessLogic.Model.ValidationResults
 {
-    public class ValidationResult
+    public struct ValidationResult
     {
         public bool IsSuccess { get; }
         public string[] Errors { get; }

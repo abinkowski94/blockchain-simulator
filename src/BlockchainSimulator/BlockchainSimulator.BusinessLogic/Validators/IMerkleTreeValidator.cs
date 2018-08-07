@@ -5,6 +5,6 @@ namespace BlockchainSimulator.BusinessLogic.Validators
 {
     public interface IMerkleTreeValidator
     {
-        ValidationResult Validate(Node tree);
+        ValidationResult Validate(MerkleNode tree);
     }
 }

@@ -5,9 +5,14 @@ using System.Text;
 namespace BlockchainSimulator.BusinessLogic.Services
 {
     public class EncryptionService : IEncryptionService
-    {        
+    {
         public string GetSha256Hash(string value)
         {
+            if (value == null)
+            {
+                return null;
+            }
+
             using (var hashFunction = SHA256.Create())
             {
                 return string.Concat(hashFunction
