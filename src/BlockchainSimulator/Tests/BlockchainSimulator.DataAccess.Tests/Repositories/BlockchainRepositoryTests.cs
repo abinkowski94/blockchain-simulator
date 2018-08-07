@@ -93,12 +93,12 @@ namespace BlockchainSimulator.DataAccess.Tests.Repositories
             Assert.NotNull(result.Blocks);
             Assert.Equal(2, result.Blocks.Count);
             Assert.True(result.Blocks.First().IsGenesis);
-            Assert.Equal(result.Blocks.First().Header.Target, "0000");
+            Assert.Equal("0000", result.Blocks.First().Header.Target);
             Assert.Equal(
                 "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
                 result.Blocks.First().Body.Transactions.First().Sender);
             Assert.False(result.Blocks.Last().IsGenesis);
-            Assert.Equal(result.Blocks.Last().Header.Target, "0000");
+            Assert.Equal("0000", result.Blocks.Last().Header.Target);
             Assert.Equal(
                 @"MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAYnEJ5opsGtKxG6AJ9XxZznKVKcRuyJIh6LyU9UXNJg73j1YB/sYHvm07fP3cCixmSboHJru3ycE4yjZAednMxQIDAQAB",
                 result.Blocks.Last().Body.Transactions.First().Sender);
