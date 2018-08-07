@@ -6,9 +6,5 @@ namespace BlockchainSimulator.DataAccess.Model.Block
     {
         [JsonProperty("isGenesis")]
         public override bool IsGenesis => true;
-
-        public GenesisBlock(Body body, Header header, string id) : base(body, header, id)
-        {
-        }
     }
 }

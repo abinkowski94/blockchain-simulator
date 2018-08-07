@@ -1,19 +1,22 @@
 using Newtonsoft.Json;
 
-namespace BlockchainSimulator.DataAccess.Model.Block
+namespace BlockchainSimulator.BusinessLogic.Model.Block
 {
     public abstract class BlockBase
     {
-        [JsonProperty("id")] 
         public string Id { get; set; }
 
-        [JsonProperty("body")] 
         public Body Body { get; set; }
 
-        [JsonProperty("header")] 
         public Header Header { get; set; }
 
-        [JsonProperty("isGenesis")] 
         public abstract bool IsGenesis { get; }
+
+        public string BlockJson { get; set; }
+
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this);
+        }
     }
 }

@@ -5,27 +5,23 @@ namespace BlockchainSimulator.DataAccess.Model.Transaction
     public class Transaction
     {
         [JsonProperty("id")]
-        public string Id { get; }
+        public string Id { get; set; }
         
         [JsonProperty("sender")]
-        public string Sender { get; }
+        public string Sender { get; set; }
         
         [JsonProperty("recipient")]
-        public string Recipient { get; }
+        public string Recipient { get; set; }
         
         [JsonProperty("amount")]
-        public decimal Amount { get; }
+        public decimal Amount { get; set; }
         
         [JsonProperty("fee")]
-        public decimal Fee { get; }
+        public decimal Fee { get; set; }
 
-        public Transaction(string id, string sender, string recipient, decimal amount, decimal fee)
+        public override string ToString()
         {
-            Id = id;
-            Sender = sender;
-            Recipient = recipient;
-            Amount = amount;
-            Fee = fee;
+            return JsonConvert.SerializeObject(this);
         }
     }
 }

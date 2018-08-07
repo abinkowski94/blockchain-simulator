@@ -8,4 +8,8 @@
       <ProjectReference Include="..\BlockchainSimulator.DataAccess\BlockchainSimulator.DataAccess.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="AutoMapper" Version="7.0.1" />
+    </ItemGroup>
+
 </Project>
