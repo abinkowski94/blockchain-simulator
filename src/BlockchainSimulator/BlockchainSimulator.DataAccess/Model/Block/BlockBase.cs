@@ -13,7 +13,7 @@ namespace BlockchainSimulator.DataAccess.Model.Block
         [JsonProperty("header")] 
         public Header Header { get; set; }
 
-        [JsonProperty("isGenesis")] 
+        [JsonProperty("isGenesis")]
         public abstract bool IsGenesis { get; }
     }
 }

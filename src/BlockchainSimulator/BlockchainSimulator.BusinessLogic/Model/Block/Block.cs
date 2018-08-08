@@ -1,11 +1,16 @@
+using Newtonsoft.Json;
+
 namespace BlockchainSimulator.BusinessLogic.Model.Block
 {
     public class Block : BlockBase
     {
-        public string ParentId => Parent.Id;
-
-        public Block Parent { get; set; }
-
+        [JsonProperty("parentId")]
+        public string ParentId { get; set; }
+        
+        [JsonProperty("isGenesis")]
         public override bool IsGenesis => false;
+
+        [JsonIgnore]
+        public Block Parent { get; set; }
     }
 }

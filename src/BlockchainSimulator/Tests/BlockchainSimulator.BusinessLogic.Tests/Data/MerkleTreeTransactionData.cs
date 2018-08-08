@@ -19,12 +19,10 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                             Sender = "00000000",
                             Recipient = "11111111",
                             Amount = 1000,
-                            Fee = 0,
-                            TransactionJson =
-                                "{\"id\": \"1\", \"Sender\": \"00000000\", \"Recipient\": 11111111, \"Amount\" = 1000, \"Fee\" = 0}"
+                            Fee = 0
                         }
                     },
-                    "b0e7e9a9000ed690ce9840216710d5b752b73dc1d87368d152edf03c14533c46"
+                    "075e2ee940f291540722d8c3ea2433a9e4806a8b4dfb3a58d7fd338774e0bb66"
                 },
                 {
                     new HashSet<Transaction>
@@ -35,9 +33,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                             Sender = "00000000",
                             Recipient = "11111111",
                             Amount = 1000,
-                            Fee = 0,
-                            TransactionJson =
-                                "{\"id\": \"1\", \"Sender\": \"00000000\", \"Recipient\": 11111111, \"Amount\" = 1000, \"Fee\" = 0}"
+                            Fee = 0
                         },
                         new Transaction
                         {
@@ -45,9 +41,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                             Sender = "00000000",
                             Recipient = "22222222",
                             Amount = 1000,
-                            Fee = 0,
-                            TransactionJson =
-                                "{\"id\": \"2\", \"Sender\": \"00000000\", \"Recipient\": 22222222, \"Amount\" = 1000, \"Fee\" = 0}"
+                            Fee = 0
                         },
                         new Transaction
                         {
@@ -55,9 +49,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                             Sender = "11111111",
                             Recipient = "33333333",
                             Amount = 20,
-                            Fee = 0.1m,
-                            TransactionJson =
-                                "{\"id\": \"3\", \"Sender\": \"11111111\", \"Recipient\": 33333333, \"Amount\" = 20, \"Fee\" = 0.1}"
+                            Fee = 0.1m
                         },
                         new Transaction
                         {
@@ -65,9 +57,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                             Sender = "22222222",
                             Recipient = "33333333",
                             Amount = 15,
-                            Fee = 0.2m,
-                            TransactionJson =
-                                "{\"id\": \"4\", \"Sender\": \"22222222\", \"Recipient\": 33333333, \"Amount\" = 15, \"Fee\" = 0.2}"
+                            Fee = 0.2m
                         },
                         new Transaction
                         {
@@ -75,12 +65,10 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                             Sender = "33333333",
                             Recipient = "11111111",
                             Amount = 3.1m,
-                            Fee = 0.05m,
-                            TransactionJson =
-                                "{\"id\": \"1\", \"Sender\": \"33333333\", \"Recipient\": 11111111, \"Amount\" = 3.1, \"Fee\" = 0.05}"
+                            Fee = 0.05m
                         }
                     },
-                    "77c68adb67e3d365919672221e31c6e8ab2f3ca4310674ab87688f9d9a7f6ae3"
+                    "527f2414cd36a489c11d018f71dad8ba609ae1a7781a103c1ba5bf249ac5de87"
                 }
             };
 
@@ -94,9 +82,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                     Sender = "00000000",
                     Recipient = "11111111",
                     Amount = 1000,
-                    Fee = 0,
-                    TransactionJson =
-                        "{\"id\": \"1\", \"Sender\": \"00000000\", \"Recipient\": 11111111, \"Amount\" = 1000, \"Fee\" = 0}"
+                    Fee = 0
                 }
             },
             new HashSet<Transaction>
@@ -107,9 +93,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                     Sender = "00000000",
                     Recipient = "11111111",
                     Amount = 1000,
-                    Fee = 0,
-                    TransactionJson =
-                        "{\"id\": \"1\", \"Sender\": \"00000000\", \"Recipient\": 11111111, \"Amount\" = 1000, \"Fee\" = 0}"
+                    Fee = 0
                 },
                 new Transaction
                 {
@@ -117,9 +101,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                     Sender = "00000000",
                     Recipient = "22222222",
                     Amount = 1000,
-                    Fee = 0,
-                    TransactionJson =
-                        "{\"id\": \"2\", \"Sender\": \"00000000\", \"Recipient\": 22222222, \"Amount\" = 1000, \"Fee\" = 0}"
+                    Fee = 0
                 },
                 new Transaction
                 {
@@ -127,9 +109,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                     Sender = "11111111",
                     Recipient = "33333333",
                     Amount = 20,
-                    Fee = 0.1m,
-                    TransactionJson =
-                        "{\"id\": \"3\", \"Sender\": \"11111111\", \"Recipient\": 33333333, \"Amount\" = 20, \"Fee\" = 0.1}"
+                    Fee = 0.1m
                 },
                 new Transaction
                 {
@@ -137,9 +117,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                     Sender = "22222222",
                     Recipient = "33333333",
                     Amount = 15,
-                    Fee = 0.2m,
-                    TransactionJson =
-                        "{\"id\": \"4\", \"Sender\": \"22222222\", \"Recipient\": 33333333, \"Amount\" = 15, \"Fee\" = 0.2}"
+                    Fee = 0.2m
                 },
                 new Transaction
                 {
@@ -147,9 +125,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                     Sender = "33333333",
                     Recipient = "11111111",
                     Amount = 3.1m,
-                    Fee = 0.05m,
-                    TransactionJson =
-                        "{\"id\": \"1\", \"Sender\": \"33333333\", \"Recipient\": 11111111, \"Amount\" = 3.1, \"Fee\" = 0.05}"
+                    Fee = 0.05m
                 }
             }
         };
