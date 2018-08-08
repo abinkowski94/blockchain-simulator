@@ -16,16 +16,20 @@ namespace BlockchainSimulator.BusinessLogic.Validators
 
         public ValidationResult Validate(MerkleNode tree)
         {
+            if (tree == null)
+            {
+                return new ValidationResult(true, new string[0]);        
+            }            
             if (tree.GetType() == typeof(Node))
             {
                 var node = (Node) tree;
-                var combinedHashes = $"{node.LeftNode.Hash}{node.RightNode.Hash}";
+                var combinedHashes = $"{node.LeftNode.Hash}{node.RightNode?.Hash}";
                 var hash = _encryptionService.GetSha256Hash(combinedHashes);
 
                 if (hash != node.Hash)
                 {
                     return new ValidationResult(false,
-                        new[] {$"Wrong hash for nodes hashes h1:{node.LeftNode.Hash} and h2: {node.RightNode.Hash}"});
+                        new[] {$"Wrong hash for nodes with hashes h1:{node.LeftNode.Hash} and h2: {node.RightNode?.Hash}"});
                 }
 
                 var leftNodeValidationResult = Validate(node.LeftNode);
