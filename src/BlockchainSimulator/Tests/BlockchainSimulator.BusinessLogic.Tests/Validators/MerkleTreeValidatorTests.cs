@@ -52,6 +52,25 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators
                 result.Errors.First());
         }
 
+        [Fact]
+        public void Validate_WrongLeafHash_ErrorValidationResult()
+        {
+            // Arrange
+            var tree = new MerkleTreeProvider(new EncryptionService())
+                .GetMerkleTree(MerkleTreeTransactionData.TransactionData.First().First() as HashSet<Transaction>);
+            tree.Hash = "2ac9a6746aca543af8dff39894cfe8173afba21eb01c6fae33d52947222855ef";
+            tree.LeftNode.Hash = "000";
+
+            // Act
+            var result = _merkleTreeValidator.Validate(tree);
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.NotNull(result.Errors);
+            Assert.NotEmpty(result.Errors);
+            Assert.Equal("Wrong hash for transaction with id: 1", result.Errors.First());
+        }
+
         [Theory]
         [MemberData(nameof(MerkleTreeTransactionData.TransactionData), MemberType = typeof(MerkleTreeTransactionData))]
         public void Validate_WrongTree_ErrorValidationResult(HashSet<Transaction> transactions)
