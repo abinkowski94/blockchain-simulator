@@ -5,9 +5,9 @@ using Xunit;
 
 namespace BlockchainSimulator.BusinessLogic.Tests.Data
 {
-    public class MerkleTreeTransactionData
+    public class TransactionDataSet
     {
-        public static TheoryData<HashSet<Transaction>, string> TransactionDataAndResults =>
+        public static TheoryData<HashSet<Transaction>, string> TransactionDataAndMerkleTreeHashResults =>
             new TheoryData<HashSet<Transaction>, string>
             {
                 {

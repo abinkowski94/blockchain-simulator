@@ -11,6 +11,6 @@ namespace BlockchainSimulator.BusinessLogic.Model.Block
         public override bool IsGenesis => false;
 
         [JsonIgnore]
-        public Block Parent { get; set; }
+        public BlockBase Parent { get; set; }
     }
 }

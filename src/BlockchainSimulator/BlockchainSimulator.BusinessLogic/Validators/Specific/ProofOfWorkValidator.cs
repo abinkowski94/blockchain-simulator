@@ -11,7 +11,7 @@ namespace BlockchainSimulator.BusinessLogic.Validators.Specific
         {
         }
 
-        protected override ValidationResult SpecificValidation(Block blockchain)
+        protected override ValidationResult SpecificValidation(BlockBase blockchain)
         {
             var hash = _encryptionService.GetSha256Hash(blockchain.BlockJson);
             if (hash.StartsWith(blockchain.Header.Target))

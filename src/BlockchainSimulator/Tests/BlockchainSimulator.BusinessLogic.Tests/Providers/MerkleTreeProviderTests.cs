@@ -42,7 +42,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Providers
         }
 
         [Theory]
-        [MemberData(nameof(MerkleTreeTransactionData.TransactionDataAndResults), MemberType = typeof(MerkleTreeTransactionData))]
+        [MemberData(nameof(TransactionDataSet.TransactionDataAndMerkleTreeHashResults), MemberType = typeof(TransactionDataSet))]
         public void GetMerkleTree_SetOfTransactions_CorrectMerkleTree(HashSet<Transaction> transactions,
             string resultHash)
         {

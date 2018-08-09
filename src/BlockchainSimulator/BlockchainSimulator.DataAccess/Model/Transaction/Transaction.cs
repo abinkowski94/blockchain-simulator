@@ -18,10 +18,5 @@ namespace BlockchainSimulator.DataAccess.Model.Transaction
         
         [JsonProperty("fee")]
         public decimal Fee { get; set; }
-
-        public override string ToString()
-        {
-            return JsonConvert.SerializeObject(this);
-        }
     }
 }

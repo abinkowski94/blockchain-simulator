@@ -5,6 +5,6 @@ namespace BlockchainSimulator.BusinessLogic.Validators
 {
     public interface IBlockchainValidator
     {
-        ValidationResult Validate(Block blockchain);
+        ValidationResult Validate(BlockBase blockchain);
     }
 }

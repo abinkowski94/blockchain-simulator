@@ -14,7 +14,8 @@ namespace BlockchainSimulator.DataAccess.Repositories
 
         public string GetFile(string fileName)
         {
-            return File.ReadAllText($"{_directory}//{fileName}");
+            var path = $"{_directory}//{fileName}";
+            return File.Exists(path) ? File.ReadAllText(path) : null;
         }
 
         public void SaveFile(string data, string fileName)

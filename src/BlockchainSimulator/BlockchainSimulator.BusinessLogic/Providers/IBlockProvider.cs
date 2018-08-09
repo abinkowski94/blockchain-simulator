@@ -6,6 +6,6 @@ namespace BlockchainSimulator.BusinessLogic.Providers
 {
     public interface IBlockProvider
     {
-        Block CreateBlock(HashSet<Transaction> transactions, Block parentBlock);
+        BlockBase CreateBlock(HashSet<Transaction> transactions, BlockBase parentBlock = null);
     }
 }

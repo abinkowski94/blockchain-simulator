@@ -9,40 +9,53 @@ namespace BlockchainSimulator.BusinessLogic.Validators
         private readonly IMerkleTreeValidator _merkleTreeValidator;
         protected readonly IEncryptionService _encryptionService;
 
-        public BaseBlockchainValidator(IMerkleTreeValidator merkleTreeValidator, IEncryptionService encryptionService)
+        protected BaseBlockchainValidator(IMerkleTreeValidator merkleTreeValidator,
+            IEncryptionService encryptionService)
         {
             _merkleTreeValidator = merkleTreeValidator;
             _encryptionService = encryptionService;
         }
 
-        protected abstract ValidationResult SpecificValidation(Block blockchain);
+        protected abstract ValidationResult SpecificValidation(BlockBase blockchain);
 
-        public ValidationResult Validate(Block blockchain)
+        public ValidationResult Validate(BlockBase blockchain)
         {
-            while (!blockchain.IsGenesis)
+            if (blockchain == null)
             {
-                var validationResult = ValidateParentHash(blockchain);
-                if (!validationResult.IsSuccess)
-                {
-                    return validationResult;
-                }
-
-                validationResult = ValidateTree(blockchain);
-                if (!validationResult.IsSuccess)
-                {
-                    return validationResult;
-                }
-
-                validationResult = SpecificValidation(blockchain);
-                if (!validationResult.IsSuccess)
-                {
-                    return validationResult;
-                }
-
-                blockchain = blockchain.Parent;
+                return new ValidationResult(false, new[] {"The block can not be null!"});
             }
 
-            return ValidateTree(blockchain);
+            ValidationResult validationResult;
+            while (!blockchain.IsGenesis)
+            {
+                validationResult = ValidateParentHash(blockchain as Block);
+                if (!validationResult.IsSuccess)
+                {
+                    return validationResult;
+                }
+
+                validationResult = _merkleTreeValidator.Validate(blockchain.Body.MerkleTree);
+                if (!validationResult.IsSuccess)
+                {
+                    return validationResult;
+                }
+
+                validationResult = SpecificValidation(blockchain as Block);
+                if (!validationResult.IsSuccess)
+                {
+                    return validationResult;
+                }
+
+                blockchain = ((Block) blockchain).Parent;
+            }
+
+            validationResult = _merkleTreeValidator.Validate(blockchain.Body.MerkleTree);
+            if (!validationResult.IsSuccess)
+            {
+                return validationResult;
+            }
+
+            return SpecificValidation(blockchain);
         }
 
         private ValidationResult ValidateParentHash(Block blockchain)
@@ -55,17 +68,6 @@ namespace BlockchainSimulator.BusinessLogic.Validators
             }
 
             return new ValidationResult(true, new string[0]);
-        }
-
-        private ValidationResult ValidateTree(BlockBase blockchain)
-        {
-            var validationResult = _merkleTreeValidator.Validate(blockchain.Body.MerkleTree);
-            if (!validationResult.IsSuccess)
-            {
-                return validationResult;
-            }
-
-            return _merkleTreeValidator.Validate(blockchain.Body.MerkleTree);
         }
     }
 }

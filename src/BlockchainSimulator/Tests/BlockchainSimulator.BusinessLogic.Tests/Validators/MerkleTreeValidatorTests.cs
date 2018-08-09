@@ -37,7 +37,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators
         {
             // Arrange
             var tree = new MerkleTreeProvider(new EncryptionService())
-                .GetMerkleTree(MerkleTreeTransactionData.TransactionData.Last().First() as HashSet<Transaction>);
+                .GetMerkleTree(TransactionDataSet.TransactionData.Last().First() as HashSet<Transaction>);
             ((Node) tree.LeftNode).LeftNode.Hash = "000";
 
             // Act
@@ -57,7 +57,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators
         {
             // Arrange
             var tree = new MerkleTreeProvider(new EncryptionService())
-                .GetMerkleTree(MerkleTreeTransactionData.TransactionData.First().First() as HashSet<Transaction>);
+                .GetMerkleTree(TransactionDataSet.TransactionData.First().First() as HashSet<Transaction>);
             tree.Hash = "2ac9a6746aca543af8dff39894cfe8173afba21eb01c6fae33d52947222855ef";
             tree.LeftNode.Hash = "000";
 
@@ -72,7 +72,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators
         }
 
         [Theory]
-        [MemberData(nameof(MerkleTreeTransactionData.TransactionData), MemberType = typeof(MerkleTreeTransactionData))]
+        [MemberData(nameof(TransactionDataSet.TransactionData), MemberType = typeof(TransactionDataSet))]
         public void Validate_WrongTree_ErrorValidationResult(HashSet<Transaction> transactions)
         {
             // Arrange
@@ -89,7 +89,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators
         }
 
         [Theory]
-        [MemberData(nameof(MerkleTreeTransactionData.TransactionData), MemberType = typeof(MerkleTreeTransactionData))]
+        [MemberData(nameof(TransactionDataSet.TransactionData), MemberType = typeof(TransactionDataSet))]
         public void Validate_CorrectTree_SuccessValidationResult(HashSet<Transaction> transactions)
         {
             // Arrange
