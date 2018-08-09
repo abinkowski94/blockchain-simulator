@@ -1,5 +1,4 @@
 ﻿using System;
-using BlockchainSimulator.DataAccess.Model.Block;
 using BlockchainSimulator.DataAccess.Model.Transaction;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -18,7 +17,7 @@ namespace BlockchainSimulator.DataAccess.Converters
             try
             {
                 var jObject = JObject.Load(reader);
-                if (jObject["transactionId"].Value<string>() != null)
+                if (jObject["transactionId"]?.Value<string>() != null)
                 {
                     return jObject.ToObject<Leaf>(serializer);
                 }

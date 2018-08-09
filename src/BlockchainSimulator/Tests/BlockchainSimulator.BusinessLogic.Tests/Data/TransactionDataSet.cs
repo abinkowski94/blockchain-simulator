@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 using Xunit;
 
@@ -23,6 +22,36 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                         }
                     },
                     "075e2ee940f291540722d8c3ea2433a9e4806a8b4dfb3a58d7fd338774e0bb66"
+                },
+                {
+                    new HashSet<Transaction>
+                    {
+                        new Transaction
+                        {
+                            Id = "1",
+                            Sender = "11111111",
+                            Recipient = "33333333",
+                            Amount = 11,
+                            Fee = 0.5m
+                        },
+                        new Transaction
+                        {
+                            Id = "2",
+                            Sender = "11111111",
+                            Recipient = "22222222",
+                            Amount = 12,
+                            Fee = 0.1m
+                        },
+                        new Transaction
+                        {
+                            Id = "3",
+                            Sender = "11111111",
+                            Recipient = "44444444",
+                            Amount = 13.1m,
+                            Fee = 0.65m
+                        }
+                    },
+                    "b6a350ceb8531ecb0c087a94f0abdf017543c5f65bd71c893e21a77a5d31b53b"
                 },
                 {
                     new HashSet<Transaction>
@@ -69,7 +98,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                         }
                     },
                     "527f2414cd36a489c11d018f71dad8ba609ae1a7781a103c1ba5bf249ac5de87"
-                }
+                },
             };
 
         public static TheoryData<HashSet<Transaction>> TransactionData => new TheoryData<HashSet<Transaction>>
@@ -83,6 +112,33 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                     Recipient = "11111111",
                     Amount = 1000,
                     Fee = 0
+                }
+            },
+            new HashSet<Transaction>
+            {
+                new Transaction
+                {
+                    Id = "1",
+                    Sender = "11111111",
+                    Recipient = "33333333",
+                    Amount = 11,
+                    Fee = 0.5m
+                },
+                new Transaction
+                {
+                    Id = "2",
+                    Sender = "11111111",
+                    Recipient = "22222222",
+                    Amount = 12,
+                    Fee = 0.1m
+                },
+                new Transaction
+                {
+                    Id = "3",
+                    Sender = "11111111",
+                    Recipient = "44444444",
+                    Amount = 13.1m,
+                    Fee = 0.65m
                 }
             },
             new HashSet<Transaction>

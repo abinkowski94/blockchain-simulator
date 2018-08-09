@@ -5,9 +5,9 @@ namespace BlockchainSimulator.BusinessLogic.Services
 {
     public abstract class BaseService
     {
-        public IMapper LocalMapper { get; }
+        protected IMapper LocalMapper { get; }
 
-        public BaseService()
+        protected BaseService()
         {
             LocalMapper = new Mapper(new MapperConfiguration(cfg =>
             {
