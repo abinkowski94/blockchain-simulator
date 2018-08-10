@@ -1,42 +1,65 @@
 using System.Collections.Generic;
 using BlockchainSimulator.BusinessLogic.Model.Block;
 using BlockchainSimulator.BusinessLogic.Model.Maps;
-using BlockchainSimulator.BusinessLogic.Model.Transaction;
-using BlockchainSimulator.BusinessLogic.Model.ValidationResults;
-using BlockchainSimulator.BusinessLogic.Providers;
-using BlockchainSimulator.BusinessLogic.Validators;
+using BlockchainSimulator.DataAccess.Model;
 using BlockchainSimulator.DataAccess.Repositories;
 
 namespace BlockchainSimulator.BusinessLogic.Services
 {
     public class BlockchainService : BaseService, IBlockchainService
     {
+        public BlockBase Blockchain { get; private set; }
+        private readonly object _padlock = new object();
         private readonly IBlockchainRepository _blockchainRepository;
-        private readonly IBlockchainValidator _blockchainValidator;
-        private readonly IBlockProvider _blockProvider;
 
-        public BlockchainService(IBlockchainValidator blockchainValidator, IBlockProvider blockProvider,
-            IBlockchainRepository blockchainRepository)
+        public BlockchainService(IBlockchainRepository blockchainRepository)
         {
-            _blockchainValidator = blockchainValidator;
-            _blockProvider = blockProvider;
             _blockchainRepository = blockchainRepository;
-        }
-
-        public ValidationResult Validate(BlockBase blockchain)
-        {
-            return _blockchainValidator.Validate(blockchain);
-        }
-
-        public BlockBase CreateBlock(HashSet<Transaction> transactions, BlockBase block = null)
-        {
-            return _blockProvider.CreateBlock(transactions, block);
         }
 
         public BlockBase GetBlockchain()
         {
-            var blockchain = _blockchainRepository.GetBlockchain();
-            return LocalMapper.ManualMap(blockchain);
+            lock (_padlock)
+            {
+                var blockchain = _blockchainRepository.GetBlockchain();
+                var result = LocalMapper.ManualMap(blockchain);
+                Blockchain = result;
+
+                return result;
+            }
+        }
+
+        public void SaveBlockchain(BlockBase blockBase, List<BlockBase> blocks = null)
+        {
+            if (blockBase == null)
+            {
+                return;
+            }
+
+            if (blocks == null)
+            {
+                blocks = new List<BlockBase>();
+            }
+
+            switch (blockBase)
+            {
+                case Block block:
+                    blocks.Insert(0, block);
+                    SaveBlockchain(block.Parent, blocks);
+                    break;
+                case GenesisBlock genesisBlock:
+                    blocks.Insert(0, genesisBlock);
+                    break;
+            }
+
+            var mappedBlocks = LocalMapper.Map<List<DataAccess.Model.Block.BlockBase>>(blocks);
+            var blockchain = new Blockchain {Blocks = mappedBlocks};
+
+            lock (_padlock)
+            {
+                Blockchain = blockBase;
+                _blockchainRepository.SaveBlockchain(blockchain);
+            }
         }
     }
 }
