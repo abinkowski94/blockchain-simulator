@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using BlockchainSimulator.BusinessLogic.Model.Block;
-using BlockchainSimulator.BusinessLogic.Model.Maps;
+using BlockchainSimulator.BusinessLogic.Model.MappingProfiles;
 using BlockchainSimulator.DataAccess.Model;
 using BlockchainSimulator.DataAccess.Repositories;
 

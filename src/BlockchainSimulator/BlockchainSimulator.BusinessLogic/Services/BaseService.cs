@@ -1,5 +1,5 @@
 using AutoMapper;
-using BlockchainSimulator.BusinessLogic.Model.Maps;
+using BlockchainSimulator.BusinessLogic.Model.MappingProfiles;
 
 namespace BlockchainSimulator.BusinessLogic.Services
 {

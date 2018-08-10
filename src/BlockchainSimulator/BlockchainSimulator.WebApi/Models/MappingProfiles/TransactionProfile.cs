@@ -1,6 +1,6 @@
 using AutoMapper;
 
-namespace BlockchainSimulator.WebApi.Models.Maps
+namespace BlockchainSimulator.WebApi.Models.MappingProfiles
 {
     public class TransactionProfile : Profile
     {

@@ -1,7 +1,7 @@
 using AutoMapper;
 using BlockchainSimulator.DataAccess.Model.Transaction;
 
-namespace BlockchainSimulator.BusinessLogic.Model.Maps
+namespace BlockchainSimulator.BusinessLogic.Model.MappingProfiles
 {
     public class TransactionProfile : Profile
     {

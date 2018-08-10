@@ -5,7 +5,7 @@ using BlockchainSimulator.BusinessLogic.Model.Block;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.DataAccess.Model;
 
-namespace BlockchainSimulator.BusinessLogic.Model.Maps
+namespace BlockchainSimulator.BusinessLogic.Model.MappingProfiles
 {
     public static class MapperExtensions
     {
