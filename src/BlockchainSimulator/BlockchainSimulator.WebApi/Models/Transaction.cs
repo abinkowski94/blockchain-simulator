@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace BlockchainSimulator.BusinessLogic.Model.Transaction
+namespace BlockchainSimulator.WebApi.Models
 {
     public class Transaction
     {
@@ -19,10 +19,7 @@ namespace BlockchainSimulator.BusinessLogic.Model.Transaction
         [JsonProperty("fee")] 
         public decimal Fee { get; set; }
 
-        [JsonIgnore] 
-        public string TransactionJson => JsonConvert.SerializeObject(this);
-
-        [JsonIgnore]
+        [JsonProperty("transactionDetails", NullValueHandling = NullValueHandling.Ignore)]
         public TransactionDetails TransactionDetails { get; set; }
     }
 }
