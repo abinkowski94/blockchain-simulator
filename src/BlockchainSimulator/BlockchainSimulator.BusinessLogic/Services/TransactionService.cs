@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using BlockchainSimulator.BusinessLogic.Configurations;
 using BlockchainSimulator.BusinessLogic.Model.Block;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 
@@ -9,13 +10,16 @@ namespace BlockchainSimulator.BusinessLogic.Services
 {
     public class TransactionService : ITransactionService
     {
-        private readonly ConcurrentBag<Transaction> _pendingTransactions;
+        private readonly object _padlock = new object();
+        private readonly ConcurrentDictionary<string, Transaction> _pendingTransactions;
         private readonly IBlockchainService _blockchainService;
+        private readonly IMiningService _miningService;
 
-        public TransactionService(IBlockchainService blockchainService)
+        public TransactionService(IBlockchainService blockchainService, IMiningService miningService)
         {
-            _pendingTransactions = new ConcurrentBag<Transaction>();
+            _pendingTransactions = new ConcurrentDictionary<string, Transaction>();
             _blockchainService = blockchainService;
+            _miningService = miningService;
         }
 
         public Transaction AddTransaction(Transaction transaction)
@@ -23,14 +27,27 @@ namespace BlockchainSimulator.BusinessLogic.Services
             transaction.Id = Guid.NewGuid().ToString();
             transaction.TransactionDetails = null;
 
-            _pendingTransactions.Add(transaction);
-            
+            _pendingTransactions.TryAdd(transaction.Id, transaction);
+
+            // Launches mining
+            // TODO: adjust configuration
+            if (ProofOfWorkConfigurations.BlockSize < _pendingTransactions.Count)
+            {
+                lock (_padlock)
+                {
+                    var transactions = _pendingTransactions.ToList().OrderByDescending(t => t.Value.Fee)
+                        .Select(t => t.Value).ToList();
+                    transactions.ForEach(t => _pendingTransactions.TryRemove(t.Id, out _));
+                    _miningService.MineBlocks(transactions);
+                }
+            }
+
             return transaction;
         }
 
         public List<Transaction> GetPendingTransactions()
         {
-            return _pendingTransactions.ToList().OrderByDescending(t => t.Fee).ToList();
+            return _pendingTransactions.ToList().OrderByDescending(t => t.Value.Fee).Select(t => t.Value).ToList();
         }
 
         public Transaction GetTransaction(string id)
