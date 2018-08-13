@@ -16,7 +16,7 @@ namespace BlockchainSimulator.WebApi.Controllers
         }
 
         [HttpPost]
-        public ActionResult AcceptBlock(string base64Blockchain)
+        public ActionResult AcceptBlockchain(string base64Blockchain)
         {
             throw new NotImplementedException();
         }

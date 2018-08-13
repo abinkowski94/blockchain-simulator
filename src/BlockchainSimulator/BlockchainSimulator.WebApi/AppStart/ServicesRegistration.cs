@@ -19,6 +19,7 @@ namespace BlockchainSimulator.WebApi.AppStart
             // Services, Providers, Validators
             services.AddTransient<IEncryptionService, EncryptionService>();
             services.AddSingleton<IBlockchainService, BlockchainService>();
+            services.AddSingleton<ITransactionService, TransactionService>();
 
             services.AddTransient<IMerkleTreeProvider, MerkleTreeProvider>();
             services.AddTransient<IBlockProvider, ProofOfWorkBlockProvider>(); // TODO: add configuration fo it
