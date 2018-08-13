@@ -167,5 +167,21 @@ namespace BlockchainSimulator.DataAccess.Tests.Repositories
             Assert.Equal(@"MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAYnEJ5opsGtKxG6AJ9XxZznKVKcRuy",
                 result.Blocks.Last().Body.Transactions.First().Sender);
         }
+        
+        [Fact]
+        public void GetBlockchain_Null_Null()
+        {
+            // Arrange
+            _fileRepositoryMock.Setup(p => p.GetFile("blockchain.json"))
+                .Returns((string)null);
+
+            // Act
+            var result = _blockchainRepository.GetBlockchain();
+
+            // Assert
+            _fileRepositoryMock.Verify(p => p.GetFile("blockchain.json"));
+
+            Assert.Null(result);
+        }
     }
 }
