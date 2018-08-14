@@ -15,4 +15,9 @@
     <ProjectReference Include="..\BlockchainSimulator.BusinessLogic\BlockchainSimulator.BusinessLogic.csproj" />
     <ProjectReference Include="..\BlockchainSimulator.DataAccess\BlockchainSimulator.DataAccess.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Update="hosting.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

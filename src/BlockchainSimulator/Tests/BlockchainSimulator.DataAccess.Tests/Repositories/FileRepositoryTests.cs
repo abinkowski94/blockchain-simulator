@@ -14,7 +14,7 @@ namespace BlockchainSimulator.DataAccess.Tests.Repositories
         public FileRepositoryTests()
         {
             _hostingEnvironmentMock = new Mock<IHostingEnvironment>();
-            _hostingEnvironmentMock.Setup(p => p.WebRootPath).Returns(Directory.GetCurrentDirectory());
+            _hostingEnvironmentMock.Setup(p => p.ContentRootPath).Returns(Directory.GetCurrentDirectory());
             _fileRepository = new FileRepository(_hostingEnvironmentMock.Object);
         }
 
@@ -29,7 +29,7 @@ namespace BlockchainSimulator.DataAccess.Tests.Repositories
             _fileRepository.SaveFile(data, fileName);
             
             // Assert
-            _hostingEnvironmentMock.Verify(p => p.WebRootPath);
+            _hostingEnvironmentMock.Verify(p => p.ContentRootPath);
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace BlockchainSimulator.DataAccess.Tests.Repositories
             var result = _fileRepository.GetFile(fileName);
 
             // Assert
-            _hostingEnvironmentMock.Verify(p => p.WebRootPath);
+            _hostingEnvironmentMock.Verify(p => p.ContentRootPath);
             
             Assert.Equal(data, result);
         }
@@ -58,7 +58,7 @@ namespace BlockchainSimulator.DataAccess.Tests.Repositories
             var result = _fileRepository.GetFile("not-existing.json");
 
             // Assert
-            _hostingEnvironmentMock.Verify(p => p.WebRootPath);
+            _hostingEnvironmentMock.Verify(p => p.ContentRootPath);
             
             Assert.Null(result);
         }

@@ -9,18 +9,18 @@ namespace BlockchainSimulator.DataAccess.Repositories
 
         public FileRepository(IHostingEnvironment environment)
         {
-            _directory = environment.WebRootPath;
+            _directory = environment.ContentRootPath ?? Directory.GetCurrentDirectory();
         }
 
         public string GetFile(string fileName)
         {
-            var path = $"{_directory}//{fileName}";
+            var path = $"{_directory}\\{fileName}";
             return File.Exists(path) ? File.ReadAllText(path) : null;
         }
 
         public void SaveFile(string data, string fileName)
         {
-            File.WriteAllText($"{_directory}//{fileName}", data);
+            File.WriteAllText($"{_directory}\\{fileName}", data);
         }
     }
 }

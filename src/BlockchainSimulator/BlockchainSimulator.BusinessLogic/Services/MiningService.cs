@@ -29,10 +29,10 @@ namespace BlockchainSimulator.BusinessLogic.Services
             {
                 return Task.Run(() =>
                 {
-                    var parentBlock = _blockchainService.Blockchain;
+                    var parentBlock = _blockchainService.GetBlockchain();
                     var newBlock = _blockProvider.CreateBlock(transactions.ToHashSet(), parentBlock);
                     _blockchainService.SaveBlockchain(newBlock);
-                    _consensusService.ReachConsensus(newBlock);
+                    _consensusService.ReachConsensus();
                 }, token);
             });
         }

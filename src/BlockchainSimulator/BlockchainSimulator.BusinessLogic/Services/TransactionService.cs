@@ -31,7 +31,7 @@ namespace BlockchainSimulator.BusinessLogic.Services
 
             // Launches mining
             // TODO: adjust configuration
-            if (ProofOfWorkConfigurations.BlockSize < _pendingTransactions.Count)
+            if (ProofOfWorkConfigurations.BlockSize <= _pendingTransactions.Count)
             {
                 lock (_padlock)
                 {

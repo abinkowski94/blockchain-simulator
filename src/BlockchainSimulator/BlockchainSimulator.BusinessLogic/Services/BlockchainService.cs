@@ -8,7 +8,6 @@ namespace BlockchainSimulator.BusinessLogic.Services
 {
     public class BlockchainService : BaseService, IBlockchainService
     {
-        public BlockBase Blockchain { get; private set; }
         private readonly object _padlock = new object();
         private readonly IBlockchainRepository _blockchainRepository;
 
@@ -23,7 +22,6 @@ namespace BlockchainSimulator.BusinessLogic.Services
             {
                 var blockchain = _blockchainRepository.GetBlockchain();
                 var result = LocalMapper.ManualMap(blockchain);
-                Blockchain = result;
 
                 return result;
             }
@@ -57,7 +55,6 @@ namespace BlockchainSimulator.BusinessLogic.Services
 
             lock (_padlock)
             {
-                Blockchain = blockBase;
                 _blockchainRepository.SaveBlockchain(blockchain);
             }
         }

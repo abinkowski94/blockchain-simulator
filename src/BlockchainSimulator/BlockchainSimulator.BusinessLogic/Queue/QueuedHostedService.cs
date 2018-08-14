@@ -24,9 +24,10 @@ namespace BlockchainSimulator.BusinessLogic.Queue
                 {
                     await workItem(cancellationToken);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     // TODO: log errors
+                    Console.WriteLine(e);
                 }
             }
         }

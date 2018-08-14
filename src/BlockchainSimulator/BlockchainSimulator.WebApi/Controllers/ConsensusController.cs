@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using BlockchainSimulator.BusinessLogic.Services;
 using BlockchainSimulator.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,28 +9,47 @@ namespace BlockchainSimulator.WebApi.Controllers
     [ApiController]
     public class ConsensusController : BaseController
     {
+        private readonly IConsensusService _consensusService;
+
+        public ConsensusController(IConsensusService consensusService)
+        {
+            _consensusService = consensusService;
+        }
+
         [HttpGet]
         public ActionResult<List<ServerNode>> GetNodes()
         {
-            throw new NotImplementedException();
+            var result = _consensusService.GetNodes();
+            return LocalMapper.Map<List<ServerNode>>(result);
         }
 
         [HttpPost]
-        public ActionResult AcceptBlockchain(string base64Blockchain)
+        public ActionResult<bool> AcceptBlockchain([FromBody] EncodedBlockchain encodedBlockchain)
         {
-            throw new NotImplementedException();
+            return _consensusService.AcceptBlockchain(encodedBlockchain.Base64Blockchain);
         }
 
         [HttpPut]
         public ActionResult<ServerNode> ConnectNode([FromBody] ServerNode serverNode)
         {
-            throw new NotImplementedException();
+            var mappedServerNode = LocalMapper.Map<BusinessLogic.Model.Consensus.ServerNode>(serverNode);
+            var result = _consensusService.ConnectNode(mappedServerNode);
+
+            return LocalMapper.Map<ServerNode>(result);
         }
 
         [HttpDelete]
         public ActionResult<ServerNode> DisconnectNode(string nodeId)
         {
-            throw new NotImplementedException();
+            var result = _consensusService.DisconnectNode(nodeId);
+            return LocalMapper.Map<ServerNode>(result);
+        }
+
+        [HttpPatch]
+        public ActionResult<List<ServerNode>> DisconnectFromNetwork()
+        {
+            var result = _consensusService.DisconnectFromNetwork();
+            return LocalMapper.Map<List<ServerNode>>(result);
         }
     }
 }
