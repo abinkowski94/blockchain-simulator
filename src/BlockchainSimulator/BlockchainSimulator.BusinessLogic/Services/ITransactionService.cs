@@ -1,14 +1,15 @@
 using System.Collections.Generic;
+using BlockchainSimulator.BusinessLogic.Model.Responses;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 
 namespace BlockchainSimulator.BusinessLogic.Services
 {
     public interface ITransactionService
     {
-        Transaction AddTransaction(Transaction transaction);
+        BaseResponse<Transaction> AddTransaction(Transaction transaction);
 
-        List<Transaction> GetPendingTransactions();
+        BaseResponse<List<Transaction>> GetPendingTransactions();
 
-        Transaction GetTransaction(string id);
+        BaseResponse<Transaction> GetTransaction(string id);
     }
 }

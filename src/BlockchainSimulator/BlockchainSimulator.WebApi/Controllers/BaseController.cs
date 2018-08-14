@@ -6,7 +6,7 @@ namespace BlockchainSimulator.WebApi.Controllers
 {
     public abstract class BaseController : ControllerBase
     {
-        protected IMapper LocalMapper { get; }
+        public IMapper LocalMapper { get; }
 
         protected BaseController()
         {
@@ -14,6 +14,7 @@ namespace BlockchainSimulator.WebApi.Controllers
             {
                 cfg.AddProfile(new TransactionProfile());
                 cfg.AddProfile(new ConsensusProfile());
+                cfg.AddProfile(new ResponsesProfile());
             }));
         }
     }

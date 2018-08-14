@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BlockchainSimulator.BusinessLogic.Configurations;
 using BlockchainSimulator.BusinessLogic.Model.Block;
+using BlockchainSimulator.BusinessLogic.Model.Responses;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 
 namespace BlockchainSimulator.BusinessLogic.Services
@@ -22,12 +23,15 @@ namespace BlockchainSimulator.BusinessLogic.Services
             _miningService = miningService;
         }
 
-        public Transaction AddTransaction(Transaction transaction)
+        public BaseResponse<Transaction> AddTransaction(Transaction transaction)
         {
             transaction.Id = Guid.NewGuid().ToString();
             transaction.TransactionDetails = null;
 
-            _pendingTransactions.TryAdd(transaction.Id, transaction);
+            if (!_pendingTransactions.TryAdd(transaction.Id, transaction))
+            {
+                return new ErrorResponse<Transaction>("Could not add the transaction to pending list!", null);
+            }
 
             // Launches mining
             // TODO: adjust configuration
@@ -40,20 +44,38 @@ namespace BlockchainSimulator.BusinessLogic.Services
                     transactions.ForEach(t => _pendingTransactions.TryRemove(t.Id, out _));
                     _miningService.MineBlocks(transactions);
                 }
+
+                return new SuccessResponse<Transaction>(
+                    "The transaction has been added and processing has been started", transaction);
             }
 
-            return transaction;
+            return new SuccessResponse<Transaction>("The transaction has been added to pending list", transaction);
         }
 
-        public List<Transaction> GetPendingTransactions()
+        public BaseResponse<List<Transaction>> GetPendingTransactions()
         {
-            return _pendingTransactions.ToList().OrderByDescending(t => t.Value.Fee).Select(t => t.Value).ToList();
+            var result = _pendingTransactions.ToList().OrderByDescending(t => t.Value.Fee).Select(t => t.Value)
+                .ToList();
+            return new SuccessResponse<List<Transaction>>($"The list of pending transactions: {DateTime.UtcNow}",
+                result);
         }
 
-        public Transaction GetTransaction(string id)
+        public BaseResponse<Transaction> GetTransaction(string id)
         {
-            var blockchain = _blockchainService.GetBlockchain();
-            return FindAndFillTransactionData(id, blockchain);
+            var blockchainResponse = _blockchainService.GetBlockchain();
+            if (blockchainResponse.IsSuccess)
+            {
+                var result = FindAndFillTransactionData(id, blockchainResponse.Result);
+                if (result == null)
+                {
+                    return new ErrorResponse<Transaction>($"Could not find the transaction id: {id}", null);
+                }
+
+                return new SuccessResponse<Transaction>("The transaction has been found", result);
+            }
+
+            return new ErrorResponse<Transaction>("An error occured while reading blockchain from local storage!", null,
+                blockchainResponse.Message);
         }
 
         private static Transaction FindAndFillTransactionData(string transactionId, BlockBase block)

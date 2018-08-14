@@ -6,7 +6,7 @@ namespace BlockchainSimulator.BusinessLogic.Model.Consensus
         
         public string HttpAddress { get; set; }
 
-        public bool IsConnected { get; set; }
+        public bool? IsConnected { get; set; }
 
         public long Delay { get; set; }
     }

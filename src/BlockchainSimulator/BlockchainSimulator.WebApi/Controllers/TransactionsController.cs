@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using BlockchainSimulator.BusinessLogic.Services;
+using BlockchainSimulator.WebApi.Extensions;
 using BlockchainSimulator.WebApi.Models;
+using BlockchainSimulator.WebApi.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlockchainSimulator.WebApi.Controllers
@@ -17,26 +19,26 @@ namespace BlockchainSimulator.WebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Transaction> GetTransaction(string id)
+        public ActionResult<BaseResponse> GetTransaction(string id)
         {
-            var transaction = _transactionService.GetTransaction(id);
-            return LocalMapper.Map<Transaction>(transaction);
+            var response = _transactionService.GetTransaction(id);
+            return response.GetBaseResponse<BusinessLogic.Model.Transaction.Transaction, Transaction>(this);
         }
 
         [HttpGet]
-        public ActionResult<List<Transaction>> GetPendingTransactions()
+        public ActionResult<BaseResponse> GetPendingTransactions()
         {
-            var transactions = _transactionService.GetPendingTransactions();
-            return LocalMapper.Map<List<Transaction>>(transactions);
+            var response = _transactionService.GetPendingTransactions();
+            return response.GetBaseResponse<List<BusinessLogic.Model.Transaction.Transaction>, List<Transaction>>(this);
         }
 
         [HttpPost]
-        public ActionResult<Transaction> AddTransaction([FromBody] Transaction transaction)
+        public ActionResult<BaseResponse> AddTransaction([FromBody] Transaction transaction)
         {
             var mappedTransaction = LocalMapper.Map<BusinessLogic.Model.Transaction.Transaction>(transaction);
             var result = _transactionService.AddTransaction(mappedTransaction);
 
-            return LocalMapper.Map<Transaction>(result);
+            return result.GetBaseResponse<BusinessLogic.Model.Transaction.Transaction, Transaction>(this);
         }
     }
 }

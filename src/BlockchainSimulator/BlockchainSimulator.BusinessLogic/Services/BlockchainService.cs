@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using BlockchainSimulator.BusinessLogic.Model.Block;
 using BlockchainSimulator.BusinessLogic.Model.MappingProfiles;
+using BlockchainSimulator.BusinessLogic.Model.Responses;
 using BlockchainSimulator.DataAccess.Model;
 using BlockchainSimulator.DataAccess.Repositories;
 
@@ -16,14 +17,14 @@ namespace BlockchainSimulator.BusinessLogic.Services
             _blockchainRepository = blockchainRepository;
         }
 
-        public BlockBase GetBlockchain()
+        public BaseResponse<BlockBase> GetBlockchain()
         {
             lock (_padlock)
             {
                 var blockchain = _blockchainRepository.GetBlockchain();
                 var result = LocalMapper.ManualMap(blockchain);
 
-                return result;
+                return new SuccessResponse<BlockBase>("The blockchain from local storage.", result);
             }
         }
 

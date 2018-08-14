@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using BlockchainSimulator.BusinessLogic.Services;
+using BlockchainSimulator.WebApi.Extensions;
 using BlockchainSimulator.WebApi.Models;
+using BlockchainSimulator.WebApi.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlockchainSimulator.WebApi.Controllers
@@ -17,39 +19,40 @@ namespace BlockchainSimulator.WebApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<ServerNode>> GetNodes()
+        public ActionResult<BaseResponse> GetNodes()
         {
             var result = _consensusService.GetNodes();
-            return LocalMapper.Map<List<ServerNode>>(result);
+            return result.GetBaseResponse<List<BusinessLogic.Model.Consensus.ServerNode>, List<ServerNode>>(this);
         }
 
         [HttpPost]
-        public ActionResult<bool> AcceptBlockchain([FromBody] EncodedBlockchain encodedBlockchain)
+        public ActionResult<BaseResponse> AcceptBlockchain([FromBody] EncodedBlockchain encodedBlockchain)
         {
-            return _consensusService.AcceptBlockchain(encodedBlockchain.Base64Blockchain);
+            return _consensusService.AcceptBlockchain(encodedBlockchain.Base64Blockchain)
+                .GetBaseResponse<bool, bool>(this);
         }
 
         [HttpPut]
-        public ActionResult<ServerNode> ConnectNode([FromBody] ServerNode serverNode)
+        public ActionResult<BaseResponse> ConnectNode([FromBody] ServerNode serverNode)
         {
             var mappedServerNode = LocalMapper.Map<BusinessLogic.Model.Consensus.ServerNode>(serverNode);
             var result = _consensusService.ConnectNode(mappedServerNode);
 
-            return LocalMapper.Map<ServerNode>(result);
+            return result.GetBaseResponse<BusinessLogic.Model.Consensus.ServerNode, ServerNode>(this);
         }
 
         [HttpDelete]
-        public ActionResult<ServerNode> DisconnectNode(string nodeId)
+        public ActionResult<BaseResponse> DisconnectNode(string nodeId)
         {
             var result = _consensusService.DisconnectNode(nodeId);
-            return LocalMapper.Map<ServerNode>(result);
+            return result.GetBaseResponse<BusinessLogic.Model.Consensus.ServerNode, ServerNode>(this);
         }
 
         [HttpPatch]
-        public ActionResult<List<ServerNode>> DisconnectFromNetwork()
+        public ActionResult<BaseResponse> DisconnectFromNetwork()
         {
             var result = _consensusService.DisconnectFromNetwork();
-            return LocalMapper.Map<List<ServerNode>>(result);
+            return result.GetBaseResponse<List<BusinessLogic.Model.Consensus.ServerNode>, List<ServerNode>>(this);
         }
     }
 }

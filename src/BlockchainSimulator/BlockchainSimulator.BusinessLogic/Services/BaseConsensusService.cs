@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using BlockchainSimulator.BusinessLogic.Model.Consensus;
+using BlockchainSimulator.BusinessLogic.Model.Responses;
 using BlockchainSimulator.BusinessLogic.Queue;
 
 namespace BlockchainSimulator.BusinessLogic.Services
@@ -19,64 +20,101 @@ namespace BlockchainSimulator.BusinessLogic.Services
             _queue = queue;
         }
 
-        public abstract bool AcceptBlockchain(string base64Blockchain);
+        public abstract BaseResponse<bool> AcceptBlockchain(string base64Blockchain);
 
         public abstract void ReachConsensus();
 
-        public List<ServerNode> GetNodes()
+        public BaseResponse<List<ServerNode>> GetNodes()
         {
-            return _serverNodes.Select(kv => kv.Value).ToList();
+            return new SuccessResponse<List<ServerNode>>($"The server list for current time: {DateTime.UtcNow}",
+                _serverNodes.Select(kv => kv.Value).ToList());
         }
 
-        public ServerNode ConnectNode(ServerNode serverNode)
+        public BaseResponse<ServerNode> ConnectNode(ServerNode serverNode)
         {
-            if (serverNode?.Id == null || serverNode.HttpAddress == null || _serverNodes.ContainsKey(serverNode.Id))
+            var validationErrors = ValidateNode(serverNode);
+            if (validationErrors.Any())
             {
-                return null;
+                return new ErrorResponse<ServerNode>("Invalid input node", serverNode, validationErrors.ToArray());
             }
 
-            _queue.QueueBackgroundWorkItem(async token =>
-            {
-                using (var httpClientHandler = new HttpClientHandler())
-                {
-                    httpClientHandler.ServerCertificateCustomValidationCallback =
-                        (message, cert, chain, errors) => true;
-                    using (var httpClient = new HttpClient(httpClientHandler))
-                    {
-                        try
-                        {
-                            var result = await httpClient.GetAsync($"{serverNode.HttpAddress}/api/info", token);
-                            serverNode.IsConnected = result.IsSuccessStatusCode;
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                        }
-                    }
-                }
-            });
+            serverNode.IsConnected = null;
 
-            return _serverNodes.TryAdd(serverNode.Id, serverNode) ? serverNode : null;
+            CheckNodeConnection(serverNode);
+
+            if (!_serverNodes.TryAdd(serverNode.Id, serverNode))
+            {
+                return new ErrorResponse<ServerNode>($"Could not add a node with id: {serverNode.Id}", serverNode);
+            }
+
+            return new SuccessResponse<ServerNode>("The node has been added successfully!", serverNode);
         }
 
-        public ServerNode DisconnectNode(string nodeId)
+        public BaseResponse<ServerNode> DisconnectNode(string nodeId)
         {
             _serverNodes.TryRemove(nodeId, out var result);
-            if (result != null)
+            if (result == null)
             {
-                result.IsConnected = false;
+                return new ErrorResponse<ServerNode>($"Could not disconnect node with id: {nodeId}", null);
             }
 
-            return result;
+            result.IsConnected = false;
+            return new SuccessResponse<ServerNode>($"The node with id: {nodeId} has been disconnected!", result);
         }
 
-        public List<ServerNode> DisconnectFromNetwork()
+        public BaseResponse<List<ServerNode>> DisconnectFromNetwork()
         {
             var result = _serverNodes.Select(kv => kv.Value).ToList();
             result.ForEach(n => n.IsConnected = false);
             _serverNodes.Clear();
 
-            return result;
+            return new SuccessResponse<List<ServerNode>>("All nodes has been disconnected!", result);
+        }
+
+        private List<string> ValidateNode(ServerNode serverNode)
+        {
+            var validationErrors = new List<string>();
+            if (serverNode.Id == null)
+            {
+                validationErrors.Add("The node's id can not be null!");
+            }
+
+            if (serverNode.HttpAddress == null)
+            {
+                validationErrors.Add("The node's http address cannot be null!");
+            }
+
+            if (_serverNodes.ContainsKey(serverNode.Id))
+            {
+                validationErrors.Add($"The node's id already exists id: {serverNode.Id}!");
+            }
+
+            return validationErrors;
+        }
+
+        private void CheckNodeConnection(ServerNode serverNode)
+        {
+            _queue.QueueBackgroundWorkItem(async token =>
+            {
+                using (var httpClientHandler = new HttpClientHandler())
+                {
+                    // Turns off SSL
+                    httpClientHandler.ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) => true;
+                    using (var httpClient = new HttpClient(httpClientHandler))
+                    {
+                        try
+                        {
+                            var response = await httpClient.GetAsync($"{serverNode.HttpAddress}/api/info", token);
+                            serverNode.IsConnected = response.IsSuccessStatusCode;
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            serverNode.IsConnected = false;
+                        }
+                    }
+                }
+            });
         }
     }
 }

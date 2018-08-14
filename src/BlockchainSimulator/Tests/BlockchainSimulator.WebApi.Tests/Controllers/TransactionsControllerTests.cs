@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using BlockchainSimulator.BusinessLogic.Model.Responses;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.BusinessLogic.Services;
 using BlockchainSimulator.WebApi.Controllers;
@@ -40,11 +41,11 @@ namespace BlockchainSimulator.WebApi.Tests.Controllers
             };
 
             _transactionServiceMock.Setup(p => p.GetTransaction(id))
-                .Returns(businessTransaction);
+                .Returns(new SuccessResponse<Transaction>("", businessTransaction));
 
             // Act
             var result = _transactionsController.GetTransaction(id);
-            var transaction = result.Value;
+            var transaction = result.Value.Result as Models.Transaction;
 
             // Assert
             _transactionServiceMock.Verify(p => p.GetTransaction(id));
@@ -83,12 +84,13 @@ namespace BlockchainSimulator.WebApi.Tests.Controllers
             };
 
             _transactionServiceMock.Setup(p => p.GetPendingTransactions())
-                .Returns(new List<Transaction> {businessTransaction, businessTransaction});
+                .Returns(new SuccessResponse<List<Transaction>>("",
+                    new List<Transaction> {businessTransaction, businessTransaction}));
 
             // Act
             var result = _transactionsController.GetPendingTransactions();
-            var transactions = result.Value;
-            var transaction = transactions.First();
+            var transactions = result.Value.Result as List<Models.Transaction>;
+            var transaction = transactions?.First();
 
             // Assert
             _transactionServiceMock.Verify(p => p.GetPendingTransactions());

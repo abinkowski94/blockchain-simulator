@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlockchainSimulator.BusinessLogic.Model.Block;
+using BlockchainSimulator.BusinessLogic.Model.Responses;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.BusinessLogic.Providers;
 using BlockchainSimulator.BusinessLogic.Queue;
@@ -23,16 +25,19 @@ namespace BlockchainSimulator.BusinessLogic.Services
             _consensusService = consensusService;
         }
 
-        public void MineBlocks(List<Transaction> transactions)
+        public void MineBlocks(IEnumerable<Transaction> transactions)
         {
             _queue.QueueBackgroundWorkItem(token =>
             {
                 return Task.Run(() =>
                 {
-                    var parentBlock = _blockchainService.GetBlockchain();
-                    var newBlock = _blockProvider.CreateBlock(transactions.ToHashSet(), parentBlock);
-                    _blockchainService.SaveBlockchain(newBlock);
-                    _consensusService.ReachConsensus();
+                    var blockchainResponse = _blockchainService.GetBlockchain();
+                    if (blockchainResponse.IsSuccess)
+                    {
+                        var newBlock = _blockProvider.CreateBlock(transactions.ToHashSet(), blockchainResponse.Result);
+                        _blockchainService.SaveBlockchain(newBlock);
+                        _consensusService.ReachConsensus();
+                    }
                 }, token);
             });
         }

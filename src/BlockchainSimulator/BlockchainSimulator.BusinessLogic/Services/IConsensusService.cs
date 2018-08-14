@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using BlockchainSimulator.BusinessLogic.Model.Consensus;
+using BlockchainSimulator.BusinessLogic.Model.Responses;
 
 namespace BlockchainSimulator.BusinessLogic.Services
 {
@@ -7,14 +8,14 @@ namespace BlockchainSimulator.BusinessLogic.Services
     {
         void ReachConsensus();
 
-        List<ServerNode> GetNodes();
+        BaseResponse<List<ServerNode>> GetNodes();
 
-        bool AcceptBlockchain(string base64Blockchain);
+        BaseResponse<bool> AcceptBlockchain(string base64Blockchain);
 
-        ServerNode ConnectNode(ServerNode serverNode);
+        BaseResponse<ServerNode> ConnectNode(ServerNode serverNode);
 
-        ServerNode DisconnectNode(string nodeId);
+        BaseResponse<ServerNode> DisconnectNode(string nodeId);
 
-        List<ServerNode> DisconnectFromNetwork();
+        BaseResponse<List<ServerNode>> DisconnectFromNetwork();
     }
 }

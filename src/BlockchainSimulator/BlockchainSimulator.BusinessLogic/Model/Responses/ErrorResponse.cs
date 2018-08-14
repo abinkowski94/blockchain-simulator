@@ -1,13 +1,13 @@
 namespace BlockchainSimulator.BusinessLogic.Model.Responses
 {
-    public class ErrorResponse : BaseResponse
+    public class ErrorResponse<T> : BaseResponse<T>
     {
         public override bool IsSuccess => false;
-        public ErrorResponse[] InnerErrors { get; }
-
-        public ErrorResponse(string message, ErrorResponse[] innerErrors) : base(message)
+        public string[] Errors { get; }
+        
+        public ErrorResponse(string message, T result, params string[] errors) : base(message, result)
         {
-            InnerErrors = innerErrors;
+            Errors = errors;
         }
     }
 }
