@@ -7,8 +7,7 @@ namespace BlockchainSimulator.BusinessLogic.Providers.Specific
 {
     public class ProofOfWorkBlockProvider : BaseBlockProvider
     {
-        public ProofOfWorkBlockProvider(IMerkleTreeProvider merkleTreeProvider, IEncryptionService encryptionService) :
-            base(merkleTreeProvider, encryptionService)
+        public ProofOfWorkBlockProvider(IMerkleTreeProvider merkleTreeProvider) : base(merkleTreeProvider)
         {
         }
 
@@ -17,19 +16,19 @@ namespace BlockchainSimulator.BusinessLogic.Providers.Specific
             currentBlock.Header.Version = ProofOfWorkConfigurations.Version;
             currentBlock.Header.Target = ProofOfWorkConfigurations.Target;
             currentBlock.Header.Nonce = GetProof(currentBlock);
-                        
+
             return currentBlock;
         }
 
-        private string GetProof(BlockBase block)
+        private static string GetProof(BlockBase block)
         {
             long expectedNonce = 0;
-            
-            while (!_encryptionService.GetSha256Hash(block.BlockJson).StartsWith(block.Header.Target))
+
+            while (!EncryptionService.GetSha256Hash(block.BlockJson).StartsWith(block.Header.Target))
             {
                 expectedNonce++;
                 block.Header.Nonce = Convert.ToString(expectedNonce, 16);
-            } 
+            }
 
             return Convert.ToString(expectedNonce, 16);
         }

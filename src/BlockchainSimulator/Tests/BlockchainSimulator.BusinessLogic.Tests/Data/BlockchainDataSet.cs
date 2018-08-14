@@ -1,4 +1,4 @@
-using BlockchainSimulator.DataAccess.Converters;
+using BlockchainSimulator.DataAccess.Converters.Specific;
 using BlockchainSimulator.DataAccess.Model;
 using Newtonsoft.Json;
 using Xunit;

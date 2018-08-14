@@ -7,13 +7,6 @@ namespace BlockchainSimulator.BusinessLogic.Providers
 {
     public class MerkleTreeProvider : IMerkleTreeProvider
     {
-        private readonly IEncryptionService _encryptionService;
-
-        public MerkleTreeProvider(IEncryptionService encryptionService)
-        {
-            _encryptionService = encryptionService;
-        }
-
         public Node GetMerkleTree(HashSet<Transaction> transactions)
         {
             if (transactions == null)
@@ -26,7 +19,7 @@ namespace BlockchainSimulator.BusinessLogic.Providers
                     {
                         TransactionId = t.Id,
                         Transaction = t,
-                        Hash = _encryptionService.GetSha256Hash(t.TransactionJson)
+                        Hash = EncryptionService.GetSha256Hash(t.TransactionJson)
                     }
                 ).Cast<MerkleNode>()
                 .ToList();
@@ -47,7 +40,7 @@ namespace BlockchainSimulator.BusinessLogic.Providers
                         {
                             LeftNode = node,
                             RightNode = null,
-                            Hash = _encryptionService.GetSha256Hash($"{node.Hash}{null}")
+                            Hash = EncryptionService.GetSha256Hash($"{node.Hash}{null}")
                         }
                     };
                 }
@@ -65,7 +58,7 @@ namespace BlockchainSimulator.BusinessLogic.Providers
                 {
                     LeftNode = nodes[i],
                     RightNode = rightNode,
-                    Hash = _encryptionService.GetSha256Hash($"{nodes[i].Hash}{rightNode?.Hash}")
+                    Hash = EncryptionService.GetSha256Hash($"{nodes[i].Hash}{rightNode?.Hash}")
                 };
 
                 resultNodes.Add(result);

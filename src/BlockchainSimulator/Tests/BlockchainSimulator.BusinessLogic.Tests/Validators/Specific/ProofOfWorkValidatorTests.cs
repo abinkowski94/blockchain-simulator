@@ -19,11 +19,8 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators.Specific
 
         public ProofOfWorkValidatorTests()
         {
-            var encryptionService = new EncryptionService();
-            _proofOfWorkValidator =
-                new ProofOfWorkValidator(new MerkleTreeValidator(encryptionService), encryptionService);
-            _proofOfWorkBlockProvider =
-                new ProofOfWorkBlockProvider(new MerkleTreeProvider(encryptionService), encryptionService);
+            _proofOfWorkValidator = new ProofOfWorkValidator(new MerkleTreeValidator());
+            _proofOfWorkBlockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider());
         }
 
         [Fact]

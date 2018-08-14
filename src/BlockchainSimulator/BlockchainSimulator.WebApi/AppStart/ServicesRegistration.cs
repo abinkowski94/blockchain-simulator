@@ -23,7 +23,6 @@ namespace BlockchainSimulator.WebApi.AppStart
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             
             // Services
-            services.AddTransient<IEncryptionService, EncryptionService>();
             services.AddSingleton<IBlockchainService, BlockchainService>();
             services.AddSingleton<ITransactionService, TransactionService>();
             services.AddSingleton<IMiningService, MiningService>();

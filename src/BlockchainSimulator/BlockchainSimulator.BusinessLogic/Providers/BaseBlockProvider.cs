@@ -10,12 +10,10 @@ namespace BlockchainSimulator.BusinessLogic.Providers
     public abstract class BaseBlockProvider : BaseService, IBlockProvider
     {
         private readonly IMerkleTreeProvider _merkleTreeProvider;
-        protected readonly IEncryptionService _encryptionService;
 
-        protected BaseBlockProvider(IMerkleTreeProvider merkleTreeProvider, IEncryptionService encryptionService)
+        protected BaseBlockProvider(IMerkleTreeProvider merkleTreeProvider)
         {
             _merkleTreeProvider = merkleTreeProvider;
-            _encryptionService = encryptionService;
         }
 
         protected abstract BlockBase FillBlock(BlockBase currentBlock);
@@ -36,7 +34,7 @@ namespace BlockchainSimulator.BusinessLogic.Providers
 
             var header = new Header
             {
-                ParentHash = _encryptionService.GetSha256Hash(parentBlock?.BlockJson),
+                ParentHash = EncryptionService.GetSha256Hash(parentBlock?.BlockJson),
                 MerkleTreeRootHash = tree.Hash,
                 TimeStamp = DateTime.UtcNow,
                 Version = null,

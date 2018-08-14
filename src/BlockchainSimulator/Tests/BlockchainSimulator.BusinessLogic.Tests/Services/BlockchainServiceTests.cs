@@ -57,9 +57,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Services
         public void SaveBlockchain_Blocks_Void()
         {
             // Arrange
-            var encryptionService = new EncryptionService();
-            var blockchainProvider =
-                new ProofOfWorkBlockProvider(new MerkleTreeProvider(encryptionService), encryptionService);
+            var blockchainProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider());
 
             var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>) ts.First())
                 .ToList();

@@ -5,20 +5,13 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Services
 {
     public class EncryptionServiceTests
     {
-        private readonly EncryptionService _encryptionService;
-
-        public EncryptionServiceTests()
-        {
-            _encryptionService = new EncryptionService();
-        }
-
         [Fact]
         public void GetSha256Hash_Null_Null()
         {
             // Arrange
 
             // Act
-            var result = _encryptionService.GetSha256Hash(null);
+            var result = EncryptionService.GetSha256Hash(null);
 
             // Assert
             Assert.Null(result);
@@ -31,7 +24,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Services
             const string value = "";
 
             // Act
-            var result = _encryptionService.GetSha256Hash(value);
+            var result = EncryptionService.GetSha256Hash(value);
 
             // Assert
             Assert.NotNull(result);
@@ -45,8 +38,8 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Services
             const string value = "{ \"testProperty\": \"test data\" }";
 
             // Act
-            var resultOne = _encryptionService.GetSha256Hash(value);
-            var resultTwo = _encryptionService.GetSha256Hash(value);
+            var resultOne = EncryptionService.GetSha256Hash(value);
+            var resultTwo = EncryptionService.GetSha256Hash(value);
 
             // Assert
             Assert.NotNull(resultOne);
@@ -61,8 +54,8 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Services
             const string value = "{ \"testProperty\": \"test data 1\" }";
 
             // Act
-            var resultOne = _encryptionService.GetSha256Hash(value);
-            var resultTwo = _encryptionService.GetSha256Hash(value);
+            var resultOne = EncryptionService.GetSha256Hash(value);
+            var resultTwo = EncryptionService.GetSha256Hash(value);
 
             // Assert
             Assert.NotNull(resultOne);
@@ -79,7 +72,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Services
             // Arrange
 
             // Act
-            var result = _encryptionService.GetSha256Hash(json);
+            var result = EncryptionService.GetSha256Hash(json);
 
             // Assert
             Assert.NotNull(result);

@@ -1,11 +1,11 @@
 ﻿using System;
-using BlockchainSimulator.DataAccess.Model.Block;
+using BlockchainSimulator.DataAccess.Model.Transaction;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace BlockchainSimulator.DataAccess.Converters
+namespace BlockchainSimulator.DataAccess.Converters.Specific
 {
-    public class BlockConverter : JsonConverter
+    public class NodeConverter : JsonConverter
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
@@ -17,12 +17,12 @@ namespace BlockchainSimulator.DataAccess.Converters
             try
             {
                 var jObject = JObject.Load(reader);
-                if (jObject["isGenesis"].Value<bool>())
+                if (jObject["transactionId"]?.Value<string>() != null)
                 {
-                    return jObject.ToObject<GenesisBlock>(serializer);
+                    return jObject.ToObject<Leaf>(serializer);
                 }
 
-                return jObject.ToObject<Block>(serializer);
+                return jObject.ToObject<Node>(serializer);
             }
             catch (JsonReaderException)
             {
@@ -32,7 +32,7 @@ namespace BlockchainSimulator.DataAccess.Converters
 
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(BlockBase);
+            return objectType == typeof(MerkleNode);
         }
     }
 }

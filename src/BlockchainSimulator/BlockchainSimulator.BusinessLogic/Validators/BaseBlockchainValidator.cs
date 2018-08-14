@@ -7,13 +7,10 @@ namespace BlockchainSimulator.BusinessLogic.Validators
     public abstract class BaseBlockchainValidator : IBlockchainValidator
     {
         private readonly IMerkleTreeValidator _merkleTreeValidator;
-        protected readonly IEncryptionService _encryptionService;
 
-        protected BaseBlockchainValidator(IMerkleTreeValidator merkleTreeValidator,
-            IEncryptionService encryptionService)
+        protected BaseBlockchainValidator(IMerkleTreeValidator merkleTreeValidator)
         {
             _merkleTreeValidator = merkleTreeValidator;
-            _encryptionService = encryptionService;
         }
 
         protected abstract ValidationResult SpecificValidation(BlockBase blockchain);
@@ -60,7 +57,7 @@ namespace BlockchainSimulator.BusinessLogic.Validators
 
         private ValidationResult ValidateParentHash(Block blockchain)
         {
-            var parentHash = _encryptionService.GetSha256Hash(blockchain.Parent.BlockJson);
+            var parentHash = EncryptionService.GetSha256Hash(blockchain.Parent.BlockJson);
             if (parentHash != blockchain.Header.ParentHash)
             {
                 return new ValidationResult(false,

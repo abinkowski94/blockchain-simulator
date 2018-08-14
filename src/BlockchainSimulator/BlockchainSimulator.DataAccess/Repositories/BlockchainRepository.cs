@@ -18,18 +18,7 @@ namespace BlockchainSimulator.DataAccess.Repositories
         public Blockchain GetBlockchain()
         {
             var json = _fileRepository.GetFile(_blockchainFileName);
-            if (json == null)
-            {
-                return null;
-            }
-
-            var settings = new JsonSerializerSettings
-            {
-                Converters = new JsonConverter[] {new BlockConverter(), new NodeConverter()}
-            };
-            var result = JsonConvert.DeserializeObject<Blockchain>(json, settings);
-
-            return result;
+            return BlockchainConverter.DeserializeBlockchain(json);
         }
 
         public Blockchain SaveBlockchain(Blockchain blockchain)

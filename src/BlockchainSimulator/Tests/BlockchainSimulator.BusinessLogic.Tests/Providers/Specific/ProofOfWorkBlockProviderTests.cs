@@ -17,8 +17,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Providers.Specific
 
         public ProofOfWorkBlockProviderTests()
         {
-            var encryptionService = new EncryptionService();
-            _blockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(encryptionService), encryptionService);
+            _blockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider());
         }
 
         [Fact]

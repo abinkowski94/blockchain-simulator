@@ -5,7 +5,7 @@ using System.Text;
 using BlockchainSimulator.BusinessLogic.Model.MappingProfiles;
 using BlockchainSimulator.BusinessLogic.Queue;
 using BlockchainSimulator.BusinessLogic.Validators;
-using BlockchainSimulator.DataAccess.Converters;
+using BlockchainSimulator.DataAccess.Converters.Specific;
 using BlockchainSimulator.DataAccess.Model;
 using BlockchainSimulator.DataAccess.Repositories;
 using Newtonsoft.Json;

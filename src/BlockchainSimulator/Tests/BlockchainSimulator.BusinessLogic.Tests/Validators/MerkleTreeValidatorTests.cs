@@ -15,7 +15,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators
 
         public MerkleTreeValidatorTests()
         {
-            _merkleTreeValidator = new MerkleTreeValidator(new EncryptionService());
+            _merkleTreeValidator = new MerkleTreeValidator();
         }
 
         [Fact]
@@ -36,8 +36,8 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators
         public void Validate_WrongTreeHash_ErrorValidationResult()
         {
             // Arrange
-            var tree = new MerkleTreeProvider(new EncryptionService())
-                .GetMerkleTree(TransactionDataSet.TransactionData.Last().First() as HashSet<Transaction>);
+            var tree = new MerkleTreeProvider().GetMerkleTree(
+                TransactionDataSet.TransactionData.Last().First() as HashSet<Transaction>);
             ((Node) tree.LeftNode).LeftNode.Hash = "000";
 
             // Act
@@ -56,8 +56,8 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators
         public void Validate_WrongLeafHash_ErrorValidationResult()
         {
             // Arrange
-            var tree = new MerkleTreeProvider(new EncryptionService())
-                .GetMerkleTree(TransactionDataSet.TransactionData.First().First() as HashSet<Transaction>);
+            var tree = new MerkleTreeProvider().GetMerkleTree(
+                TransactionDataSet.TransactionData.First().First() as HashSet<Transaction>);
             tree.Hash = "2ac9a6746aca543af8dff39894cfe8173afba21eb01c6fae33d52947222855ef";
             tree.LeftNode.Hash = "000";
 
@@ -76,7 +76,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators
         public void Validate_WrongTree_ErrorValidationResult(HashSet<Transaction> transactions)
         {
             // Arrange
-            var tree = new MerkleTreeProvider(new EncryptionService()).GetMerkleTree(transactions);
+            var tree = new MerkleTreeProvider().GetMerkleTree(transactions);
             tree.Hash = "00000000000000";
 
             // Act
@@ -93,7 +93,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators
         public void Validate_CorrectTree_SuccessValidationResult(HashSet<Transaction> transactions)
         {
             // Arrange
-            var tree = new MerkleTreeProvider(new EncryptionService()).GetMerkleTree(transactions);
+            var tree = new MerkleTreeProvider().GetMerkleTree(transactions);
 
             // Act
             var result = _merkleTreeValidator.Validate(tree);

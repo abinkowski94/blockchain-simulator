@@ -6,14 +6,13 @@ namespace BlockchainSimulator.BusinessLogic.Validators.Specific
 {
     public class ProofOfWorkValidator : BaseBlockchainValidator
     {
-        public ProofOfWorkValidator(IMerkleTreeValidator merkleTreeValidator, IEncryptionService encryptionService) :
-            base(merkleTreeValidator, encryptionService)
+        public ProofOfWorkValidator(IMerkleTreeValidator merkleTreeValidator) : base(merkleTreeValidator)
         {
         }
 
         protected override ValidationResult SpecificValidation(BlockBase blockchain)
         {
-            var hash = _encryptionService.GetSha256Hash(blockchain.BlockJson);
+            var hash = EncryptionService.GetSha256Hash(blockchain.BlockJson);
             if (hash.StartsWith(blockchain.Header.Target))
             {
                 return new ValidationResult(true, new string[] { });

@@ -13,7 +13,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Providers
 
         public MerkleTreeProviderTests()
         {
-            _merkleTreeProvider = new MerkleTreeProvider(new EncryptionService());
+            _merkleTreeProvider = new MerkleTreeProvider();
         }
 
         [Fact]
