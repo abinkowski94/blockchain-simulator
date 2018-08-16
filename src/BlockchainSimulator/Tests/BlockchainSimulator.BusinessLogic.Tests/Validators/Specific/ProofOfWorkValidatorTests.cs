@@ -4,7 +4,6 @@ using System.Linq;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.BusinessLogic.Providers;
 using BlockchainSimulator.BusinessLogic.Providers.Specific;
-using BlockchainSimulator.BusinessLogic.Services;
 using BlockchainSimulator.BusinessLogic.Tests.Data;
 using BlockchainSimulator.BusinessLogic.Validators;
 using BlockchainSimulator.BusinessLogic.Validators.Specific;

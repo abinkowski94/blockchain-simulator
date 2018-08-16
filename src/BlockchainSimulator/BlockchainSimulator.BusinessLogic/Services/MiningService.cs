@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BlockchainSimulator.BusinessLogic.Model.Block;
-using BlockchainSimulator.BusinessLogic.Model.Responses;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.BusinessLogic.Providers;
 using BlockchainSimulator.BusinessLogic.Queue;

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.BusinessLogic.Providers;
-using BlockchainSimulator.BusinessLogic.Services;
 using BlockchainSimulator.BusinessLogic.Tests.Data;
 using Xunit;
 

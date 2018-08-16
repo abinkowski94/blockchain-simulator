@@ -5,7 +5,6 @@ using BlockchainSimulator.BusinessLogic.Model.Block;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.BusinessLogic.Providers;
 using BlockchainSimulator.BusinessLogic.Providers.Specific;
-using BlockchainSimulator.BusinessLogic.Services;
 using BlockchainSimulator.BusinessLogic.Tests.Data;
 using Xunit;
 
