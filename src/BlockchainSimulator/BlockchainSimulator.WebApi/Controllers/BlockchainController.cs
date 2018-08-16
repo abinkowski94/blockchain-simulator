@@ -1,6 +1,6 @@
 using BlockchainSimulator.DataAccess.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+using System.Linq;
 
 namespace BlockchainSimulator.WebApi.Controllers
 {
@@ -25,13 +25,24 @@ namespace BlockchainSimulator.WebApi.Controllers
         }
 
         /// <summary>
+        /// Gets the block with given id
+        /// </summary>
+        /// <param name="id">The id of the block</param>
+        /// <returns>The block with given id</returns>
+        [HttpGet("{id}")]
+        public ActionResult<object> GetBlock(string id)
+        {
+            return _blockchainRepository.GetBlockchain().Blocks.FirstOrDefault(b => b.Id == id);
+        }
+
+        /// <summary>
         /// Gets the locally stored blockchain
         /// </summary>
         /// <returns>The blockchain</returns>
         [HttpGet]
-        public ActionResult<string> GetBlockchain()
+        public ActionResult<object> GetBlockchain()
         {
-            return JsonConvert.SerializeObject(_blockchainRepository.GetBlockchain());
+            return _blockchainRepository.GetBlockchain();
         }
     }
 }
