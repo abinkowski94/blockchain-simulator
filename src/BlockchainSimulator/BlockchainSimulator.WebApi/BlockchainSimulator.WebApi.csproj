@@ -34,4 +34,18 @@
   <ItemGroup>
     <PackageReference Update="Microsoft.NETCore.App" Version="2.1.2" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <Target Name="IncludeDocFile" BeforeTargets="PrepareForPublish">
+    <ItemGroup Condition=" '$(DocumentationFile)' != '' ">
+      <_DocumentationFile Include="$(DocumentationFile)" />
+      <ContentWithTargetPath Include="@(_DocumentationFile->'%(FullPath)')"
+                             RelativePath="%(_DocumentationFile.Identity)"
+                             TargetPath="%(_DocumentationFile.Filename)%(_DocumentationFile.Extension)"
+                             CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
 </Project>
