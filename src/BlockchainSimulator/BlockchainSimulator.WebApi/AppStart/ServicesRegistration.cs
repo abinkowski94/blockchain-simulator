@@ -10,8 +10,16 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BlockchainSimulator.WebApi.AppStart
 {
+    /// <summary>
+    /// The service registration extension
+    /// </summary>
     public static class ServicesRegistration
     {
+        /// <summary>
+        ///  Adds the blockchain services to the container
+        /// </summary>
+        /// <param name="services">The service container</param>
+        /// <returns>The service container</returns>
         public static IServiceCollection AddBlockchainServices(this IServiceCollection services)
         {
             // Repositories
@@ -21,7 +29,7 @@ namespace BlockchainSimulator.WebApi.AppStart
             // Queues
             services.AddHostedService<QueuedHostedService>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
-            
+
             // Services
             services.AddSingleton<IBlockchainService, BlockchainService>();
             services.AddSingleton<ITransactionService, TransactionService>();

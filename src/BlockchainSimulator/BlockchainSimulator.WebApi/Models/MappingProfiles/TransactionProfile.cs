@@ -2,8 +2,14 @@ using AutoMapper;
 
 namespace BlockchainSimulator.WebApi.Models.MappingProfiles
 {
+    /// <summary>
+    /// The profile for the transactions
+    /// </summary>
     public class TransactionProfile : Profile
     {
+        /// <summary>
+        /// The constructor
+        /// </summary>
         public TransactionProfile()
         {
             CreateMap<BusinessLogic.Model.Transaction.Transaction, Transaction>()

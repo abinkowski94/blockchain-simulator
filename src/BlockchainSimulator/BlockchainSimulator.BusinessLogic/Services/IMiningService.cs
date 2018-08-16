@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using BlockchainSimulator.BusinessLogic.Model.Responses;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 
 namespace BlockchainSimulator.BusinessLogic.Services

@@ -4,8 +4,14 @@ using BlockchainSimulator.WebApi.Models.Responses;
 
 namespace BlockchainSimulator.WebApi.Models.MappingProfiles
 {
+    /// <summary>
+    /// The profile for the responses
+    /// </summary>
     public class ResponsesProfile : Profile
     {
+        /// <summary>
+        /// The constructor
+        /// </summary>
         public ResponsesProfile()
         {
             CreateMap(typeof(BaseResponse<>), typeof(BaseResponse))

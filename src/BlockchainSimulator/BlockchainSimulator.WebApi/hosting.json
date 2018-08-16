@@ -1,4 +1,4 @@
 {
-  "urls": "https://localhost:50001;http://localhost:50000",
-  "contentRoot": "C:\\repos\\blockchain-simulator\\src\\BlockchainSimulator\\BlockchainSimulator.WebApi\\wwwroot"
+  "urls": "https://localhost:5001;http://localhost:5000",
+  "contentRoot": "wwwroot"
 }
