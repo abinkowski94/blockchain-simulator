@@ -27,7 +27,7 @@ namespace BlockchainSimulator.BusinessLogic.Services
             return Task.Run(() =>
             {
                 var blockchainResponse = _blockchainService.GetBlockchain();
-                var newBlock = _blockProvider.CreateBlock(transactions.ToHashSet(), blockchainResponse.Result);
+                var newBlock = _blockProvider.CreateBlock(transactions.ToHashSet(), enqueueTime, blockchainResponse.Result);
                 
                 _blockchainService.SaveBlockchain(newBlock);
                 _consensusService.ReachConsensus();

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BlockchainSimulator.BusinessLogic.Configurations;
@@ -33,7 +34,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Providers.Specific
             // Arrange
 
             // Act
-            var result = _blockProvider.CreateBlock(null);
+            var result = _blockProvider.CreateBlock(null, new DateTime(1, 1, 1));
 
             // Assert
             Assert.Null(result);
@@ -45,7 +46,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Providers.Specific
             // Arrange
 
             // Act
-            var result = _blockProvider.CreateBlock(new HashSet<Transaction>());
+            var result = _blockProvider.CreateBlock(new HashSet<Transaction>(), new DateTime(1, 1, 1));
 
             // Assert
             Assert.Null(result);
@@ -58,7 +59,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Providers.Specific
             var transactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.Last().First();
 
             // Act
-            var result = _blockProvider.CreateBlock(transactions);
+            var result = _blockProvider.CreateBlock(transactions, new DateTime(1, 1, 1));
 
             // Assert
             Assert.NotNull(result);
@@ -79,11 +80,11 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Providers.Specific
         {
             // Arrange
             var parentTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.First().First();
-            var parent = _blockProvider.CreateBlock(parentTransactions);
+            var parent = _blockProvider.CreateBlock(parentTransactions, new DateTime(1, 1, 1));
             var transactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.Last().First();
 
             // Act
-            var result = _blockProvider.CreateBlock(transactions, parent) as Block;
+            var result = _blockProvider.CreateBlock(transactions, new DateTime(1, 1, 1), parent) as Block;
 
             // Assert
             Assert.NotNull(result);

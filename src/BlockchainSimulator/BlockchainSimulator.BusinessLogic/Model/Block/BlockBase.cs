@@ -1,3 +1,4 @@
+using System;
 using Newtonsoft.Json;
 
 namespace BlockchainSimulator.BusinessLogic.Model.Block
@@ -13,6 +14,9 @@ namespace BlockchainSimulator.BusinessLogic.Model.Block
         [JsonProperty("header")]
         public Header Header { get; set; }
 
+        [JsonProperty("queueTime")] 
+        public TimeSpan QueueTime { set; get; }
+        
         [JsonProperty("isGenesis")]
         public abstract bool IsGenesis { get; }
 

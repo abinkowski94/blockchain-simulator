@@ -22,6 +22,7 @@ namespace BlockchainSimulator.BusinessLogic.Model.MappingProfiles
                 .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dst => dst.Header, opt => opt.MapFrom(src => src.Header))
                 .ForMember(dst => dst.Body, opt => opt.MapFrom(src => src.Body))
+                .ForMember(dst => dst.QueueTime, opt => opt.MapFrom(src => src.QueueTime))
                 .ReverseMap()
                 .ForAllOtherMembers(dst => dst.Ignore());
 
@@ -30,6 +31,7 @@ namespace BlockchainSimulator.BusinessLogic.Model.MappingProfiles
                 .ForMember(dst => dst.ParentId, opt => opt.MapFrom(src => src.ParentId))
                 .ForMember(dst => dst.Header, opt => opt.MapFrom(src => src.Header))
                 .ForMember(dst => dst.Body, opt => opt.MapFrom(src => src.Body))
+                .ForMember(dst => dst.QueueTime, opt => opt.MapFrom(src => src.QueueTime))
                 .ReverseMap()
                 .ForAllOtherMembers(dst => dst.Ignore());
         }

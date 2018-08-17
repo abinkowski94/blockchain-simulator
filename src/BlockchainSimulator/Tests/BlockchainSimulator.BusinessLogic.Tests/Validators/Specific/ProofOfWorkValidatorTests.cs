@@ -51,8 +51,8 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators.Specific
             var genesisTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.First().First();
             var blockTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.Last().First();
 
-            var genesisBlock = _proofOfWorkBlockProvider.CreateBlock(genesisTransactions);
-            var blockchain = _proofOfWorkBlockProvider.CreateBlock(blockTransactions, genesisBlock);
+            var genesisBlock = _proofOfWorkBlockProvider.CreateBlock(genesisTransactions, new DateTime(1, 1, 1));
+            var blockchain = _proofOfWorkBlockProvider.CreateBlock(blockTransactions, new DateTime(1, 1, 1), genesisBlock);
 
             // Act
             var result = _proofOfWorkValidator.Validate(blockchain);
@@ -69,8 +69,8 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators.Specific
             var genesisTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.First().First();
             var blockTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.Last().First();
 
-            var genesisBlock = _proofOfWorkBlockProvider.CreateBlock(genesisTransactions);
-            var blockchain = _proofOfWorkBlockProvider.CreateBlock(blockTransactions, genesisBlock);
+            var genesisBlock = _proofOfWorkBlockProvider.CreateBlock(genesisTransactions, new DateTime(1, 1, 1));
+            var blockchain = _proofOfWorkBlockProvider.CreateBlock(blockTransactions, new DateTime(1, 1, 1), genesisBlock);
             blockchain.Header.Nonce = "0";
             blockchain.Header.TimeStamp = new DateTime(1, 1, 1);
 
@@ -87,7 +87,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators.Specific
         public void Validate_GenesisBlocks_SuccessValidationResults(HashSet<Transaction> transactions)
         {
             // Arrange
-            var block = _proofOfWorkBlockProvider.CreateBlock(transactions);
+            var block = _proofOfWorkBlockProvider.CreateBlock(transactions, new DateTime(1, 1, 1));
 
             // Act
             var result = _proofOfWorkValidator.Validate(block);

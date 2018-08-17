@@ -18,7 +18,7 @@ namespace BlockchainSimulator.BusinessLogic.Providers
 
         protected abstract BlockBase FillBlock(BlockBase currentBlock);
 
-        public BlockBase CreateBlock(HashSet<Transaction> transactions, BlockBase parentBlock = null)
+        public BlockBase CreateBlock(HashSet<Transaction> transactions, DateTime enqueueTime, BlockBase parentBlock = null)
         {
             if (transactions == null)
             {
@@ -53,7 +53,8 @@ namespace BlockchainSimulator.BusinessLogic.Providers
             {
                 newBlock = new GenesisBlock
                 {
-                    Id = Convert.ToString(0, 16)
+                    Id = Convert.ToString(0, 16),
+                    QueueTime = DateTime.UtcNow - enqueueTime
                 };
             }
             else
@@ -61,6 +62,7 @@ namespace BlockchainSimulator.BusinessLogic.Providers
                 newBlock = new Block
                 {
                     Id = Convert.ToString(long.Parse(parentBlock.Id) + 1, 16),
+                    QueueTime = DateTime.UtcNow - enqueueTime,
                     ParentId = parentBlock.Id,
                     Parent = parentBlock
                 };

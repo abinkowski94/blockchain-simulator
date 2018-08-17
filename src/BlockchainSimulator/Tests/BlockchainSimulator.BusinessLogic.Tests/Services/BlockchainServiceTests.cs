@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BlockchainSimulator.BusinessLogic.Configurations;
@@ -26,7 +27,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Services
             configurationMock.Setup(p => p.Version).Returns("PoW-v1");
             configurationMock.Setup(p => p.BlockSize).Returns(10);
             _configuration = configurationMock.Object;
-            
+
             _blockchainRepositoryMock = new Mock<IBlockchainRepository>();
             _blockchainService = new BlockchainService(_blockchainRepositoryMock.Object);
         }
@@ -71,7 +72,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Services
                 .ToList();
 
             BlockBase block = null;
-            transactionSetList.ForEach(ts => block = blockchainProvider.CreateBlock(ts, block));
+            transactionSetList.ForEach(ts => block = blockchainProvider.CreateBlock(ts, new DateTime(1, 1, 1), block));
 
             // Act
             _blockchainService.SaveBlockchain(block);
