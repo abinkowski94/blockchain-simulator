@@ -1,50 +1,53 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-  <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RuntimeFrameworkVersion>2.1.2</RuntimeFrameworkVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netcoreapp2.1\BlockchainSimulator.WebApi.xml</DocumentationFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <Folder Include="Models\Responses" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="AutoMapper">
-      <Version>7.0.1</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Swashbuckle.AspNetCore">
-      <Version>3.0.0</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BlockchainSimulator.BusinessLogic\BlockchainSimulator.BusinessLogic.csproj" />
-    <ProjectReference Include="..\BlockchainSimulator.DataAccess\BlockchainSimulator.DataAccess.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Update="hosting.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\.gitkeep">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="Microsoft.NETCore.App" Version="2.1.2" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
-
-  <Target Name="IncludeDocFile" BeforeTargets="PrepareForPublish">
-    <ItemGroup Condition=" '$(DocumentationFile)' != '' ">
-      <_DocumentationFile Include="$(DocumentationFile)" />
-      <ContentWithTargetPath Include="@(_DocumentationFile->'%(FullPath)')" RelativePath="%(_DocumentationFile.Identity)" TargetPath="%(_DocumentationFile.Filename)%(_DocumentationFile.Extension)" CopyToPublishDirectory="PreserveNewest" />
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <RuntimeFrameworkVersion>2.1.2</RuntimeFrameworkVersion>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DocumentationFile>bin\Debug\netcoreapp2.1\BlockchainSimulator.WebApi.xml</DocumentationFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <Folder Include="Models\Responses"/>
     </ItemGroup>
-  </Target>
+    <ItemGroup>
+        <PackageReference Include="AutoMapper">
+            <Version>7.0.1</Version>
+        </PackageReference>
+        <PackageReference Include="Microsoft.AspNetCore.App"/>
+        <PackageReference Include="Swashbuckle.AspNetCore">
+            <Version>3.0.0</Version>
+        </PackageReference>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\BlockchainSimulator.BusinessLogic\BlockchainSimulator.BusinessLogic.csproj"/>
+        <ProjectReference Include="..\BlockchainSimulator.DataAccess\BlockchainSimulator.DataAccess.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Update="hosting.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Update="appsettings.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Update="wwwroot\.gitkeep">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Update="Microsoft.NETCore.App" Version="2.1.2"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <Target Name="IncludeDocFile" BeforeTargets="PrepareForPublish">
+        <ItemGroup Condition=" '$(DocumentationFile)' != '' ">
+            <_DocumentationFile Include="$(DocumentationFile)"/>
+            <ContentWithTargetPath Include="@(_DocumentationFile->'%(FullPath)')"
+                                   RelativePath="%(_DocumentationFile.Identity)"
+                                   TargetPath="%(_DocumentationFile.Filename)%(_DocumentationFile.Extension)"
+                                   CopyToPublishDirectory="PreserveNewest"/>
+        </ItemGroup>
+    </Target>
 </Project>
