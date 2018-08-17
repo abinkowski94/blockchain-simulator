@@ -66,7 +66,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Providers.Specific
             Assert.Equal("0", result.Id);
             Assert.Equal(_configuration.Version, result.Header.Version);
             Assert.Null(result.Header.ParentHash);
-            Assert.Equal("527f2414cd36a489c11d018f71dad8ba609ae1a7781a103c1ba5bf249ac5de87",
+            Assert.Equal("da9e4ab040c871393429f7311263489d3ae62c70886a8c060fbce5ced276b064",
                 result.Header.MerkleTreeRootHash);
             Assert.Equal(_configuration.Target, result.Header.Target);
             Assert.NotNull(result.Header.Nonce);
@@ -93,7 +93,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Providers.Specific
             Assert.Equal("0", result.ParentId);
             Assert.Equal(_configuration.Version, result.Header.Version);
             Assert.NotNull(result.Header.ParentHash);
-            Assert.Equal("527f2414cd36a489c11d018f71dad8ba609ae1a7781a103c1ba5bf249ac5de87",
+            Assert.Equal("da9e4ab040c871393429f7311263489d3ae62c70886a8c060fbce5ced276b064",
                 result.Header.MerkleTreeRootHash);
             Assert.Equal(_configuration.Target, result.Header.Target);
             Assert.NotNull(result.Header.Nonce);

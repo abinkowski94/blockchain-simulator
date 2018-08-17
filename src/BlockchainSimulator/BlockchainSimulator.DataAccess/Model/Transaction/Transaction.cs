@@ -1,3 +1,4 @@
+using System;
 using Newtonsoft.Json;
 
 namespace BlockchainSimulator.DataAccess.Model.Transaction
@@ -18,5 +19,8 @@ namespace BlockchainSimulator.DataAccess.Model.Transaction
         
         [JsonProperty("fee")]
         public decimal Fee { get; set; }
+        
+        [JsonProperty("registrationTime")]
+        public DateTime RegistrationTime { get; set; }
     }
 }

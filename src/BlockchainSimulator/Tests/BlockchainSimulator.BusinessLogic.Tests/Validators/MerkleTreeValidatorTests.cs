@@ -46,9 +46,6 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators
             Assert.False(result.IsSuccess);
             Assert.NotNull(result.Errors);
             Assert.NotEmpty(result.Errors);
-            Assert.Equal(
-                "Wrong hash for nodes with hashes h1:000 and h2: 05615a4f5e18817f431e536f40a36b18ab105ddb94ddafa8aaaafb86cdd51e06",
-                result.Errors.First());
         }
 
         [Fact]

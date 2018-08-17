@@ -21,7 +21,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                             Fee = 0
                         }
                     },
-                    "075e2ee940f291540722d8c3ea2433a9e4806a8b4dfb3a58d7fd338774e0bb66"
+                    "8d6700faac589cb0006df093cd5db8cf496451c90232c939106aaa1a6db5aa89"
                 },
                 {
                     new HashSet<Transaction>
@@ -51,7 +51,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                             Fee = 0.65m
                         }
                     },
-                    "b6a350ceb8531ecb0c087a94f0abdf017543c5f65bd71c893e21a77a5d31b53b"
+                    "b8924079106fac6e2fa5588837b75a3502ff977271a8bfd7cf32dd19e12ddbc5"
                 },
                 {
                     new HashSet<Transaction>
@@ -97,7 +97,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Data
                             Fee = 0.05m
                         }
                     },
-                    "527f2414cd36a489c11d018f71dad8ba609ae1a7781a103c1ba5bf249ac5de87"
+                    "da9e4ab040c871393429f7311263489d3ae62c70886a8c060fbce5ced276b064"
                 },
             };
 

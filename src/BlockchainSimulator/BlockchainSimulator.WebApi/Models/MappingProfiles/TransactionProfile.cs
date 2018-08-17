@@ -18,6 +18,7 @@ namespace BlockchainSimulator.WebApi.Models.MappingProfiles
                 .ForMember(dst => dst.Recipient, opt => opt.MapFrom(src => src.Recipient))
                 .ForMember(dst => dst.Amount, opt => opt.MapFrom(src => src.Amount))
                 .ForMember(dst => dst.Fee, opt => opt.MapFrom(src => src.Fee))
+                .ForMember(dst => dst.RegistrationTime, opt => opt.MapFrom(src => src.RegistrationTime))
                 .ForMember(dst => dst.TransactionDetails, opt => opt.MapFrom(src => src.TransactionDetails))
                 .ReverseMap()
                 .ForAllOtherMembers(dst => dst.Ignore());

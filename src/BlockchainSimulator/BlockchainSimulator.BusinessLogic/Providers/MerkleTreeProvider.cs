@@ -21,13 +21,12 @@ namespace BlockchainSimulator.BusinessLogic.Providers
                         Transaction = t,
                         Hash = EncryptionService.GetSha256Hash(t.TransactionJson)
                     }
-                ).Cast<MerkleNode>()
-                .ToList();
+                ).Cast<MerkleNode>().ToList();
 
             return CombineNodes(leafs).FirstOrDefault() as Node;
         }
 
-        private List<MerkleNode> CombineNodes(List<MerkleNode> nodes)
+        private static List<MerkleNode> CombineNodes(List<MerkleNode> nodes)
         {
             if (nodes.Count <= 1)
             {

@@ -22,6 +22,12 @@ namespace BlockchainSimulator.BusinessLogic.Services
             lock (_padlock)
             {
                 var blockchain = _blockchainRepository.GetBlockchain();
+
+                if (blockchain?.Blocks == null)
+                {
+                    return new ErrorResponse<BlockBase>("The blockchain does not contain blocks", null);
+                }
+                
                 var result = LocalMapper.ManualMap(blockchain);
 
                 return new SuccessResponse<BlockBase>("The blockchain from local storage.", result);

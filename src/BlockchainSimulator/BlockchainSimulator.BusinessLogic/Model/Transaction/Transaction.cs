@@ -1,3 +1,4 @@
+using System;
 using Newtonsoft.Json;
 
 namespace BlockchainSimulator.BusinessLogic.Model.Transaction
@@ -18,6 +19,9 @@ namespace BlockchainSimulator.BusinessLogic.Model.Transaction
 
         [JsonProperty("fee")] 
         public decimal Fee { get; set; }
+        
+        [JsonProperty("registrationTime")]
+        public DateTime RegistrationTime { get; set; }
 
         [JsonIgnore] 
         public string TransactionJson => JsonConvert.SerializeObject(this);

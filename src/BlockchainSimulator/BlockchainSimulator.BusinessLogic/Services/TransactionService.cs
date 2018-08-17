@@ -6,78 +6,85 @@ using BlockchainSimulator.BusinessLogic.Configurations;
 using BlockchainSimulator.BusinessLogic.Model.Block;
 using BlockchainSimulator.BusinessLogic.Model.Responses;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
+using BlockchainSimulator.BusinessLogic.Queue.MiningQueue;
 
 namespace BlockchainSimulator.BusinessLogic.Services
 {
     public class TransactionService : ITransactionService
     {
-        private readonly IBlockchainConfiguration _configuration;
-        private readonly object _padlock = new object();
         private readonly ConcurrentDictionary<string, Transaction> _pendingTransactions;
+        private readonly IBlockchainConfiguration _configuration;
         private readonly IBlockchainService _blockchainService;
         private readonly IMiningService _miningService;
+        private readonly IMiningQueue _queue;
 
         public TransactionService(IBlockchainService blockchainService, IMiningService miningService,
-            IBlockchainConfiguration configuration)
+            IBlockchainConfiguration configuration, IMiningQueue queue)
         {
             _pendingTransactions = new ConcurrentDictionary<string, Transaction>();
+            _configuration = configuration;
             _blockchainService = blockchainService;
             _miningService = miningService;
-            _configuration = configuration;
+            _queue = queue;
         }
 
         public BaseResponse<Transaction> AddTransaction(Transaction transaction)
         {
             transaction.Id = Guid.NewGuid().ToString();
             transaction.TransactionDetails = null;
+            transaction.RegistrationTime = DateTime.UtcNow;
 
             if (!_pendingTransactions.TryAdd(transaction.Id, transaction))
             {
-                return new ErrorResponse<Transaction>("Could not add the transaction to pending list!", null);
+                return new ErrorResponse<Transaction>(
+                    $"Could not add the transaction: {transaction.Id} to the pending list", transaction);
+            }
+
+
+            if (_pendingTransactions.Count % _configuration.BlockSize != 0)
+            {
+                return new SuccessResponse<Transaction>("The transaction has been added to pending list",
+                    transaction);
             }
 
             // Launches mining
-            if (_configuration.BlockSize <= _pendingTransactions.Count)
+            var enqueueTime = DateTime.UtcNow;
+            _queue.QueueMiningTask(async token =>
             {
-                lock (_padlock)
-                {
-                    var transactions = _pendingTransactions.ToList().OrderByDescending(t => t.Value.Fee)
-                        .Select(t => t.Value).ToList();
-                    transactions.ForEach(t => _pendingTransactions.TryRemove(t.Id, out _));
-                    _miningService.MineBlocks(transactions);
-                }
+                var transactions = _pendingTransactions.Select(t => t.Value).OrderByDescending(t => t.Fee)
+                    .Take(_configuration.BlockSize).ToList();
+                transactions.ForEach(t => _pendingTransactions.TryRemove(t.Id, out _));
+                await _miningService.MineBlocks(transactions, enqueueTime, token);
+            });
 
-                return new SuccessResponse<Transaction>(
-                    "The transaction has been added and processing has been started", transaction);
-            }
-
-            return new SuccessResponse<Transaction>("The transaction has been added to pending list", transaction);
+            return new SuccessResponse<Transaction>("The transaction has been added and processing has started",
+                transaction);
         }
 
         public BaseResponse<List<Transaction>> GetPendingTransactions()
         {
-            var result = _pendingTransactions.ToList().OrderByDescending(t => t.Value.Fee).Select(t => t.Value)
-                .ToList();
-            return new SuccessResponse<List<Transaction>>($"The list of pending transactions: {DateTime.UtcNow}",
-                result);
+            var result = _pendingTransactions.Select(t => t.Value).ToList().OrderByDescending(t => t.Fee).ToList();
+            var message = $"Pending transactions count: {_pendingTransactions.Count}/{_configuration.BlockSize}";
+
+            return new SuccessResponse<List<Transaction>>(message, result);
         }
 
         public BaseResponse<Transaction> GetTransaction(string id)
         {
             var blockchainResponse = _blockchainService.GetBlockchain();
-            if (blockchainResponse.IsSuccess)
+            if (!blockchainResponse.IsSuccess)
             {
-                var result = FindAndFillTransactionData(id, blockchainResponse.Result);
-                if (result == null)
-                {
-                    return new ErrorResponse<Transaction>($"Could not find the transaction id: {id}", null);
-                }
-
-                return new SuccessResponse<Transaction>("The transaction has been found", result);
+                return new ErrorResponse<Transaction>("An error occured while reading blockchain from local storage!",
+                    null, blockchainResponse.Message);
             }
 
-            return new ErrorResponse<Transaction>("An error occured while reading blockchain from local storage!", null,
-                blockchainResponse.Message);
+            var result = FindAndFillTransactionData(id, blockchainResponse.Result);
+            if (result == null)
+            {
+                return new ErrorResponse<Transaction>($"Could not find the transaction id: {id}", null);
+            }
+
+            return new SuccessResponse<Transaction>("The transaction has been found", result);
         }
 
         private static Transaction FindAndFillTransactionData(string transactionId, BlockBase block)

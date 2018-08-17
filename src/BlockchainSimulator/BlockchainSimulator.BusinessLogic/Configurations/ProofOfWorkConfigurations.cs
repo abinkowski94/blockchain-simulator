@@ -10,9 +10,9 @@ namespace BlockchainSimulator.BusinessLogic.Configurations
 
         public ProofOfWorkConfiguration(IConfiguration configuration)
         {
-            Version = configuration["Version"] ?? "PoW-v1";
-            Target = configuration["Target"] ?? "0000";
-            BlockSize = int.TryParse(configuration["BlockSize"], out var result) ? result : 10;
+            Version = configuration["BlockchainConfiguration:Version"] ?? "PoW-v1";
+            Target = configuration["BlockchainConfiguration:Target"] ?? "0000";
+            BlockSize = int.TryParse(configuration["BlockchainConfiguration:BlockSize"], out var result) ? result : 10;
         }
     }
 }

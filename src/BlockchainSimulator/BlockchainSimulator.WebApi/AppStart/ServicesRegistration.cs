@@ -1,7 +1,8 @@
 using BlockchainSimulator.BusinessLogic.Configurations;
 using BlockchainSimulator.BusinessLogic.Providers;
 using BlockchainSimulator.BusinessLogic.Providers.Specific;
-using BlockchainSimulator.BusinessLogic.Queue;
+using BlockchainSimulator.BusinessLogic.Queue.BackgroundTasks;
+using BlockchainSimulator.BusinessLogic.Queue.MiningQueue;
 using BlockchainSimulator.BusinessLogic.Services;
 using BlockchainSimulator.BusinessLogic.Services.Specific;
 using BlockchainSimulator.BusinessLogic.Validators;
@@ -24,7 +25,7 @@ namespace BlockchainSimulator.WebApi.AppStart
         public static IServiceCollection AddBlockchainServices(this IServiceCollection services)
         {
             // Configurations
-            services.AddSingleton<IBlockchainConfiguration, ProofOfWorkConfiguration>(); // TODO: read it form configuration
+            services.AddSingleton<IBlockchainConfiguration, ProofOfWorkConfiguration>(); // TODO: read form config
 
             // Repositories
             services.AddSingleton<IFileRepository, FileRepository>();
@@ -33,6 +34,8 @@ namespace BlockchainSimulator.WebApi.AppStart
             // Queues
             services.AddHostedService<QueuedHostedService>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+            services.AddHostedService<MiningHostedService>();
+            services.AddSingleton<IMiningQueue, MiningQueue>();
 
             // Services
             services.AddSingleton<IBlockchainService, BlockchainService>();
