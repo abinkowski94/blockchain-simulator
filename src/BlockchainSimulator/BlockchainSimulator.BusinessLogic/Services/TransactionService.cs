@@ -11,16 +11,19 @@ namespace BlockchainSimulator.BusinessLogic.Services
 {
     public class TransactionService : ITransactionService
     {
+        private readonly IBlockchainConfiguration _configuration;
         private readonly object _padlock = new object();
         private readonly ConcurrentDictionary<string, Transaction> _pendingTransactions;
         private readonly IBlockchainService _blockchainService;
         private readonly IMiningService _miningService;
 
-        public TransactionService(IBlockchainService blockchainService, IMiningService miningService)
+        public TransactionService(IBlockchainService blockchainService, IMiningService miningService,
+            IBlockchainConfiguration configuration)
         {
             _pendingTransactions = new ConcurrentDictionary<string, Transaction>();
             _blockchainService = blockchainService;
             _miningService = miningService;
+            _configuration = configuration;
         }
 
         public BaseResponse<Transaction> AddTransaction(Transaction transaction)
@@ -34,8 +37,7 @@ namespace BlockchainSimulator.BusinessLogic.Services
             }
 
             // Launches mining
-            // TODO: adjust configuration
-            if (ProofOfWorkConfigurations.BlockSize <= _pendingTransactions.Count)
+            if (_configuration.BlockSize <= _pendingTransactions.Count)
             {
                 lock (_padlock)
                 {

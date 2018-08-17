@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using BlockchainSimulator.BusinessLogic.Configurations;
 using BlockchainSimulator.BusinessLogic.Model.Block;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.BusinessLogic.Providers;
@@ -14,11 +15,18 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Services
 {
     public class BlockchainServiceTests
     {
+        private readonly IBlockchainConfiguration _configuration;
         private readonly BlockchainService _blockchainService;
         private readonly Mock<IBlockchainRepository> _blockchainRepositoryMock;
 
         public BlockchainServiceTests()
         {
+            var configurationMock = new Mock<IBlockchainConfiguration>();
+            configurationMock.Setup(p => p.Target).Returns("0000");
+            configurationMock.Setup(p => p.Version).Returns("PoW-v1");
+            configurationMock.Setup(p => p.BlockSize).Returns(10);
+            _configuration = configurationMock.Object;
+            
             _blockchainRepositoryMock = new Mock<IBlockchainRepository>();
             _blockchainService = new BlockchainService(_blockchainRepositoryMock.Object);
         }
@@ -57,7 +65,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Services
         public void SaveBlockchain_Blocks_Void()
         {
             // Arrange
-            var blockchainProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider());
+            var blockchainProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _configuration);
 
             var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>) ts.First())
                 .ToList();

@@ -27,6 +27,9 @@
     <Content Update="hosting.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="wwwroot\blockchain.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

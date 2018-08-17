@@ -6,17 +6,25 @@ using BlockchainSimulator.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.BusinessLogic.Providers;
 using BlockchainSimulator.BusinessLogic.Providers.Specific;
 using BlockchainSimulator.BusinessLogic.Tests.Data;
+using Moq;
 using Xunit;
 
 namespace BlockchainSimulator.BusinessLogic.Tests.Providers.Specific
 {
     public class ProofOfWorkBlockProviderTests
     {
+        private readonly IBlockchainConfiguration _configuration;
         private readonly ProofOfWorkBlockProvider _blockProvider;
 
         public ProofOfWorkBlockProviderTests()
         {
-            _blockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider());
+            var configurationMock = new Mock<IBlockchainConfiguration>();
+            configurationMock.Setup(p => p.Target).Returns("0000");
+            configurationMock.Setup(p => p.Version).Returns("PoW-v1");
+            configurationMock.Setup(p => p.BlockSize).Returns(10);
+            _configuration = configurationMock.Object;
+            
+            _blockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _configuration);
         }
 
         [Fact]
@@ -56,11 +64,11 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Providers.Specific
             Assert.NotNull(result);
             Assert.True(result.IsGenesis);
             Assert.Equal("0", result.Id);
-            Assert.Equal(ProofOfWorkConfigurations.Version, result.Header.Version);
+            Assert.Equal(_configuration.Version, result.Header.Version);
             Assert.Null(result.Header.ParentHash);
             Assert.Equal("527f2414cd36a489c11d018f71dad8ba609ae1a7781a103c1ba5bf249ac5de87",
                 result.Header.MerkleTreeRootHash);
-            Assert.Equal(ProofOfWorkConfigurations.Target, result.Header.Target);
+            Assert.Equal(_configuration.Target, result.Header.Target);
             Assert.NotNull(result.Header.Nonce);
             Assert.Equal(transactions.Count, result.Body.TransactionCounter);
             Assert.NotNull(result.Body.MerkleTree);
@@ -83,11 +91,11 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Providers.Specific
             Assert.False(result.IsGenesis);
             Assert.Equal("1", result.Id);
             Assert.Equal("0", result.ParentId);
-            Assert.Equal(ProofOfWorkConfigurations.Version, result.Header.Version);
+            Assert.Equal(_configuration.Version, result.Header.Version);
             Assert.NotNull(result.Header.ParentHash);
             Assert.Equal("527f2414cd36a489c11d018f71dad8ba609ae1a7781a103c1ba5bf249ac5de87",
                 result.Header.MerkleTreeRootHash);
-            Assert.Equal(ProofOfWorkConfigurations.Target, result.Header.Target);
+            Assert.Equal(_configuration.Target, result.Header.Target);
             Assert.NotNull(result.Header.Nonce);
             Assert.Equal(transactions.Count, result.Body.TransactionCounter);
             Assert.NotNull(result.Body.MerkleTree);

@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BlockchainSimulator.BusinessLogic.Configurations;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.BusinessLogic.Providers;
 using BlockchainSimulator.BusinessLogic.Providers.Specific;
 using BlockchainSimulator.BusinessLogic.Tests.Data;
 using BlockchainSimulator.BusinessLogic.Validators;
 using BlockchainSimulator.BusinessLogic.Validators.Specific;
+using Moq;
 using Xunit;
 
 namespace BlockchainSimulator.BusinessLogic.Tests.Validators.Specific
@@ -18,8 +20,14 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Validators.Specific
 
         public ProofOfWorkValidatorTests()
         {
+            var configurationMock = new Mock<IBlockchainConfiguration>();
+            configurationMock.Setup(p => p.Target).Returns("0000");
+            configurationMock.Setup(p => p.Version).Returns("PoW-v1");
+            configurationMock.Setup(p => p.BlockSize).Returns(10);
+            var configuration = configurationMock.Object;
+            
             _proofOfWorkValidator = new ProofOfWorkValidator(new MerkleTreeValidator());
-            _proofOfWorkBlockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider());
+            _proofOfWorkBlockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), configuration);
         }
 
         [Fact]

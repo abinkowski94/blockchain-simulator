@@ -16,6 +16,7 @@ namespace BlockchainSimulator.WebApi
         {
             var config = new ConfigurationBuilder()
                 .AddJsonFile("hosting.json", optional: false)
+                .AddJsonFile("appsettings.json", optional: false)
                 .Build();
 
             var host = new WebHostBuilder()

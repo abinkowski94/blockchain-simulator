@@ -7,14 +7,18 @@ namespace BlockchainSimulator.BusinessLogic.Providers.Specific
 {
     public class ProofOfWorkBlockProvider : BaseBlockProvider
     {
-        public ProofOfWorkBlockProvider(IMerkleTreeProvider merkleTreeProvider) : base(merkleTreeProvider)
+        private readonly IBlockchainConfiguration _configuration;
+
+        public ProofOfWorkBlockProvider(IMerkleTreeProvider merkleTreeProvider, IBlockchainConfiguration configuration)
+            : base(merkleTreeProvider)
         {
+            _configuration = configuration;
         }
 
         protected override BlockBase FillBlock(BlockBase currentBlock)
         {
-            currentBlock.Header.Version = ProofOfWorkConfigurations.Version;
-            currentBlock.Header.Target = ProofOfWorkConfigurations.Target;
+            currentBlock.Header.Version = _configuration.Version;
+            currentBlock.Header.Target = _configuration.Target;
             currentBlock.Header.Nonce = GetProof(currentBlock);
 
             return currentBlock;

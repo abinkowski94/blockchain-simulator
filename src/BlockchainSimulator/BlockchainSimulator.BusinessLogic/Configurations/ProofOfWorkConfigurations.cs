@@ -1,9 +1,18 @@
+using Microsoft.Extensions.Configuration;
+
 namespace BlockchainSimulator.BusinessLogic.Configurations
 {
-    public static class ProofOfWorkConfigurations
+    public class ProofOfWorkConfiguration : IBlockchainConfiguration
     {
-        public static string Version => "POW-v1";
-        public static string Target => "0000";
-        public static int BlockSize => 10;
+        public string Version { get; }
+        public string Target { get; }
+        public int BlockSize { get; }
+
+        public ProofOfWorkConfiguration(IConfiguration configuration)
+        {
+            Version = configuration["Version"] ?? "PoW-v1";
+            Target = configuration["Target"] ?? "0000";
+            BlockSize = int.TryParse(configuration["BlockSize"], out var result) ? result : 10;
+        }
     }
 }

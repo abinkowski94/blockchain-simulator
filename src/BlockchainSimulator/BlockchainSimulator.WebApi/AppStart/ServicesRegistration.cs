@@ -1,3 +1,4 @@
+using BlockchainSimulator.BusinessLogic.Configurations;
 using BlockchainSimulator.BusinessLogic.Providers;
 using BlockchainSimulator.BusinessLogic.Providers.Specific;
 using BlockchainSimulator.BusinessLogic.Queue;
@@ -22,6 +23,9 @@ namespace BlockchainSimulator.WebApi.AppStart
         /// <returns>The service container</returns>
         public static IServiceCollection AddBlockchainServices(this IServiceCollection services)
         {
+            // Configurations
+            services.AddSingleton<IBlockchainConfiguration, ProofOfWorkConfiguration>(); // TODO: read it form configuration
+
             // Repositories
             services.AddSingleton<IFileRepository, FileRepository>();
             services.AddSingleton<IBlockchainRepository, BlockchainRepository>();
