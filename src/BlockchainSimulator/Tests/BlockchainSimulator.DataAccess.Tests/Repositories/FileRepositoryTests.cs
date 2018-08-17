@@ -3,6 +3,7 @@ using BlockchainSimulator.DataAccess.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.Configuration;
 
 namespace BlockchainSimulator.DataAccess.Tests.Repositories
 {
@@ -15,7 +16,7 @@ namespace BlockchainSimulator.DataAccess.Tests.Repositories
         {
             _hostingEnvironmentMock = new Mock<IHostingEnvironment>();
             _hostingEnvironmentMock.Setup(p => p.ContentRootPath).Returns(Directory.GetCurrentDirectory());
-            _fileRepository = new FileRepository(_hostingEnvironmentMock.Object);
+            _fileRepository = new FileRepository(_hostingEnvironmentMock.Object, new Mock<IConfiguration>().Object);
         }
 
         [Fact]
