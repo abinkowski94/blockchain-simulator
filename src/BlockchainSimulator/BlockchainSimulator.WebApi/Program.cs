@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using BlockchainSimulator.WebApi.AppStart;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 
 namespace BlockchainSimulator.WebApi
@@ -15,8 +16,7 @@ namespace BlockchainSimulator.WebApi
         public static void Main(string[] args)
         {
             var config = new ConfigurationBuilder()
-                .AddJsonFile("hosting.json", optional: false)
-                .AddJsonFile("appsettings.json", optional: false)
+                .AddJsonFiles(new[] {"hosting.json", "appsettings.json"}, args)
                 .Build();
 
             var host = new WebHostBuilder()

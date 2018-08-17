@@ -1,0 +1,7 @@
+urls|-|https://localhost:5002 
+contentRoot|-|wwwroot 
+Node:Id|-|2 
+Node:Type|-|PoW 
+BlockchainConfiguration:Version|-|PoW-v1 
+BlockchainConfiguration:Target|-|0000 
+BlockchainConfiguration:BlockSize|-|5
