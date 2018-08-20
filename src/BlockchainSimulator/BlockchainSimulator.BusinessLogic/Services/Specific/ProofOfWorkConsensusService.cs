@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Text;
 using BlockchainSimulator.BusinessLogic.Model.MappingProfiles;
 using BlockchainSimulator.BusinessLogic.Model.Responses;
-using BlockchainSimulator.BusinessLogic.Queue.BackgroundTasks;
+using BlockchainSimulator.BusinessLogic.Queues.BackgroundTasks;
 using BlockchainSimulator.BusinessLogic.Validators;
 using BlockchainSimulator.DataAccess.Converters;
 using BlockchainSimulator.DataAccess.Repositories;

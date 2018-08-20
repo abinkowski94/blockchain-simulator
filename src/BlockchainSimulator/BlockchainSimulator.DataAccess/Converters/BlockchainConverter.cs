@@ -6,11 +6,6 @@ namespace BlockchainSimulator.DataAccess.Converters
 {
     public static class BlockchainConverter
     {
-        public static string SerializeBlockchain(Blockchain blockchain)
-        {
-            return blockchain == null ? null : JsonConvert.SerializeObject(blockchain);
-        }
-
         public static Blockchain DeserializeBlockchain(string json)
         {
             if (json == null)

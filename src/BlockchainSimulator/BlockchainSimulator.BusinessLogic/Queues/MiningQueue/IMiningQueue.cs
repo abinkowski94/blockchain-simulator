@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BlockchainSimulator.BusinessLogic.Queue.MiningQueue
+namespace BlockchainSimulator.BusinessLogic.Queues.MiningQueue
 {
     public interface IMiningQueue
     {

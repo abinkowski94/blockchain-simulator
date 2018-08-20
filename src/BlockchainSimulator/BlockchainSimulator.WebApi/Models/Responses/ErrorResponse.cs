@@ -1,5 +1,6 @@
 namespace BlockchainSimulator.WebApi.Models.Responses
 {
+    /// <inheritdoc />
     /// <summary>
     /// The error response
     /// </summary>

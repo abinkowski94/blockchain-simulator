@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BlockchainSimulator.BusinessLogic.Queue.BackgroundTasks
+namespace BlockchainSimulator.BusinessLogic.Queues.BackgroundTasks
 {
     public class BackgroundTaskQueue : IBackgroundTaskQueue
     {

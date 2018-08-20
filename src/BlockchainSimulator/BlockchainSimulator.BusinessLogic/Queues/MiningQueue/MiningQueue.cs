@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BlockchainSimulator.BusinessLogic.Queue.MiningQueue
+namespace BlockchainSimulator.BusinessLogic.Queues.MiningQueue
 {
     public class MiningQueue : IMiningQueue
     {

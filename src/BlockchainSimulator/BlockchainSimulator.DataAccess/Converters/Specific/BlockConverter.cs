@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using BlockchainSimulator.DataAccess.Model.Block;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -7,6 +8,7 @@ namespace BlockchainSimulator.DataAccess.Converters.Specific
 {
     public class BlockConverter : JsonConverter
     {
+        [ExcludeFromCodeCoverage]
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
         }

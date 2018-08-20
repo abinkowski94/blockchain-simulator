@@ -5,16 +5,19 @@
         <IsPackable>false</IsPackable>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0"/>
-        <PackageReference Include="Moq" Version="4.9.0"/>
-        <PackageReference Include="xunit" Version="2.4.0"/>
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0"/>
-        <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
+        <PackageReference Include="Moq" Version="4.9.0" />
+        <PackageReference Include="xunit" Version="2.4.0" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+        <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\BlockchainSimulator.BusinessLogic\BlockchainSimulator.BusinessLogic.csproj"/>
+        <ProjectReference Include="..\..\BlockchainSimulator.BusinessLogic\BlockchainSimulator.BusinessLogic.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Update="Microsoft.NETCore.App" Version="2.1.2"/>
+        <PackageReference Update="Microsoft.NETCore.App" Version="2.1.2" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Services\Specific" />
     </ItemGroup>
 </Project>

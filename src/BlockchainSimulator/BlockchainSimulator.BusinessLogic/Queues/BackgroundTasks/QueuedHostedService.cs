@@ -3,13 +3,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 
-namespace BlockchainSimulator.BusinessLogic.Queue.MiningQueue
+namespace BlockchainSimulator.BusinessLogic.Queues.BackgroundTasks
 {
-    public class MiningHostedService : BackgroundService
+    public class QueuedHostedService : BackgroundService
     {
-        private readonly IMiningQueue _taskQueue;
+        private readonly IBackgroundTaskQueue _taskQueue;
 
-        public MiningHostedService(IMiningQueue taskQueue)
+        public QueuedHostedService(IBackgroundTaskQueue taskQueue)
         {
             _taskQueue = taskQueue;
         }

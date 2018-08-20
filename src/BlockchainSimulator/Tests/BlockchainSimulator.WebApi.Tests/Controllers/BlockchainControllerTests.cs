@@ -1,4 +1,7 @@
+using System.Collections.Generic;
+using System.Linq;
 using BlockchainSimulator.DataAccess.Model;
+using BlockchainSimulator.DataAccess.Model.Block;
 using BlockchainSimulator.DataAccess.Repositories;
 using BlockchainSimulator.WebApi.Controllers;
 using Moq;
@@ -29,8 +32,51 @@ namespace BlockchainSimulator.WebApi.Tests.Controllers
 
             // Assert
             _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
-            
+
             Assert.NotNull(result);
         }
-     }
- }
+
+        [Fact]
+        public void GetBlock_Id_Block()
+        {
+            // Arrange
+            const string id = "1";
+            var blockchain = new Blockchain {Blocks = new List<BlockBase> {new Block {Id = id}}};
+
+            _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
+                .Returns(blockchain);
+
+            // Act
+            var result = _blockchainController.GetBlock(id);
+            var block = result.Value as Block;
+
+            // Assert
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
+
+            Assert.NotNull(result);
+            Assert.NotNull(block);
+            Assert.Equal(blockchain.Blocks.First(), block);
+            Assert.Equal(id, block.Id);
+        }
+        
+        [Fact]
+        public void GetBlock_Id_Null()
+        {
+            // Arrange
+            const string id = "1";
+
+            _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
+                .Returns((Blockchain) null);
+
+            // Act
+            var result = _blockchainController.GetBlock(id);
+            var block = result.Value as Block;
+
+            // Assert
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
+
+            Assert.NotNull(result);
+            Assert.Null(block);
+        }
+    }
+}

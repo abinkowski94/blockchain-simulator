@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using BlockchainSimulator.BusinessLogic.Model.Consensus;
 using BlockchainSimulator.BusinessLogic.Model.Responses;
-using BlockchainSimulator.BusinessLogic.Queue.BackgroundTasks;
+using BlockchainSimulator.BusinessLogic.Queues.BackgroundTasks;
 
 namespace BlockchainSimulator.BusinessLogic.Services
 {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BlockchainSimulator.BusinessLogic.Model.Responses;
@@ -65,6 +66,30 @@ namespace BlockchainSimulator.WebApi.Tests.Controllers
         }
 
         [Fact]
+        public void GetTransaction_Null_Error()
+        {
+            // Arrange
+            _transactionServiceMock.Setup(p => p.GetTransaction(null))
+                .Returns(new ErrorResponse<Transaction>("The id cannot be null!", null, "Inner error"));
+
+            // Act
+            var result = _transactionsController.GetTransaction(null);
+            var errorResponse = result.Value as Models.Responses.ErrorResponse;
+            var transaction = result.Value.Result as Models.Transaction;
+
+            // Assert
+            _transactionServiceMock.Verify(p => p.GetTransaction(null));
+
+            Assert.NotNull(result);
+            Assert.NotNull(errorResponse);
+            Assert.NotNull(result.Value);
+            Assert.Null(transaction);
+            Assert.Equal("The id cannot be null!", result.Value.Message);
+            Assert.Equal("Inner error", errorResponse.Errors.First());
+        }
+
+
+        [Fact]
         public void GetPendingTransactions_Empty_TransactionList()
         {
             // Arrange
@@ -109,6 +134,33 @@ namespace BlockchainSimulator.WebApi.Tests.Controllers
             Assert.Equal(businessTransaction.TransactionDetails.BlockId, transaction.TransactionDetails.BlockId);
             Assert.Equal(businessTransaction.TransactionDetails.BlocksBehind,
                 transaction.TransactionDetails.BlocksBehind);
+        }
+
+        [Fact]
+        public void AddTransaction_Transaction_Transaction()
+        {
+            // Arrange
+            var transaction = new Models.Transaction {Id = "1", Amount = 10, Fee = 11};
+
+            _transactionServiceMock.Setup(p => p.AddTransaction(It.IsAny<Transaction>()))
+                .Returns((Transaction tr) => new SuccessResponse<Transaction>("Transaction has been added", tr));
+
+            // Act
+            var result = _transactionsController.AddTransaction(transaction);
+            var response = result.Value;
+            var resultTransaction = result.Value.Result as Models.Transaction;
+
+            // Assert
+            _transactionServiceMock.Verify(p => p.AddTransaction(It.IsAny<Transaction>()));
+
+            Assert.NotNull(result);
+            Assert.NotNull(response);
+            Assert.NotEqual(Guid.Empty, response.Id);
+            Assert.NotNull(response.Message);
+            Assert.NotNull(resultTransaction);
+            Assert.Equal(transaction.Id, resultTransaction.Id);
+            Assert.Equal(transaction.Amount, resultTransaction.Amount);
+            Assert.Equal(transaction.Fee, resultTransaction.Fee);
         }
     }
 }

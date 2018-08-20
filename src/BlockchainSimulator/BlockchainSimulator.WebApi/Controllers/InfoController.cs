@@ -28,9 +28,9 @@ namespace BlockchainSimulator.WebApi.Controllers
         /// </summary>
         /// <returns>Returns OK status</returns>
         [HttpGet]
-        public IEnumerable<KeyValuePair<string, string>> GetInfo()
+        public List<KeyValuePair<string, string>> GetInfo()
         {
-            return _configuration.AsEnumerable().Where(kv => kv.Value != null);
+            return _configuration.AsEnumerable().Where(kv => kv.Value != null).ToList();
         }
     }
 }

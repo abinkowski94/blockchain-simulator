@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BlockchainSimulator.BusinessLogic.Queue.BackgroundTasks
+namespace BlockchainSimulator.BusinessLogic.Queues.BackgroundTasks
 {
     public interface IBackgroundTaskQueue
     {
