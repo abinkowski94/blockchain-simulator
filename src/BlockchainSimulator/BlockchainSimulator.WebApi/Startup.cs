@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 
@@ -14,9 +15,12 @@ namespace BlockchainSimulator.WebApi
     /// <summary>
     /// The startup configuration
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class Startup
     {
-        // ReSharper disable once UnusedAutoPropertyAccessor.Local
+        /// <summary>
+        /// The configuration
+        /// </summary>
         private IConfiguration Configuration { get; }
 
         /// <summary>
@@ -64,7 +68,7 @@ namespace BlockchainSimulator.WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            services.AddBlockchainServices();
+            services.AddBlockchainServices(Configuration);
 
             services.AddSwaggerGen(c =>
             {

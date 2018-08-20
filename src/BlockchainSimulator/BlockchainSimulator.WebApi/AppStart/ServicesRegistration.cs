@@ -1,13 +1,14 @@
 using BlockchainSimulator.BusinessLogic.Configurations;
 using BlockchainSimulator.BusinessLogic.Providers;
 using BlockchainSimulator.BusinessLogic.Providers.Specific;
-using BlockchainSimulator.BusinessLogic.Queue.BackgroundTasks;
-using BlockchainSimulator.BusinessLogic.Queue.MiningQueue;
+using BlockchainSimulator.BusinessLogic.Queues.BackgroundTasks;
+using BlockchainSimulator.BusinessLogic.Queues.MiningQueue;
 using BlockchainSimulator.BusinessLogic.Services;
 using BlockchainSimulator.BusinessLogic.Services.Specific;
 using BlockchainSimulator.BusinessLogic.Validators;
 using BlockchainSimulator.BusinessLogic.Validators.Specific;
 using BlockchainSimulator.DataAccess.Repositories;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlockchainSimulator.WebApi.AppStart
@@ -21,12 +22,11 @@ namespace BlockchainSimulator.WebApi.AppStart
         ///  Adds the blockchain services to the container
         /// </summary>
         /// <param name="services">The service container</param>
+        /// <param name="configuration">The configuration</param>
         /// <returns>The service container</returns>
-        public static IServiceCollection AddBlockchainServices(this IServiceCollection services)
+        public static IServiceCollection AddBlockchainServices(this IServiceCollection services,
+            IConfiguration configuration)
         {
-            // Configurations
-            services.AddSingleton<IBlockchainConfiguration, ProofOfWorkConfiguration>(); // TODO: read form config
-
             // Repositories
             services.AddSingleton<IFileRepository, FileRepository>();
             services.AddSingleton<IBlockchainRepository, BlockchainRepository>();
@@ -41,15 +41,26 @@ namespace BlockchainSimulator.WebApi.AppStart
             services.AddSingleton<IBlockchainService, BlockchainService>();
             services.AddSingleton<ITransactionService, TransactionService>();
             services.AddSingleton<IMiningService, MiningService>();
-            services.AddSingleton<IConsensusService, ProofOfWorkConsensusService>(); // TODO: add configuration for it
 
-            // Providers
-            services.AddTransient<IMerkleTreeProvider, MerkleTreeProvider>();
-            services.AddTransient<IBlockProvider, ProofOfWorkBlockProvider>(); // TODO: add configuration for it
+            // Specific
+            switch (configuration["Node:Type"])
+            {
+                case "PoW":
+                    // Config
+                    services.AddSingleton<IBlockchainConfiguration, ProofOfWorkConfiguration>();
 
-            // Validators
-            services.AddTransient<IMerkleTreeValidator, MerkleTreeValidator>();
-            services.AddTransient<IBlockchainValidator, ProofOfWorkValidator>(); // TODO: add configuration for it
+                    // Services
+                    services.AddSingleton<IConsensusService, ProofOfWorkConsensusService>();
+
+                    // Providers
+                    services.AddTransient<IMerkleTreeProvider, MerkleTreeProvider>();
+                    services.AddTransient<IBlockProvider, ProofOfWorkBlockProvider>();
+
+                    // Validators
+                    services.AddTransient<IMerkleTreeValidator, MerkleTreeValidator>();
+                    services.AddTransient<IBlockchainValidator, ProofOfWorkValidator>();
+                    break;
+            }
 
             return services;
         }
