@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <RuntimeFrameworkVersion>2.1.2</RuntimeFrameworkVersion>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DocumentationFile>bin\Debug\netcoreapp2.1\BlockchainSimulator.Common.xml</DocumentationFile>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Update="Microsoft.NETCore.App" Version="2.1.2" />
+        <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    </ItemGroup>
+    
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <Target Name="IncludeDocFile" BeforeTargets="PrepareForPublish">
+        <ItemGroup Condition=" '$(DocumentationFile)' != '' ">
+            <_DocumentationFile Include="$(DocumentationFile)"/>
+            <ContentWithTargetPath Include="@(_DocumentationFile->'%(FullPath)')"
+                                   RelativePath="%(_DocumentationFile.Identity)"
+                                   TargetPath="%(_DocumentationFile.Filename)%(_DocumentationFile.Extension)"
+                                   CopyToPublishDirectory="PreserveNewest"/>
+        </ItemGroup>
+    </Target>
+</Project>

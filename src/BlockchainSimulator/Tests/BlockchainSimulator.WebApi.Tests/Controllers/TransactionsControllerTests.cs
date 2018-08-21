@@ -4,6 +4,7 @@ using System.Linq;
 using BlockchainSimulator.BusinessLogic.Model.Responses;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.BusinessLogic.Services;
+using BlockchainSimulator.Common.Models.Responses;
 using BlockchainSimulator.WebApi.Controllers;
 using Moq;
 using Xunit;
@@ -74,7 +75,7 @@ namespace BlockchainSimulator.WebApi.Tests.Controllers
 
             // Act
             var result = _transactionsController.GetTransaction(null);
-            var errorResponse = result.Value as Models.Responses.ErrorResponse;
+            var errorResponse = result.Value as ErrorResponse;
             var transaction = result.Value.Result as Models.Transaction;
 
             // Assert

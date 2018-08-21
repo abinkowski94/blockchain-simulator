@@ -1,6 +1,6 @@
 using BlockchainSimulator.BusinessLogic.Model.Responses;
+using BlockchainSimulator.Common.Models.Responses;
 using BlockchainSimulator.WebApi.Controllers;
-using BlockchainSimulator.WebApi.Models.Responses;
 
 namespace BlockchainSimulator.WebApi.Extensions
 {

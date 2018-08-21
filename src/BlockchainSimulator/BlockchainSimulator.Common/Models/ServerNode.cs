@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace BlockchainSimulator.WebApi.Models
+namespace BlockchainSimulator.Common.Models
 {
     /// <summary>
     /// The other node of the network

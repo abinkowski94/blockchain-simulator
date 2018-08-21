@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using BlockchainSimulator.BusinessLogic.Services;
+using BlockchainSimulator.Common.Models;
+using BlockchainSimulator.Common.Models.Responses;
 using BlockchainSimulator.WebApi.Extensions;
 using BlockchainSimulator.WebApi.Models;
-using BlockchainSimulator.WebApi.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlockchainSimulator.WebApi.Controllers

@@ -1,6 +1,6 @@
 using AutoMapper;
 using BlockchainSimulator.BusinessLogic.Model.Responses;
-using BlockchainSimulator.WebApi.Models.Responses;
+using BlockchainSimulator.Common.Models.Responses;
 
 namespace BlockchainSimulator.WebApi.Models.MappingProfiles
 {

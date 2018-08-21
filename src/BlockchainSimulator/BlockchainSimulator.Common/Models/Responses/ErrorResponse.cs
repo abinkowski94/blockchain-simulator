@@ -1,4 +1,4 @@
-namespace BlockchainSimulator.WebApi.Models.Responses
+namespace BlockchainSimulator.Common.Models.Responses
 {
     /// <inheritdoc />
     /// <summary>

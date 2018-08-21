@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BlockchainSimulator.BusinessLogic.Model.Responses;
 using BlockchainSimulator.BusinessLogic.Services;
+using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.WebApi.Controllers;
 using BlockchainSimulator.WebApi.Models;
 using Moq;

@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace BlockchainSimulator.WebApi.Models.Responses
+namespace BlockchainSimulator.Common.Models.Responses
 {
     /// <summary>
     /// The base response

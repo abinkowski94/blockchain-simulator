@@ -7,9 +7,6 @@
         <DocumentationFile>bin\Debug\netcoreapp2.1\BlockchainSimulator.WebApi.xml</DocumentationFile>
     </PropertyGroup>
     <ItemGroup>
-        <Folder Include="Models\Responses"/>
-    </ItemGroup>
-    <ItemGroup>
         <PackageReference Include="AutoMapper">
             <Version>7.0.1</Version>
         </PackageReference>
@@ -21,8 +18,9 @@
         </PackageReference>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\BlockchainSimulator.BusinessLogic\BlockchainSimulator.BusinessLogic.csproj"/>
-        <ProjectReference Include="..\BlockchainSimulator.DataAccess\BlockchainSimulator.DataAccess.csproj"/>
+        <ProjectReference Include="..\BlockchainSimulator.BusinessLogic\BlockchainSimulator.BusinessLogic.csproj" />
+        <ProjectReference Include="..\BlockchainSimulator.Common\BlockchainSimulator.Common.csproj" />
+        <ProjectReference Include="..\BlockchainSimulator.DataAccess\BlockchainSimulator.DataAccess.csproj" />
     </ItemGroup>
     <ItemGroup>
         <Content Update="hosting.json">
@@ -36,20 +34,15 @@
         </Content>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Update="Microsoft.NETCore.App" Version="2.1.2"/>
+        <PackageReference Update="Microsoft.NETCore.App" Version="2.1.2" />
     </ItemGroup>
-
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
-
     <Target Name="IncludeDocFile" BeforeTargets="PrepareForPublish">
         <ItemGroup Condition=" '$(DocumentationFile)' != '' ">
-            <_DocumentationFile Include="$(DocumentationFile)"/>
-            <ContentWithTargetPath Include="@(_DocumentationFile->'%(FullPath)')"
-                                   RelativePath="%(_DocumentationFile.Identity)"
-                                   TargetPath="%(_DocumentationFile.Filename)%(_DocumentationFile.Extension)"
-                                   CopyToPublishDirectory="PreserveNewest"/>
+            <_DocumentationFile Include="$(DocumentationFile)" />
+            <ContentWithTargetPath Include="@(_DocumentationFile->'%(FullPath)')" RelativePath="%(_DocumentationFile.Identity)" TargetPath="%(_DocumentationFile.Filename)%(_DocumentationFile.Extension)" CopyToPublishDirectory="PreserveNewest" />
         </ItemGroup>
     </Target>
 </Project>
