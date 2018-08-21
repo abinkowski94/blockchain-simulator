@@ -5,7 +5,7 @@ namespace BlockchainSimulator.BusinessLogic.Model.ValidationResults
         public bool IsSuccess { get; }
         public string[] Errors { get; }
 
-        public ValidationResult(bool isSuccess, string[] errors)
+        public ValidationResult(bool isSuccess, params string[] errors)
         {
             IsSuccess = isSuccess;
             Errors = errors;

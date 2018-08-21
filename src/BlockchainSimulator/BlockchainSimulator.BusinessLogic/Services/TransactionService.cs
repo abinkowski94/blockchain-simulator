@@ -31,15 +31,14 @@ namespace BlockchainSimulator.BusinessLogic.Services
         public BaseResponse<Transaction> AddTransaction(Transaction transaction)
         {
             transaction.Id = Guid.NewGuid().ToString();
-            transaction.TransactionDetails = null;
             transaction.RegistrationTime = DateTime.UtcNow;
+            transaction.TransactionDetails = null;
 
             if (!_pendingTransactions.TryAdd(transaction.Id, transaction))
             {
                 return new ErrorResponse<Transaction>(
                     $"Could not add the transaction: {transaction.Id} to the pending list", transaction);
             }
-
 
             if (_pendingTransactions.Count % _configuration.BlockSize != 0)
             {

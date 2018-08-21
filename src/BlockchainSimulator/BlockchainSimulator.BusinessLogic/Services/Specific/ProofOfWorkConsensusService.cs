@@ -64,14 +64,22 @@ namespace BlockchainSimulator.BusinessLogic.Services.Specific
                     var encodedBlockchain = Convert.ToBase64String(Encoding.UTF8.GetBytes(blockchainJson));
                     var body = JsonConvert.SerializeObject(new {base64Blockchain = encodedBlockchain});
 
-                    using (var handler = new HttpClientHandler())
+                    try
                     {
-                        handler.ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) => true;
-                        using (var httpClient = new HttpClient(handler))
+                        using (var handler = new HttpClientHandler())
                         {
-                            var content = new StringContent(body, Encoding.UTF8, "application/json");
-                            await httpClient.PostAsync($"{node.HttpAddress}/api/consensus", content, token);
+                            handler.ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) => true;
+                            using (var httpClient = new HttpClient(handler))
+                            {
+                                var content = new StringContent(body, Encoding.UTF8, "application/json");
+                                await httpClient.PostAsync($"{node.HttpAddress}/api/consensus", content, token);
+                            }
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        // TODO: log errors
+                        Console.WriteLine(e);
                     }
                 });
             });

@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using BlockchainSimulator.BusinessLogic.Configurations;
 using BlockchainSimulator.BusinessLogic.Model.Block;
+using BlockchainSimulator.BusinessLogic.Model.Responses;
 using BlockchainSimulator.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.BusinessLogic.Providers;
 using BlockchainSimulator.BusinessLogic.Providers.Specific;
 using BlockchainSimulator.BusinessLogic.Services;
 using BlockchainSimulator.BusinessLogic.Tests.Data;
+using BlockchainSimulator.DataAccess.Model;
 using BlockchainSimulator.DataAccess.Repositories;
 using Moq;
 using Xunit;
@@ -34,7 +36,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Services
 
         [Theory]
         [MemberData(nameof(BlockchainDataSet.BlockchainData), MemberType = typeof(BlockchainDataSet))]
-        public void GetBlockchain_NoParams_Blockchain(DataAccess.Model.Blockchain blockchain)
+        public void GetBlockchain_NoParams_Blockchain(Blockchain blockchain)
         {
             // Arrange
             _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
@@ -50,6 +52,25 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Services
         }
 
         [Fact]
+        public void GetBlockchain_NoParams_ErrorResponseNoBlocks()
+        {
+            // Arrange
+            _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
+                .Returns(new Blockchain());
+
+            // Act
+            var result = _blockchainService.GetBlockchain() as ErrorResponse<BlockBase>;
+
+            // Assert
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.Message);
+            Assert.Null(result.Result);
+            Assert.Equal("The blockchain does not contain blocks", result.Message);
+        }
+
+        [Fact]
         public void SaveBlockchain_Null_Void()
         {
             // Arrange
@@ -58,8 +79,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Services
             _blockchainService.SaveBlockchain(null);
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<DataAccess.Model.Blockchain>()),
-                Times.Never);
+            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<Blockchain>()), Times.Never);
         }
 
         [Fact]
@@ -78,7 +98,7 @@ namespace BlockchainSimulator.BusinessLogic.Tests.Services
             _blockchainService.SaveBlockchain(block);
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<DataAccess.Model.Blockchain>()));
+            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<Blockchain>()));
         }
     }
 }

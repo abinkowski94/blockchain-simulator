@@ -27,7 +27,7 @@ namespace BlockchainSimulator.BusinessLogic.Services
         public BaseResponse<List<ServerNode>> GetNodes()
         {
             return new SuccessResponse<List<ServerNode>>($"The server list for current time: {DateTime.UtcNow}",
-                _serverNodes.Select(kv => kv.Value).ToList());
+                _serverNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList());
         }
 
         public BaseResponse<ServerNode> ConnectNode(ServerNode serverNode)
@@ -64,7 +64,7 @@ namespace BlockchainSimulator.BusinessLogic.Services
 
         public BaseResponse<List<ServerNode>> DisconnectFromNetwork()
         {
-            var result = _serverNodes.Select(kv => kv.Value).ToList();
+            var result = _serverNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList();
             result.ForEach(n => n.IsConnected = false);
             _serverNodes.Clear();
 
@@ -74,6 +74,12 @@ namespace BlockchainSimulator.BusinessLogic.Services
         private List<string> ValidateNode(ServerNode serverNode)
         {
             var validationErrors = new List<string>();
+            if (serverNode == null)
+            {
+                validationErrors.Add("The node can not be null!");
+                return validationErrors;
+            }
+
             if (serverNode.Id == null)
             {
                 validationErrors.Add("The node's id can not be null!");
@@ -84,7 +90,7 @@ namespace BlockchainSimulator.BusinessLogic.Services
                 validationErrors.Add("The node's http address cannot be null!");
             }
 
-            if (_serverNodes.ContainsKey(serverNode.Id))
+            if (serverNode.Id != null && _serverNodes.ContainsKey(serverNode.Id))
             {
                 validationErrors.Add($"The node's id already exists id: {serverNode.Id}!");
             }
@@ -96,23 +102,23 @@ namespace BlockchainSimulator.BusinessLogic.Services
         {
             _queue.QueueBackgroundWorkItem(async token =>
             {
-                using (var httpClientHandler = new HttpClientHandler())
+                try
                 {
-                    // Turns off SSL
-                    httpClientHandler.ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) => true;
-                    using (var httpClient = new HttpClient(httpClientHandler))
+                    using (var httpClientHandler = new HttpClientHandler())
                     {
-                        try
+                        // Turns off SSL
+                        httpClientHandler.ServerCertificateCustomValidationCallback = (msg, cert, chain, err) => true;
+                        using (var httpClient = new HttpClient(httpClientHandler))
                         {
                             var response = await httpClient.GetAsync($"{serverNode.HttpAddress}/api/info", token);
                             serverNode.IsConnected = response.IsSuccessStatusCode;
                         }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                            serverNode.IsConnected = false;
-                        }
                     }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    serverNode.IsConnected = false;
                 }
             });
         }
