@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Queues.BackgroundTasks;
@@ -59,6 +60,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             {
                 _queue.QueueBackgroundWorkItem(async token =>
                 {
+                    // The delay
+                    Thread.Sleep((int) node.Delay);
+                    
                     var blockchain = _blockchainRepository.GetBlockchain();
                     var blockchainJson = JsonConvert.SerializeObject(blockchain);
                     var encodedBlockchain = Convert.ToBase64String(Encoding.UTF8.GetBytes(blockchainJson));
