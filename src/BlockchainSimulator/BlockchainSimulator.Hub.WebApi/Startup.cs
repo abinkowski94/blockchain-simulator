@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using BlockchainSimulator.Hub.DataAccess.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -54,10 +55,7 @@ namespace BlockchainSimulator.Hub.WebApi
             app.UseSwagger();
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blockchain simulator (Hub API)");
-            });
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blockchain simulator (Hub API)"); });
         }
 
         /// <summary>
@@ -68,13 +66,16 @@ namespace BlockchainSimulator.Hub.WebApi
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            services.AddTransient<IFileRepository, FileRepository>();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info
                 {
                     Title = "Blockchain simulator (Hub API)",
                     Version = "v1",
-                    Description = "This is the hub of the blockchain simulator where you can preform various simulations",
+                    Description =
+                        "This is the hub of the blockchain simulator where you can preform various simulations",
                     Contact = new Contact
                     {
                         Name = "Augustyn Binkowski",

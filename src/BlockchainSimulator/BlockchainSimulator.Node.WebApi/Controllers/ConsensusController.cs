@@ -36,7 +36,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         public ActionResult<BaseResponse> GetNodes()
         {
             var result = _consensusService.GetNodes();
-            return result.GetBaseResponse<List<BusinessLogic.Model.Consensus.ServerNode>, List<ServerNode>>(this);
+            return result.GetActionResult<List<BusinessLogic.Model.Consensus.ServerNode>, List<ServerNode>>(this);
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         public ActionResult<BaseResponse> AcceptBlockchain([FromBody] EncodedBlockchain encodedBlockchain)
         {
             return _consensusService.AcceptBlockchain(encodedBlockchain.Base64Blockchain)
-                .GetBaseResponse<bool, bool>(this);
+                .GetActionResult<bool, bool>(this);
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
             var mappedServerNode = LocalMapper.Map<BusinessLogic.Model.Consensus.ServerNode>(serverNode);
             var result = _consensusService.ConnectNode(mappedServerNode);
 
-            return result.GetBaseResponse<BusinessLogic.Model.Consensus.ServerNode, ServerNode>(this);
+            return result.GetActionResult<BusinessLogic.Model.Consensus.ServerNode, ServerNode>(this);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         public ActionResult<BaseResponse> DisconnectNode(string nodeId)
         {
             var result = _consensusService.DisconnectNode(nodeId);
-            return result.GetBaseResponse<BusinessLogic.Model.Consensus.ServerNode, ServerNode>(this);
+            return result.GetActionResult<BusinessLogic.Model.Consensus.ServerNode, ServerNode>(this);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         public ActionResult<BaseResponse> DisconnectFromNetwork()
         {
             var result = _consensusService.DisconnectFromNetwork();
-            return result.GetBaseResponse<List<BusinessLogic.Model.Consensus.ServerNode>, List<ServerNode>>(this);
+            return result.GetActionResult<List<BusinessLogic.Model.Consensus.ServerNode>, List<ServerNode>>(this);
         }
     }
 }

@@ -1,10 +1,10 @@
 using BlockchainSimulator.Common.Models.Responses;
-using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
-using BlockchainSimulator.Node.WebApi.Controllers;
+using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
+using BlockchainSimulator.Hub.WebApi.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BlockchainSimulator.Node.WebApi.Extensions
+namespace BlockchainSimulator.Hub.WebApi.Extensions
 {
     /// <summary>
     /// The extensions for the base response

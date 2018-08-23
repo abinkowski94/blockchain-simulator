@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace BlockchainSimulator.Common.Models
@@ -30,5 +31,17 @@ namespace BlockchainSimulator.Common.Models
         /// </summary>
         [JsonProperty("isConnected")]
         public bool? IsConnected { get; set; }
+        
+        /// <summary>
+        /// Indicates if the server needs to be spawned
+        /// </summary>
+        [JsonProperty("needsSpawn", NullValueHandling = NullValueHandling.Ignore)]
+        public bool NeedsSpawn { get; set; }
+        
+        /// <summary>
+        /// Collection of id that the node is connected to
+        /// </summary>
+        [JsonProperty("connectedTo", NullValueHandling =  NullValueHandling.Ignore)]
+        public IEnumerable<string> ConnectedTo { get; set; }
     }
 }

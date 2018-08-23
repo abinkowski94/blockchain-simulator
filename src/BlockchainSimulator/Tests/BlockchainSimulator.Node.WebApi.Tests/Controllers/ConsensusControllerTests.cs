@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using BlockchainSimulator.Common.Models;
+using BlockchainSimulator.Common.Models.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.WebApi.Controllers;
 using BlockchainSimulator.Node.WebApi.Models;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 
@@ -37,8 +39,8 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
 
             // Act
             var result = _consensusController.GetNodes();
-            var response = result.Value;
-            var nodes = response.Result as List<ServerNode>;
+            var response = (result?.Result as ObjectResult)?.Value as BaseResponse;
+            var nodes = response?.Result as List<ServerNode>;
 
             // Assert
             _consensusServiceMock.Verify(p => p.GetNodes());
@@ -69,7 +71,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
 
             // Act
             var result = _consensusController.AcceptBlockchain(encodedBlockchain);
-            var response = result?.Value;
+            var response = (result?.Result as ObjectResult)?.Value as BaseResponse;
 
             // Assert
             _consensusServiceMock.Verify(p => p.AcceptBlockchain(encodedBlockchain.Base64Blockchain));
@@ -93,7 +95,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
 
             // Act
             var result = _consensusController.ConnectNode(node);
-            var response = result?.Value;
+            var response = (result?.Result as ObjectResult)?.Value as BaseResponse;
             var responseNode = response?.Result as ServerNode;
 
             // Assert
@@ -119,7 +121,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
 
             // Act
             var result = _consensusController.DisconnectNode(id);
-            var response = result?.Value;
+            var response = (result?.Result as ObjectResult)?.Value as BaseResponse;
             var node = response?.Result as ServerNode;
 
             // Assert
@@ -149,8 +151,8 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
 
             // Act
             var result = _consensusController.DisconnectFromNetwork();
-            var response = result.Value;
-            var nodes = response.Result as List<ServerNode>;
+            var response = (result?.Result as ObjectResult)?.Value as BaseResponse;
+            var nodes = response?.Result as List<ServerNode>;
 
             // Assert
             _consensusServiceMock.Verify(p => p.DisconnectFromNetwork());

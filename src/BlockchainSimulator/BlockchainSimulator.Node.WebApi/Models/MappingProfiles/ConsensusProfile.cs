@@ -3,6 +3,7 @@ using BlockchainSimulator.Common.Models;
 
 namespace BlockchainSimulator.Node.WebApi.Models.MappingProfiles
 {
+    /// <inheritdoc />
     /// <summary>
     /// The profile for the consensus
     /// </summary>

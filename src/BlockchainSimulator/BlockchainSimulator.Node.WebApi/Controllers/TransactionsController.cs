@@ -36,7 +36,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         public ActionResult<BaseResponse> GetTransaction(string id)
         {
             var response = _transactionService.GetTransaction(id);
-            return response.GetBaseResponse<BusinessLogic.Model.Transaction.Transaction, Transaction>(this);
+            return response.GetActionResult<BusinessLogic.Model.Transaction.Transaction, Transaction>(this);
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         public ActionResult<BaseResponse> GetPendingTransactions()
         {
             var response = _transactionService.GetPendingTransactions();
-            return response.GetBaseResponse<List<BusinessLogic.Model.Transaction.Transaction>, List<Transaction>>(this);
+            return response.GetActionResult<List<BusinessLogic.Model.Transaction.Transaction>, List<Transaction>>(this);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
             var mappedTransaction = LocalMapper.Map<BusinessLogic.Model.Transaction.Transaction>(transaction);
             var result = _transactionService.AddTransaction(mappedTransaction);
 
-            return result.GetBaseResponse<BusinessLogic.Model.Transaction.Transaction, Transaction>(this);
+            return result.GetActionResult<BusinessLogic.Model.Transaction.Transaction, Transaction>(this);
         }
     }
 }
