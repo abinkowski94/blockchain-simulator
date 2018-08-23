@@ -16,13 +16,18 @@ namespace BlockchainSimulator.Hub.WebApi.Model
         Pending = 1,
 
         /// <summary>
+        /// The simulation is
+        /// </summary>
+        Preparing = 2,
+        
+        /// <summary>
         /// The simulation is running
         /// </summary>
-        Running = 2,
+        Running = 3,
 
         /// <summary>
         /// Waiting for network
         /// </summary>
-        WaitingForNetwork = 3
+        WaitingForNetwork = 4
     }
 }
