@@ -3,23 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2003
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.WebApi", "BlockchainSimulator.WebApi\BlockchainSimulator.WebApi.csproj", "{F5D38176-E02B-41F3-9668-5D9C423526B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.Node.WebApi", "BlockchainSimulator.Node.WebApi\BlockchainSimulator.Node.WebApi.csproj", "{F5D38176-E02B-41F3-9668-5D9C423526B8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.BusinessLogic", "BlockchainSimulator.BusinessLogic\BlockchainSimulator.BusinessLogic.csproj", "{3398056F-261F-43B3-8E5F-BB86BD585DB4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.Node.BusinessLogic", "BlockchainSimulator.Node.BusinessLogic\BlockchainSimulator.Node.BusinessLogic.csproj", "{3398056F-261F-43B3-8E5F-BB86BD585DB4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.DataAccess", "BlockchainSimulator.DataAccess\BlockchainSimulator.DataAccess.csproj", "{C59CEB30-0BE9-4E91-ACB9-666E4B1727C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.Node.DataAccess", "BlockchainSimulator.Node.DataAccess\BlockchainSimulator.Node.DataAccess.csproj", "{C59CEB30-0BE9-4E91-ACB9-666E4B1727C1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{55F1A5E8-C1F3-4D96-A129-A69285200CFB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.DataAccess.Tests", "Tests\BlockchainSimulator.DataAccess.Tests\BlockchainSimulator.DataAccess.Tests.csproj", "{B92B8B23-4AF1-4A20-A14D-252F1B688D8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.Node.DataAccess.Tests", "Tests\BlockchainSimulator.Node.DataAccess.Tests\BlockchainSimulator.Node.DataAccess.Tests.csproj", "{B92B8B23-4AF1-4A20-A14D-252F1B688D8F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.BusinessLogic.Tests", "Tests\BlockchainSimulator.BusinessLogic.Tests\BlockchainSimulator.BusinessLogic.Tests.csproj", "{72FA6A05-CAFD-4206-9E0E-64653C4AF824}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.Node.BusinessLogic.Tests", "Tests\BlockchainSimulator.Node.BusinessLogic.Tests\BlockchainSimulator.Node.BusinessLogic.Tests.csproj", "{72FA6A05-CAFD-4206-9E0E-64653C4AF824}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.WebApi.Tests", "Tests\BlockchainSimulator.WebApi.Tests\BlockchainSimulator.WebApi.Tests.csproj", "{6DC4A49A-8998-4C4F-A03B-06ED42631F23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.Node.WebApi.Tests", "Tests\BlockchainSimulator.Node.WebApi.Tests\BlockchainSimulator.Node.WebApi.Tests.csproj", "{6DC4A49A-8998-4C4F-A03B-06ED42631F23}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.Common", "BlockchainSimulator.Common\BlockchainSimulator.Common.csproj", "{0B065A46-3E58-4F73-9827-CC1C33E16A89}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockchainSimulator.WebApi.Hub", "BlockchainSimulator.WebApi.Hub\BlockchainSimulator.WebApi.Hub.csproj", "{92FDBEB6-41BB-4107-94B3-032C483A847A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockchainSimulator.Hub.WebApi", "BlockchainSimulator.Hub.WebApi\BlockchainSimulator.Hub.WebApi.csproj", "{92FDBEB6-41BB-4107-94B3-032C483A847A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
