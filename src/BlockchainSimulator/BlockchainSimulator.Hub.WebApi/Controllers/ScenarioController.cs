@@ -14,7 +14,7 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
     public class ScenarioController : BaseController
     {
         /// <summary>
-        /// Gets the single scenario
+        /// Gets single scenario
         /// </summary>
         /// <param name="id">Id of the scenario</param>
         /// <returns>The response with scenario</returns>

@@ -68,7 +68,7 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         /// </summary>
         /// <param name="scenarioId">The scenario id</param>
         /// <returns>Statistics for the simulation</returns>
-        [HttpGet("statistics/{scenarioId}")]
+        [HttpGet("statistic/{scenarioId}")]
         public ActionResult<BaseResponse> GenerateAndGetStatistic(Guid scenarioId)
         {
             throw new NotImplementedException();

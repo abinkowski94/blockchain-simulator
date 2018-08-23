@@ -32,7 +32,7 @@ namespace BlockchainSimulator.Hub.WebApi.Model
         /// The date and time of last run
         /// </summary>
         [JsonProperty("lastRunTime")]
-        public DateTime LastRunTime { get; set; }
+        public DateTime? LastRunTime { get; set; }
         
         /// <summary>
         /// The current status of simulation
