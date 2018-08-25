@@ -1,7 +1,9 @@
-using System;
 using BlockchainSimulator.Common.Models.Responses;
+using BlockchainSimulator.Hub.BusinessLogic.Services;
+using BlockchainSimulator.Hub.WebApi.Extensions;
 using BlockchainSimulator.Hub.WebApi.Model;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace BlockchainSimulator.Hub.WebApi.Controllers
 {
@@ -13,25 +15,15 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
     [Route("api/[controller]")]
     public class ScenarioController : BaseController
     {
+        private readonly IScenarioService _scenarioService;
+
         /// <summary>
-        /// Gets single scenario
+        /// The constructor
         /// </summary>
-        /// <param name="id">Id of the scenario</param>
-        /// <returns>The response with scenario</returns>
-        [HttpGet("{id}")]
-        public ActionResult<BaseResponse> GetScenario(Guid id)
+        /// <param name="scenarioService">The scenario service</param>
+        public ScenarioController(IScenarioService scenarioService)
         {
-            throw new NotImplementedException();
-        }
-        
-        /// <summary>
-        /// Gets the list of scenarios
-        /// </summary>
-        /// <returns>The response with scenarios</returns>
-        [HttpGet]
-        public ActionResult<BaseResponse> GetScenarios()
-        {
-            throw new NotImplementedException();
+            _scenarioService = scenarioService;
         }
 
         /// <summary>
@@ -42,20 +34,12 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         [HttpPost]
         public ActionResult<BaseResponse> CreateScenario([FromBody] Scenario scenario)
         {
-            throw  new NotImplementedException();
+            var mappedScenario = LocalMapper.Map<BusinessLogic.Model.Scenario>(scenario);
+            var response = _scenarioService.CreateScenario(mappedScenario);
+
+            return response.GetActionResult<BusinessLogic.Model.Scenario, Scenario>(this);
         }
-        
-        /// <summary>
-        /// Updates the scenario
-        /// </summary>
-        /// <param name="scenario">The scenario to update</param>
-        /// <returns>Updated scenario</returns>
-        [HttpPut]
-        public ActionResult<BaseResponse> UpdateScenario([FromBody] Scenario scenario)
-        {
-            throw  new NotImplementedException();
-        }
-        
+
         /// <summary>
         /// Deletes the scenario
         /// </summary>
@@ -74,6 +58,38 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         /// <returns>Newly create scenario</returns>
         [HttpPatch("{id}")]
         public ActionResult<BaseResponse> DuplicateScenario(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets single scenario
+        /// </summary>
+        /// <param name="id">Id of the scenario</param>
+        /// <returns>The response with scenario</returns>
+        [HttpGet("{id}")]
+        public ActionResult<BaseResponse> GetScenario(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the list of scenarios
+        /// </summary>
+        /// <returns>The response with scenarios</returns>
+        [HttpGet]
+        public ActionResult<BaseResponse> GetScenarios()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Updates the scenario
+        /// </summary>
+        /// <param name="scenario">The scenario to update</param>
+        /// <returns>Updated scenario</returns>
+        [HttpPut]
+        public ActionResult<BaseResponse> UpdateScenario([FromBody] Scenario scenario)
         {
             throw new NotImplementedException();
         }
