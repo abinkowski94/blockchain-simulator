@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using BlockchainSimulator.Hub.BusinessLogic.Services;
+using BlockchainSimulator.Hub.BusinessLogic.Storage;
 using BlockchainSimulator.Hub.DataAccess.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -67,6 +69,9 @@ namespace BlockchainSimulator.Hub.WebApi
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddTransient<IFileRepository, FileRepository>();
+            services.AddSingleton<IScenarioStorage, ScenarioStorage>();
+            services.AddSingleton<ISimulationStorage, SimulationStorage>();
+            services.AddTransient<IScenarioService, ScenarioService>();
 
             services.AddSwaggerGen(c =>
             {

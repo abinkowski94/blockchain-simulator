@@ -4,6 +4,7 @@ using BlockchainSimulator.Hub.WebApi.Extensions;
 using BlockchainSimulator.Hub.WebApi.Model;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 
 namespace BlockchainSimulator.Hub.WebApi.Controllers
 {
@@ -17,6 +18,7 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
     {
         private readonly IScenarioService _scenarioService;
 
+        /// <inheritdoc />
         /// <summary>
         /// The constructor
         /// </summary>
@@ -48,7 +50,8 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         [HttpDelete("{id}")]
         public ActionResult<BaseResponse> DeleteScenario(Guid id)
         {
-            throw new NotImplementedException();
+            return _scenarioService.RemoveScenario(id)
+                .GetActionResult<BusinessLogic.Model.Scenario, Scenario>(this);
         }
 
         /// <summary>
@@ -59,7 +62,8 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         [HttpPatch("{id}")]
         public ActionResult<BaseResponse> DuplicateScenario(Guid id)
         {
-            throw new NotImplementedException();
+            return _scenarioService.DuplicateScenario(id)
+                .GetActionResult<BusinessLogic.Model.Scenario, Scenario>(this);
         }
 
         /// <summary>
@@ -70,7 +74,8 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         [HttpGet("{id}")]
         public ActionResult<BaseResponse> GetScenario(Guid id)
         {
-            throw new NotImplementedException();
+            return _scenarioService.GetScenario(id)
+                .GetActionResult<BusinessLogic.Model.Scenario, Scenario>(this);
         }
 
         /// <summary>
@@ -80,18 +85,21 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         [HttpGet]
         public ActionResult<BaseResponse> GetScenarios()
         {
-            throw new NotImplementedException();
+            return _scenarioService.GetScenarios()
+                .GetActionResult<List<BusinessLogic.Model.Scenario>, List<Scenario>>(this);
         }
 
         /// <summary>
-        /// Updates the scenario
+        /// Renames the scenario
         /// </summary>
-        /// <param name="scenario">The scenario to update</param>
+        /// <param name="id">The id of the scenario</param>
+        /// <param name="newName">The new name of the scenario</param>
         /// <returns>Updated scenario</returns>
         [HttpPut]
-        public ActionResult<BaseResponse> UpdateScenario([FromBody] Scenario scenario)
+        public ActionResult<BaseResponse> RenameScenario(Guid id, string newName)
         {
-            throw new NotImplementedException();
+            return _scenarioService.RenameScenario(id, newName)
+                .GetActionResult<BusinessLogic.Model.Scenario, Scenario>(this);
         }
     }
 }

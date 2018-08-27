@@ -30,7 +30,7 @@ namespace BlockchainSimulator.Hub.WebApi.Model
         /// The date of modification
         /// </summary>
         [JsonProperty("modificationDate")]
-        public DateTime ModificationDate { get; set; }
+        public DateTime? ModificationDate { get; set; }
         
         /// <summary>
         /// The simulation

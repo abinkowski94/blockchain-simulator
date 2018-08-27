@@ -24,7 +24,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Model
         /// The date of modification
         /// </summary>
         [JsonProperty("modificationDate")]
-        public DateTime ModificationDate { get; set; }
+        public DateTime? ModificationDate { get; set; }
 
         /// <summary>
         /// Name of the scenario

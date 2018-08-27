@@ -41,6 +41,98 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             return new SuccessResponse<Scenario>("The scenario has been created successfully!", scenario);
         }
 
+        public BaseResponse<Scenario> GetScenario(Guid scenarioId)
+        {
+            var scenario = _scenarioStorage.GetScenario(scenarioId);
+            if (scenario == null)
+            {
+                return new ErrorResponse<Scenario>($"Could not find scenario with id: {scenarioId}!", null);
+            }
+            
+            return new SuccessResponse<Scenario>("The scenario has been found!", scenario);
+        }
+
+        public BaseResponse<Scenario> RenameScenario(Guid scenarioId, string newName)
+        {
+            var scenario = _scenarioStorage.GetScenario(scenarioId);
+            if (scenario == null)
+            {
+                return new ErrorResponse<Scenario>($"Could not find scenario with id: {scenarioId}!", null);
+            }
+
+            scenario.Name = newName;
+            _scenarioStorage.SaveChanges();
+
+            return new SuccessResponse<Scenario>("The scenario has been renamed!", scenario);
+        }
+
+        public BaseResponse<List<Scenario>> GetScenarios()
+        {
+            return new SuccessResponse<List<Scenario>>("The scenarios!", _scenarioStorage.GetScenarios());
+        }
+
+        public BaseResponse<Scenario> RemoveScenario(Guid scenarioId)
+        {
+            var scenario = _scenarioStorage.RemoveScenario(scenarioId);
+            if (scenario == null)
+            {
+                return new ErrorResponse<Scenario>($"Could not find scenario with id: {scenarioId}!", null);
+            }
+            
+            _scenarioStorage.SaveChanges();
+
+            return new SuccessResponse<Scenario>("The scenario has been deleted!", scenario);
+        }
+
+        public BaseResponse<Scenario> DuplicateScenario(Guid scenarioId)
+        {
+            var scenario = _scenarioStorage.GetScenario(scenarioId);
+            if (scenario == null)
+            {
+                return new ErrorResponse<Scenario>($"Could not find scenario with id: {scenarioId}!", null);
+            }
+
+            var duplicate = DuplicateScenario(scenario);
+            _scenarioStorage.AddScenario(duplicate);
+            _scenarioStorage.SaveChanges();
+            
+            return new SuccessResponse<Scenario>("The scenario has been duplicated!", duplicate);
+        }
+
+        private static Scenario DuplicateScenario(Scenario scenario)
+        {
+            var newId = Guid.NewGuid();
+            
+            return new Scenario
+            {
+                Id = newId,
+                Name = $"{scenario.Name} - Copy",
+                CreateDate = DateTime.UtcNow,
+                ModificationDate = null,
+                Simulation = new Simulation
+                {
+                    ScenarioId = newId,
+                    LastRunTime = null,
+                    Status = SimulationStatuses.ReadyToRun,
+                    BlockchainConfiguration = new BlockchainConfiguration
+                    {
+                        BlockSize = scenario.Simulation.BlockchainConfiguration.BlockSize,
+                        Target = scenario.Simulation.BlockchainConfiguration.Target,
+                        Version = scenario.Simulation.BlockchainConfiguration.Version
+                    },
+                    ServerNodes = new List<ServerNode>(scenario.Simulation.ServerNodes.Select(n => new ServerNode
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Delay = n.Delay,
+                        HttpAddress = n.HttpAddress,
+                        IsConnected = n.IsConnected,
+                        NeedsSpawn = n.NeedsSpawn,
+                        ConnectedTo = new List<string>(n.ConnectedTo)
+                    }))
+                }
+            };
+        }
+
         private static string[] ValidateScenario(Scenario scenario)
         {
             var errors = new List<string>();
