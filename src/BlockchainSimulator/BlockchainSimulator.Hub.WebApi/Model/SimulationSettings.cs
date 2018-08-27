@@ -19,6 +19,6 @@ namespace BlockchainSimulator.Hub.WebApi.Model
         /// Ends the simulation after given time
         /// </summary>
         [JsonProperty("forceEndAfter")]
-        public TimeSpan ForceEndAfter { get; set; }
+        public TimeSpan? ForceEndAfter { get; set; }
     }
 }

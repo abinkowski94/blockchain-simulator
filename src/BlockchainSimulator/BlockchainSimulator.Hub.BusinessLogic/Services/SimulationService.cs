@@ -9,10 +9,12 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
     public class SimulationService : ISimulationService
     {
         private readonly ISimulationStorage _simulationStorage;
+        private readonly ISimulationRunnerService _simulationRunnerService;
 
-        public SimulationService(ISimulationStorage simulationStorage)
+        public SimulationService(ISimulationStorage simulationStorage, ISimulationRunnerService simulationRunnerService)
         {
             _simulationStorage = simulationStorage;
+            _simulationRunnerService = simulationRunnerService;
         }
 
         public BaseResponse<Simulation> ChangeConfiguration(Guid scenarioId, BlockchainConfiguration configuration)
@@ -46,10 +48,12 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 return new ErrorResponse<Simulation>("The server node cannot be null!", null);
             }
+
             if (serverNode.Id == null)
             {
                 return new ErrorResponse<Simulation>("The server node id cannot be null!", null);
             }
+
             if (serverNode.HttpAddress == null)
             {
                 return new ErrorResponse<Simulation>("The server node http address cannot be null!", null);
@@ -60,11 +64,13 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 return new ErrorResponse<Simulation>($"Could not find simulation with scenario id:{scenarioId}", null);
             }
+
             if (simulation.Status != SimulationStatuses.ReadyToRun)
             {
                 return new ErrorResponse<Simulation>("You can not make changes while simulation is running",
                     simulation);
             }
+
             if (simulation.ServerNodes.Any(n => n.Id == serverNode.Id))
             {
                 return new ErrorResponse<Simulation>($"There is already server node with id:{serverNode.Id}!",
@@ -73,7 +79,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
             simulation.ServerNodes.Add(serverNode);
             _simulationStorage.SaveChanges();
-            
+
             return new SuccessResponse<Simulation>("The node has been added!", simulation);
         }
 
@@ -84,6 +90,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 return new ErrorResponse<Simulation>($"Could not find simulation with scenario id:{scenarioId}", null);
             }
+
             if (simulation.Status != SimulationStatuses.ReadyToRun)
             {
                 return new ErrorResponse<Simulation>("You can not make changes while simulation is running",
@@ -98,7 +105,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
             simulation.ServerNodes.Remove(node);
             _simulationStorage.SaveChanges();
-            
+
             return new SuccessResponse<Simulation>("The node has been removed!", simulation);
         }
 
@@ -109,18 +116,19 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 return new ErrorResponse<Simulation>($"Could not find simulation with scenario id:{scenarioId}", null);
             }
+
             if (simulation.Status != SimulationStatuses.ReadyToRun)
             {
                 return new ErrorResponse<Simulation>("You can not make changes while simulation is running",
                     simulation);
             }
-            
+
             var node1 = simulation.ServerNodes.FirstOrDefault(n => n.Id == nodeId1);
             if (node1 == null)
             {
                 return new ErrorResponse<Simulation>($"Could not find node with id:{nodeId1}", simulation);
             }
-            
+
             var node2 = simulation.ServerNodes.FirstOrDefault(n => n.Id == nodeId2);
             if (node2 == null)
             {
@@ -130,13 +138,37 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             node1.ConnectedTo.Add(nodeId2);
             node2.ConnectedTo.Add(nodeId1);
             _simulationStorage.SaveChanges();
-            
+
             return new SuccessResponse<Simulation>("The nodes have been connected!", simulation);
         }
 
         public BaseResponse<Simulation> StartSimulation(Guid scenarioId, SimulationSettings settings)
         {
-            throw new NotImplementedException();
+            if (settings == null)
+            {
+                return new ErrorResponse<Simulation>("The settings can not be null!", null);
+            }
+
+            if (settings.NodesAndTransactions == null)
+            {
+                return new ErrorResponse<Simulation>("The settings nodes and transaction count cannot be null!", null);
+            }
+
+            var simulation = _simulationStorage.GetSimulation(scenarioId);
+            if (simulation == null)
+            {
+                return new ErrorResponse<Simulation>($"Could not find simulation with scenario id:{scenarioId}", null);
+            }
+
+            if (simulation.Status != SimulationStatuses.ReadyToRun)
+            {
+                return new ErrorResponse<Simulation>("You can not make changes while simulation is running",
+                    simulation);
+            }
+
+            _simulationRunnerService.RunSimulation(settings);
+            
+            return new SuccessResponse<Simulation>("Simulation has been started", simulation);
         }
     }
 }

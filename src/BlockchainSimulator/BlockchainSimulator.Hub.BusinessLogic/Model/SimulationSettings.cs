@@ -11,7 +11,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Model
         /// <summary>
         /// Ends the simulation after given time
         /// </summary>
-        public TimeSpan ForceEndAfter { get; set; }
+        public TimeSpan? ForceEndAfter { get; set; }
 
         /// <summary>
         /// Dictionary of nodes and number of transactions to be sent
