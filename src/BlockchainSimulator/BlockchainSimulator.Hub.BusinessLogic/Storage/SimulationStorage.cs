@@ -16,7 +16,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Storage
         {
             return _scenarioStorage.GetScenario(scenarioId)?.Simulation;
         }
-
+        
         public void SaveChanges()
         {
             _scenarioStorage.SaveChanges();

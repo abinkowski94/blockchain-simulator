@@ -12,7 +12,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Model
         /// Collection of id that the node is connected to
         /// </summary>
         [JsonProperty("connectedTo", NullValueHandling = NullValueHandling.Ignore)]
-        public IEnumerable<string> ConnectedTo { get; set; }
+        public List<string> ConnectedTo { get; set; }
 
         /// <summary>
         /// Delay in connection

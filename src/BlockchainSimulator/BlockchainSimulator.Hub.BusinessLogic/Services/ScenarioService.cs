@@ -61,6 +61,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             }
 
             scenario.Name = newName;
+            scenario.ModificationDate = DateTime.UtcNow;
             _scenarioStorage.SaveChanges();
 
             return new SuccessResponse<Scenario>("The scenario has been renamed!", scenario);

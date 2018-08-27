@@ -31,12 +31,12 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Model
         /// The server nodes
         /// </summary>
         [JsonProperty("serverNodes")]
-        public IEnumerable<ServerNode> ServerNodes { get; set; }
+        public List<ServerNode> ServerNodes { get; set; }
 
         /// <summary>
         /// The current status of simulation
         /// </summary>
-        [JsonProperty("status")]
+        [JsonIgnore]
         public SimulationStatuses Status { get; set; }
     }
 }

@@ -8,6 +8,12 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Model
     public class BlockchainConfiguration
     {
         /// <summary>
+        /// The type of consensus algorithm
+        /// </summary>
+        [JsonProperty("type")]
+        public string Type { get; set; }
+        
+        /// <summary>
         /// The block size
         /// </summary>
         [JsonProperty("blockSize")]

@@ -20,7 +20,7 @@ namespace BlockchainSimulator.Hub.WebApi.Model
         /// The server nodes
         /// </summary>
         [JsonProperty("serverNodes")]
-        public IEnumerable<ServerNode> ServerNodes { get; set; }
+        public List<ServerNode> ServerNodes { get; set; }
         
         /// <summary>
         /// The configuration of the blockchain

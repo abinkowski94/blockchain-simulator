@@ -13,6 +13,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Storage
         private readonly IFileRepository _fileRepository;
         private readonly ConcurrentDictionary<Guid, Scenario> _scenarios;
         private readonly string _simulationFile;
+        private readonly object _padlock = new object();
 
         public ScenarioStorage(IFileRepository fileRepository)
         {
@@ -47,8 +48,11 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Storage
 
         public void SaveChanges()
         {
-            var data = JsonConvert.SerializeObject(_scenarios.Select(kv => kv.Value).ToList());
-            _fileRepository.SaveFile(data, _simulationFile);
+            lock (_padlock)
+            {
+                var data = JsonConvert.SerializeObject(_scenarios.Select(kv => kv.Value).ToList());
+                _fileRepository.SaveFile(data, _simulationFile);
+            }
         }
 
         private void PreloadScenarios()
