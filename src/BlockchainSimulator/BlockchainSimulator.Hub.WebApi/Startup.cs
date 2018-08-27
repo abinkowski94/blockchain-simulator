@@ -72,6 +72,7 @@ namespace BlockchainSimulator.Hub.WebApi
             services.AddSingleton<IScenarioStorage, ScenarioStorage>();
             services.AddSingleton<ISimulationStorage, SimulationStorage>();
             services.AddTransient<IScenarioService, ScenarioService>();
+            services.AddTransient<ISimulationService, SimulationService>();
 
             services.AddSwaggerGen(c =>
             {

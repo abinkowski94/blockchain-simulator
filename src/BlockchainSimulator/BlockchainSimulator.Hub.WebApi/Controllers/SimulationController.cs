@@ -52,6 +52,19 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         }
 
         /// <summary>
+        /// Changes simulation configuration
+        /// </summary>
+        /// <param name="scenarioId">The id of scenario</param>
+        /// <param name="configuration">The configuration</param>
+        /// <returns>Changed simulation</returns>
+        [HttpPatch]
+        public ActionResult<BaseResponse> ChangeConfiguration(Guid scenarioId,
+            [FromBody] BlockchainConfiguration configuration)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Starts the simulation
         /// </summary>
         /// <param name="scenarioId">The id of the scenario</param>
