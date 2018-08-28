@@ -166,7 +166,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     simulation);
             }
 
-            _simulationRunnerService.RunSimulation(settings);
+            _simulationRunnerService.RunSimulation(simulation, settings);
             
             return new SuccessResponse<Simulation>("Simulation has been started", simulation);
         }

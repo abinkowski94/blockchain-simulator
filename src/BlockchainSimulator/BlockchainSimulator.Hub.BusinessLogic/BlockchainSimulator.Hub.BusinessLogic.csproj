@@ -6,15 +6,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    </ItemGroup>
-
-    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
         <PackageReference Update="Microsoft.NETCore.App" Version="2.1.3" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\BlockchainSimulator.Hub.DataAccess\BlockchainSimulator.Hub.DataAccess.csproj" />
+        <ProjectReference Include="..\BlockchainSimulator.Node.WebApi\BlockchainSimulator.Node.WebApi.csproj" />
     </ItemGroup>
 
 </Project>

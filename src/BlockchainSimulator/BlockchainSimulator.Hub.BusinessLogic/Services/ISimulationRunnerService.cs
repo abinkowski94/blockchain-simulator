@@ -4,6 +4,6 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {
     public interface ISimulationRunnerService
     {
-        void RunSimulation(SimulationSettings settings);
+        void RunSimulation(Simulation simulation, SimulationSettings settings);
     }
 }

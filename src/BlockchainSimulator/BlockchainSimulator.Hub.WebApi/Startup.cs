@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using BlockchainSimulator.Hub.BusinessLogic.Queues;
 using BlockchainSimulator.Hub.BusinessLogic.Services;
 using BlockchainSimulator.Hub.BusinessLogic.Storage;
 using BlockchainSimulator.Hub.DataAccess.Repositories;
@@ -68,9 +69,12 @@ namespace BlockchainSimulator.Hub.WebApi
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            services.AddTransient<IFileRepository, FileRepository>();
+            services.AddTransient<IFileRepository, FileRepository>();            
             services.AddSingleton<IScenarioStorage, ScenarioStorage>();
             services.AddSingleton<ISimulationStorage, SimulationStorage>();
+            services.AddSingleton<ISimulationRunnerService, SimulationRunnerService>();
+            services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();            
+            services.AddHostedService<QueuedHostedService>();
             services.AddTransient<IScenarioService, ScenarioService>();
             services.AddTransient<ISimulationService, SimulationService>();
 
