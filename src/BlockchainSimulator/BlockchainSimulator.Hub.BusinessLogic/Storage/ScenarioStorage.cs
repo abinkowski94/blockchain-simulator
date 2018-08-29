@@ -27,7 +27,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Storage
         {
             _scenarios.TryAdd(scenario.Id, scenario);
             return scenario;
-        }        
+        }
 
         public Scenario GetScenario(Guid scenarioId)
         {
@@ -53,6 +53,12 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Storage
                 var data = JsonConvert.SerializeObject(_scenarios.Select(kv => kv.Value).ToList());
                 _fileRepository.SaveFile(data, _simulationFile);
             }
+        }
+
+        public void Dispose()
+        {
+            GetScenarios().SelectMany(s => s.Simulation.ServerNodes).Where(n => n.NodeThread != null)
+                .ToList().ForEach(n => n.NodeThread.Kill());
         }
 
         private void PreloadScenarios()

@@ -4,7 +4,7 @@ using BlockchainSimulator.Hub.BusinessLogic.Model;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Storage
 {
-    public interface IScenarioStorage
+    public interface IScenarioStorage : IDisposable
     {
         Scenario AddScenario(Scenario scenario);
         Scenario GetScenario(Guid scenarioId);

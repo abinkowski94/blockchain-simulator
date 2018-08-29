@@ -162,12 +162,13 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
             if (simulation.Status != SimulationStatuses.ReadyToRun)
             {
-                return new ErrorResponse<Simulation>("You can not make changes while simulation is running",
-                    simulation);
+                var errorMessage =
+                    $"This simulation has been already started, please wait for results! Current status: {simulation.Status}";
+                return new ErrorResponse<Simulation>(errorMessage, simulation);
             }
 
             _simulationRunnerService.RunSimulation(simulation, settings);
-            
+
             return new SuccessResponse<Simulation>("Simulation has been started", simulation);
         }
     }

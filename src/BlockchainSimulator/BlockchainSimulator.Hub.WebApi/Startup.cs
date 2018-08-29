@@ -59,6 +59,9 @@ namespace BlockchainSimulator.Hub.WebApi
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blockchain simulator (Hub API)"); });
+
+            var applicationLifetime = app.ApplicationServices.GetRequiredService<IApplicationLifetime>();
+            applicationLifetime.ApplicationStopping.Register(() => OnShutdown(app.ApplicationServices));
         }
 
         /// <summary>
@@ -69,11 +72,11 @@ namespace BlockchainSimulator.Hub.WebApi
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            services.AddTransient<IFileRepository, FileRepository>();            
+            services.AddTransient<IFileRepository, FileRepository>();
             services.AddSingleton<IScenarioStorage, ScenarioStorage>();
             services.AddSingleton<ISimulationStorage, SimulationStorage>();
             services.AddSingleton<ISimulationRunnerService, SimulationRunnerService>();
-            services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();            
+            services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             services.AddHostedService<QueuedHostedService>();
             services.AddTransient<IScenarioService, ScenarioService>();
             services.AddTransient<ISimulationService, SimulationService>();
@@ -103,6 +106,20 @@ namespace BlockchainSimulator.Hub.WebApi
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
+        }
+
+        /// <summary>
+        /// Cleans the remaining processes 
+        /// </summary>
+        /// <param name="services">The service provider</param>
+        private static void OnShutdown(IServiceProvider services)
+        {
+            Console.WriteLine("Shutting down...");
+
+            services.GetService<QueuedHostedService>().Dispose();
+            services.GetService<IScenarioStorage>().Dispose();
+            
+            Console.WriteLine("Cleanup complete!");
         }
     }
 }
