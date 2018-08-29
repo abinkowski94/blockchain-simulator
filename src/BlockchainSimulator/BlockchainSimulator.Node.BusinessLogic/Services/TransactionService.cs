@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
@@ -48,13 +49,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
             // Launches mining
             var enqueueTime = DateTime.UtcNow;
-            _queue.QueueMiningTask(async token =>
+            _queue.QueueMiningTask(token => new Task(() =>
             {
                 var transactions = _pendingTransactions.Select(t => t.Value).OrderByDescending(t => t.Fee)
                     .Take(_configuration.BlockSize).ToList();
                 transactions.ForEach(t => _pendingTransactions.TryRemove(t.Id, out _));
-                await _miningService.MineBlocks(transactions, enqueueTime, token);
-            });
+                _miningService.MineBlocks(transactions, enqueueTime, token);
+            }, token));
 
             return new SuccessResponse<Transaction>("The transaction has been added and processing has started",
                 transaction);

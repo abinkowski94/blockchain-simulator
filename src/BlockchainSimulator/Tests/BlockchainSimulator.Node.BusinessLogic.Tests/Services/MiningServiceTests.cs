@@ -34,7 +34,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         }
 
         [Fact]
-        public async Task MineBlocks_TransactionsDateAndToken_Task()
+        public void MineBlocks_TransactionsDateAndToken_Task()
         {
             // Arrange
             var transactions = TransactionDataSet.TransactionData
@@ -53,7 +53,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
                 .Returns(new SuccessResponse<bool>("The block has been accepted", true));
 
             // Act
-            await _miningService.MineBlocks(transactions, enqueueTime, token);
+            _miningService.MineBlocks(transactions, enqueueTime, token);
 
             // Assert
             _blockchainServiceMock.Verify(p => p.GetBlockchain());
@@ -63,7 +63,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         }
         
         [Fact]
-        public async Task MineBlocks_TransactionsDateAndToken_TaskAcceptFailed()
+        public void MineBlocks_TransactionsDateAndToken_TaskAcceptFailed()
         {
             // Arrange
             var transactions = TransactionDataSet.TransactionData
@@ -82,7 +82,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
                 .Returns(new ErrorResponse<bool>("The block has not been accepted", false));
 
             // Act
-            await _miningService.MineBlocks(transactions, enqueueTime, token);
+            _miningService.MineBlocks(transactions, enqueueTime, token);
 
             // Assert
             _blockchainServiceMock.Verify(p => p.GetBlockchain());

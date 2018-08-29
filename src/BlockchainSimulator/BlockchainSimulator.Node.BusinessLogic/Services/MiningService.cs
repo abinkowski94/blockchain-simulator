@@ -26,20 +26,17 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _queue = queue;
         }
 
-        public Task MineBlocks(IEnumerable<Transaction> transactions, DateTime enqueueTime, CancellationToken token)
+        public void MineBlocks(IEnumerable<Transaction> transactions, DateTime enqueueTime, CancellationToken token)
         {
-            return Task.Run(() =>
+            var transactionSet = transactions.ToHashSet();
+            var blockchainResponse = _blockchainService.GetBlockchain();
+            var newBlock = _blockProvider.CreateBlock(transactionSet, enqueueTime, blockchainResponse.Result);
+
+            var response = _consensusService.AcceptBlockchain(newBlock);
+            if (response is ErrorResponse<bool> errorResponse && !errorResponse.Result)
             {
-                var transactionSet = transactions.ToHashSet();
-                var blockchainResponse = _blockchainService.GetBlockchain();
-                var newBlock = _blockProvider.CreateBlock(transactionSet, enqueueTime, blockchainResponse.Result);
-                
-                var response = _consensusService.AcceptBlockchain(newBlock);
-                if (response is ErrorResponse<bool> errorResponse && !errorResponse.Result)
-                {
-                    _queue.QueueMiningTask(t => MineBlocks(transactionSet, enqueueTime, token));
-                }
-            }, token);
+                _queue.QueueMiningTask(t => new Task(() => MineBlocks(transactionSet, enqueueTime, token)));
+            }
         }
     }
 }

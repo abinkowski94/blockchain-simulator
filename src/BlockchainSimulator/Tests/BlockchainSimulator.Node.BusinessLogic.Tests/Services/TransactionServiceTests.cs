@@ -87,7 +87,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
 
             // Act
             var result = _transactionService.AddTransaction(transaction) as SuccessResponse<Transaction>;
-            queueTask(token);
+            var task = queueTask(token);
+            task.Start();
+            task.Wait(token);
 
             // Assert
             _blockchainConfigurationMock.Verify(p => p.BlockSize);
