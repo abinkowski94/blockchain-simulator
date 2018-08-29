@@ -14,16 +14,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
+        <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     </ItemGroup>
 
     <Target Name="IncludeDocFile" BeforeTargets="PrepareForPublish">
         <ItemGroup Condition=" '$(DocumentationFile)' != '' ">
-            <_DocumentationFile Include="$(DocumentationFile)"/>
-            <ContentWithTargetPath Include="@(_DocumentationFile->'%(FullPath)')"
-                                   RelativePath="%(_DocumentationFile.Identity)"
-                                   TargetPath="%(_DocumentationFile.Filename)%(_DocumentationFile.Extension)"
-                                   CopyToPublishDirectory="PreserveNewest"/>
+            <_DocumentationFile Include="$(DocumentationFile)" />
+            <ContentWithTargetPath Include="@(_DocumentationFile->'%(FullPath)')" RelativePath="%(_DocumentationFile.Identity)" TargetPath="%(_DocumentationFile.Filename)%(_DocumentationFile.Extension)" CopyToPublishDirectory="PreserveNewest" />
         </ItemGroup>
     </Target>
     

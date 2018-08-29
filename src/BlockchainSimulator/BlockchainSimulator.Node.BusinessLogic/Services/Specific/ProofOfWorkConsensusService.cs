@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
+using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Queues.BackgroundTasks;
@@ -56,7 +57,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
         public override void ReachConsensus()
         {
-            _serverNodes.Select(kv => kv.Value).ToList().ForEach(node =>
+            _serverNodes.Select(kv => kv.Value).ForEach(node =>
             {
                 _queue.QueueBackgroundWorkItem(async token =>
                 {

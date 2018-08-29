@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using BlockchainSimulator.Common.Extensions;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Storage
 {
@@ -58,7 +59,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Storage
         public void Dispose()
         {
             GetScenarios().SelectMany(s => s.Simulation.ServerNodes).Where(n => n.NodeThread != null)
-                .ToList().ForEach(n => n.NodeThread.Kill());
+                .ForEach(n => n.NodeThread.Kill());
         }
 
         private void PreloadScenarios()
