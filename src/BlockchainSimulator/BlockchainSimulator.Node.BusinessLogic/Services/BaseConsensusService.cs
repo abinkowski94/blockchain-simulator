@@ -1,19 +1,19 @@
+using BlockchainSimulator.Common.Queues;
+using BlockchainSimulator.Node.BusinessLogic.Model.Block;
+using BlockchainSimulator.Node.BusinessLogic.Model.Consensus;
+using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using BlockchainSimulator.Common.Queues;
-using BlockchainSimulator.Node.BusinessLogic.Model.Block;
-using BlockchainSimulator.Node.BusinessLogic.Model.Consensus;
-using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public abstract class BaseConsensusService : BaseService, IConsensusService
     {
-        protected readonly ConcurrentDictionary<string, ServerNode> _serverNodes;
         protected readonly IBackgroundTaskQueue _queue;
+        protected readonly ConcurrentDictionary<string, ServerNode> _serverNodes;
 
         protected BaseConsensusService(IBackgroundTaskQueue queue)
         {
@@ -24,14 +24,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         public abstract BaseResponse<bool> AcceptBlockchain(string base64Blockchain);
 
         public abstract BaseResponse<bool> AcceptBlockchain(BlockBase blockBase);
-
-        public abstract void ReachConsensus();
-
-        public BaseResponse<List<ServerNode>> GetNodes()
-        {
-            return new SuccessResponse<List<ServerNode>>($"The server list for current time: {DateTime.UtcNow}",
-                _serverNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList());
-        }
 
         public BaseResponse<ServerNode> ConnectNode(ServerNode serverNode)
         {
@@ -53,6 +45,15 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             return new SuccessResponse<ServerNode>("The node has been added successfully!", serverNode);
         }
 
+        public BaseResponse<List<ServerNode>> DisconnectFromNetwork()
+        {
+            var result = _serverNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList();
+            result.ForEach(n => n.IsConnected = false);
+            _serverNodes.Clear();
+
+            return new SuccessResponse<List<ServerNode>>("All nodes has been disconnected!", result);
+        }
+
         public BaseResponse<ServerNode> DisconnectNode(string nodeId)
         {
             _serverNodes.TryRemove(nodeId, out var result);
@@ -65,13 +66,37 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             return new SuccessResponse<ServerNode>($"The node with id: {nodeId} has been disconnected!", result);
         }
 
-        public BaseResponse<List<ServerNode>> DisconnectFromNetwork()
+        public BaseResponse<List<ServerNode>> GetNodes()
         {
-            var result = _serverNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList();
-            result.ForEach(n => n.IsConnected = false);
-            _serverNodes.Clear();
+            return new SuccessResponse<List<ServerNode>>($"The server list for current time: {DateTime.UtcNow}",
+                _serverNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList());
+        }
 
-            return new SuccessResponse<List<ServerNode>>("All nodes has been disconnected!", result);
+        public abstract void ReachConsensus();
+
+        private void CheckNodeConnection(ServerNode serverNode)
+        {
+            _queue.QueueBackgroundWorkItem(async token =>
+            {
+                try
+                {
+                    using (var httpClientHandler = new HttpClientHandler())
+                    {
+                        // Turns off SSL
+                        httpClientHandler.ServerCertificateCustomValidationCallback = (msg, cert, chain, err) => true;
+                        using (var httpClient = new HttpClient(httpClientHandler))
+                        {
+                            var response = await httpClient.GetAsync($"{serverNode.HttpAddress}/api/info", token);
+                            serverNode.IsConnected = response.IsSuccessStatusCode;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    serverNode.IsConnected = false;
+                }
+            });
         }
 
         private List<string> ValidateNode(ServerNode serverNode)
@@ -99,31 +124,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             }
 
             return validationErrors;
-        }
-
-        private void CheckNodeConnection(ServerNode serverNode)
-        {
-            _queue.QueueBackgroundWorkItem(async token =>
-            {
-                try
-                {
-                    using (var httpClientHandler = new HttpClientHandler())
-                    {
-                        // Turns off SSL
-                        httpClientHandler.ServerCertificateCustomValidationCallback = (msg, cert, chain, err) => true;
-                        using (var httpClient = new HttpClient(httpClientHandler))
-                        {
-                            var response = await httpClient.GetAsync($"{serverNode.HttpAddress}/api/info", token);
-                            serverNode.IsConnected = response.IsSuccessStatusCode;
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    serverNode.IsConnected = false;
-                }
-            });
         }
     }
 }

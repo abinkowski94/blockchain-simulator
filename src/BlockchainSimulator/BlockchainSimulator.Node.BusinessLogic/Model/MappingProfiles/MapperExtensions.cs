@@ -1,9 +1,9 @@
-using System.Collections.Generic;
-using System.Linq;
 using AutoMapper;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.DataAccess.Model;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
 {
@@ -31,19 +31,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
             return GetBlockchain(mapper, blockBase);
         }
 
-        private static void SetupTransactions(MerkleNode merkleNode, HashSet<Transaction.Transaction> transactions)
-        {
-            if (merkleNode is Leaf leaf)
-            {
-                leaf.Transaction = transactions.FirstOrDefault(t => t.Id == leaf.TransactionId);
-            }
-            else if (merkleNode is Transaction.Node node)
-            {
-                SetupTransactions(node.LeftNode, transactions);
-                SetupTransactions(node.RightNode, transactions);
-            }
-        }
-
         private static Blockchain GetBlockchain(IMapper mapper, BlockBase blockBase, List<BlockBase> blocks = null)
         {
             if (blockBase == null)
@@ -62,13 +49,27 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
                     blocks.Insert(0, block);
                     GetBlockchain(mapper, block.Parent, blocks);
                     break;
+
                 case GenesisBlock genesisBlock:
                     blocks.Insert(0, genesisBlock);
                     break;
             }
 
             var mappedBlocks = mapper.Map<List<DataAccess.Model.Block.BlockBase>>(blocks);
-            return new Blockchain {Blocks = mappedBlocks};
+            return new Blockchain { Blocks = mappedBlocks };
+        }
+
+        private static void SetupTransactions(MerkleNode merkleNode, HashSet<Transaction.Transaction> transactions)
+        {
+            if (merkleNode is Leaf leaf)
+            {
+                leaf.Transaction = transactions.FirstOrDefault(t => t.Id == leaf.TransactionId);
+            }
+            else if (merkleNode is Transaction.Node node)
+            {
+                SetupTransactions(node.LeftNode, transactions);
+                SetupTransactions(node.RightNode, transactions);
+            }
         }
     }
 }

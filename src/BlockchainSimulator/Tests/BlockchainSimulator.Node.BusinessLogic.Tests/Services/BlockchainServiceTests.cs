@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
@@ -12,15 +9,18 @@ using BlockchainSimulator.Node.BusinessLogic.Tests.Data;
 using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Moq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
 {
     public class BlockchainServiceTests
     {
-        private readonly IBlockchainConfiguration _configuration;
-        private readonly BlockchainService _blockchainService;
         private readonly Mock<IBlockchainRepository> _blockchainRepositoryMock;
+        private readonly BlockchainService _blockchainService;
+        private readonly IBlockchainConfiguration _configuration;
 
         public BlockchainServiceTests()
         {
@@ -71,24 +71,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         }
 
         [Fact]
-        public void SaveBlockchain_Null_Void()
-        {
-            // Arrange
-
-            // Act
-            _blockchainService.SaveBlockchain(null);
-
-            // Assert
-            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<Blockchain>()), Times.Never);
-        }
-
-        [Fact]
         public void SaveBlockchain_Blocks_Void()
         {
             // Arrange
             var blockchainProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _configuration);
 
-            var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>) ts.First())
+            var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>)ts.First())
                 .ToList();
 
             BlockBase block = null;
@@ -99,6 +87,18 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
 
             // Assert
             _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<Blockchain>()));
+        }
+
+        [Fact]
+        public void SaveBlockchain_Null_Void()
+        {
+            // Arrange
+
+            // Act
+            _blockchainService.SaveBlockchain(null);
+
+            // Assert
+            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<Blockchain>()), Times.Never);
         }
     }
 }

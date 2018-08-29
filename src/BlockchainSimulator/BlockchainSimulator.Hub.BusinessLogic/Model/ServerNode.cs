@@ -44,7 +44,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Model
         /// </summary>
         [JsonProperty("needsSpawn", NullValueHandling = NullValueHandling.Ignore)]
         public bool NeedsSpawn { get; set; }
-        
+
         /// <summary>
         /// The thread of the node
         /// </summary>

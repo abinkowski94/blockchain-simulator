@@ -1,7 +1,7 @@
-using System.Collections.Generic;
 using BlockchainSimulator.Node.WebApi.AppStart;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
 using Xunit;
 
 namespace BlockchainSimulator.Node.WebApi.Tests.AppStart
@@ -18,7 +18,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.AppStart
 
             // Act
             var result = services.AddBlockchainServices(configuration);
-            
+
             // Assert
             Assert.NotNull(result);
             Assert.Equal(16, result.Count);

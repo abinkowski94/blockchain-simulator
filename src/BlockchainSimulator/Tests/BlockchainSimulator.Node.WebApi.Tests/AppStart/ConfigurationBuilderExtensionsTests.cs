@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-using System.Linq;
 using BlockchainSimulator.Node.WebApi.AppStart;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace BlockchainSimulator.Node.WebApi.Tests.AppStart
@@ -15,7 +15,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.AppStart
             var builder = new ConfigurationBuilder();
 
             // Act
-            var result = builder.AddJsonFiles(new List<string> {"test.json"}, true, "urls|-|https://localhost:5002",
+            var result = builder.AddJsonFiles(new List<string> { "test.json" }, true, "urls|-|https://localhost:5002",
                 "contentRoot|-|wwwroot", "Node:Id|-|2", "Node:Type|-|PoW", "BlockchainConfiguration:Version|-|PoW-v1",
                 "BlockchainConfiguration:Target|-|0000", "BlockchainConfiguration:BlockSize|-|5");
             var properties = result.Build().AsEnumerable().ToList();

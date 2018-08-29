@@ -1,12 +1,12 @@
-using System;
 using BlockchainSimulator.Hub.BusinessLogic.Model;
+using System;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Storage
 {
     public class SimulationStorage : ISimulationStorage
     {
         private readonly IScenarioStorage _scenarioStorage;
-        
+
         public SimulationStorage(IScenarioStorage scenarioStorage)
         {
             _scenarioStorage = scenarioStorage;
@@ -16,7 +16,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Storage
         {
             return _scenarioStorage.GetScenario(scenarioId)?.Simulation;
         }
-        
+
         public void SaveChanges()
         {
             _scenarioStorage.SaveChanges();

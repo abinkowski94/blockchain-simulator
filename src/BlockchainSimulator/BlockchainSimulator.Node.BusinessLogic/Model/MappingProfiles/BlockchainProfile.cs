@@ -13,11 +13,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
             CreateMap<BlockBase, Block.BlockBase>()
                 .Include<GenesisBlock, Block.GenesisBlock>()
                 .Include<DataAccess.Model.Block.Block, Block.Block>();
-            
+
             CreateMap<Block.BlockBase, BlockBase>()
                 .Include<Block.GenesisBlock, GenesisBlock>()
                 .Include<Block.Block, DataAccess.Model.Block.Block>();
-            
+
             CreateMap<GenesisBlock, Block.GenesisBlock>()
                 .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dst => dst.Header, opt => opt.MapFrom(src => src.Header))

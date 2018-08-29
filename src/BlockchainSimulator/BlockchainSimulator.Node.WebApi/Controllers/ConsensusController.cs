@@ -1,10 +1,10 @@
-using System.Collections.Generic;
 using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Common.Models.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.WebApi.Extensions;
 using BlockchainSimulator.Node.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace BlockchainSimulator.Node.WebApi.Controllers
 {
@@ -26,17 +26,6 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         public ConsensusController(IConsensusService consensusService)
         {
             _consensusService = consensusService;
-        }
-
-        /// <summary>
-        /// Gets the list of connected nodes
-        /// </summary>
-        /// <returns>List of the connected nodes</returns>
-        [HttpGet]
-        public ActionResult<BaseResponse> GetNodes()
-        {
-            var result = _consensusService.GetNodes();
-            return result.GetActionResult<List<BusinessLogic.Model.Consensus.ServerNode>, List<ServerNode>>(this);
         }
 
         /// <summary>
@@ -66,6 +55,17 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         }
 
         /// <summary>
+        /// Disconnects from the network (disconnects all nodes)
+        /// </summary>
+        /// <returns>List of the disconnected nodes</returns>
+        [HttpPatch]
+        public ActionResult<BaseResponse> DisconnectFromNetwork()
+        {
+            var result = _consensusService.DisconnectFromNetwork();
+            return result.GetActionResult<List<BusinessLogic.Model.Consensus.ServerNode>, List<ServerNode>>(this);
+        }
+
+        /// <summary>
         /// Disconnects the specific node
         /// </summary>
         /// <param name="nodeId">The node id</param>
@@ -78,13 +78,13 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         }
 
         /// <summary>
-        /// Disconnects from the network (disconnects all nodes)
+        /// Gets the list of connected nodes
         /// </summary>
-        /// <returns>List of the disconnected nodes</returns>
-        [HttpPatch]
-        public ActionResult<BaseResponse> DisconnectFromNetwork()
+        /// <returns>List of the connected nodes</returns>
+        [HttpGet]
+        public ActionResult<BaseResponse> GetNodes()
         {
-            var result = _consensusService.DisconnectFromNetwork();
+            var result = _consensusService.GetNodes();
             return result.GetActionResult<List<BusinessLogic.Model.Consensus.ServerNode>, List<ServerNode>>(this);
         }
     }

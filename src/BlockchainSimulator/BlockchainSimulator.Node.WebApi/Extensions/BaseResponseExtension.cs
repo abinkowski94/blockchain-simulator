@@ -27,7 +27,7 @@ namespace BlockchainSimulator.Node.WebApi.Extensions
             response.Result = result;
 
             return new ObjectResult(response)
-                {StatusCode = response is SuccessResponse ? StatusCodes.Status200OK : StatusCodes.Status400BadRequest};
+            { StatusCode = response is SuccessResponse ? StatusCodes.Status200OK : StatusCodes.Status400BadRequest };
         }
     }
 }

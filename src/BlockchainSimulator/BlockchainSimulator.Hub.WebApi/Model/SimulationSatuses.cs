@@ -1,7 +1,7 @@
 namespace BlockchainSimulator.Hub.WebApi.Model
 {
     /// <summary>
-    /// The 
+    /// The
     /// </summary>
     public enum SimulationStatuses
     {
@@ -19,7 +19,7 @@ namespace BlockchainSimulator.Hub.WebApi.Model
         /// The simulation is
         /// </summary>
         Preparing = 2,
-        
+
         /// <summary>
         /// The simulation is running
         /// </summary>
@@ -29,7 +29,7 @@ namespace BlockchainSimulator.Hub.WebApi.Model
         /// Waiting for network
         /// </summary>
         WaitingForNetwork = 4,
-        
+
         /// <summary>
         /// Waiting for statistics to generate
         /// </summary>

@@ -1,9 +1,9 @@
-using System.Collections.Generic;
-using System.Linq;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
 using BlockchainSimulator.Node.BusinessLogic.Tests.Data;
 using BlockchainSimulator.Node.BusinessLogic.Validators;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators
@@ -15,6 +15,22 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators
         public MerkleTreeValidatorTests()
         {
             _merkleTreeValidator = new MerkleTreeValidator();
+        }
+
+        [Theory]
+        [MemberData(nameof(TransactionDataSet.TransactionData), MemberType = typeof(TransactionDataSet))]
+        public void Validate_CorrectTree_SuccessValidationResult(HashSet<Transaction> transactions)
+        {
+            // Arrange
+            var tree = new MerkleTreeProvider().GetMerkleTree(transactions);
+
+            // Act
+            var result = _merkleTreeValidator.Validate(tree);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Errors);
+            Assert.Empty(result.Errors);
         }
 
         [Fact]
@@ -29,23 +45,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators
             Assert.True(result.IsSuccess);
             Assert.NotNull(result.Errors);
             Assert.Empty(result.Errors);
-        }
-
-        [Fact]
-        public void Validate_WrongTreeHash_ErrorValidationResult()
-        {
-            // Arrange
-            var tree = new MerkleTreeProvider().GetMerkleTree(
-                TransactionDataSet.TransactionData.Last().First() as HashSet<Transaction>);
-            ((Model.Transaction.Node) tree.LeftNode).LeftNode.Hash = "000";
-
-            // Act
-            var result = _merkleTreeValidator.Validate(tree);
-
-            // Assert
-            Assert.False(result.IsSuccess);
-            Assert.NotNull(result.Errors);
-            Assert.NotEmpty(result.Errors);
         }
 
         [Fact]
@@ -84,20 +83,21 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators
             Assert.NotEmpty(result.Errors);
         }
 
-        [Theory]
-        [MemberData(nameof(TransactionDataSet.TransactionData), MemberType = typeof(TransactionDataSet))]
-        public void Validate_CorrectTree_SuccessValidationResult(HashSet<Transaction> transactions)
+        [Fact]
+        public void Validate_WrongTreeHash_ErrorValidationResult()
         {
             // Arrange
-            var tree = new MerkleTreeProvider().GetMerkleTree(transactions);
+            var tree = new MerkleTreeProvider().GetMerkleTree(
+                TransactionDataSet.TransactionData.Last().First() as HashSet<Transaction>);
+            ((Model.Transaction.Node)tree.LeftNode).LeftNode.Hash = "000";
 
             // Act
             var result = _merkleTreeValidator.Validate(tree);
 
             // Assert
-            Assert.True(result.IsSuccess);
+            Assert.False(result.IsSuccess);
             Assert.NotNull(result.Errors);
-            Assert.Empty(result.Errors);
+            Assert.NotEmpty(result.Errors);
         }
     }
 }

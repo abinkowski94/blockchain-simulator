@@ -1,10 +1,10 @@
-using System;
 using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Common.Models.Responses;
 using BlockchainSimulator.Hub.BusinessLogic.Services;
 using BlockchainSimulator.Hub.WebApi.Extensions;
 using BlockchainSimulator.Hub.WebApi.Model;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace BlockchainSimulator.Hub.WebApi.Controllers
 {
@@ -43,15 +43,17 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         }
 
         /// <summary>
-        /// Removes the with given id
+        /// Changes simulation configuration
         /// </summary>
-        /// <param name="scenarioId">The id of the scenario</param>
-        /// <param name="nodeId">Id of the node to be removed</param>
-        /// <returns>Removed node</returns>
-        [HttpDelete]
-        public ActionResult<BaseResponse> DeleteNode(Guid scenarioId, string nodeId)
+        /// <param name="scenarioId">The id of scenario</param>
+        /// <param name="configuration">The configuration</param>
+        /// <returns>Changed simulation</returns>
+        [HttpPatch]
+        public ActionResult<BaseResponse> ChangeConfiguration(Guid scenarioId,
+            [FromBody] BlockchainConfiguration configuration)
         {
-            return _simulationService.DeleteNode(scenarioId, nodeId)
+            var mappedConfiguration = LocalMapper.Map<BusinessLogic.Model.BlockchainConfiguration>(configuration);
+            return _simulationService.ChangeConfiguration(scenarioId, mappedConfiguration)
                 .GetActionResult<BusinessLogic.Model.Simulation, Simulation>(this);
         }
 
@@ -70,32 +72,27 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         }
 
         /// <summary>
-        /// Changes simulation configuration
+        /// Removes the with given id
         /// </summary>
-        /// <param name="scenarioId">The id of scenario</param>
-        /// <param name="configuration">The configuration</param>
-        /// <returns>Changed simulation</returns>
-        [HttpPatch]
-        public ActionResult<BaseResponse> ChangeConfiguration(Guid scenarioId,
-            [FromBody] BlockchainConfiguration configuration)
+        /// <param name="scenarioId">The id of the scenario</param>
+        /// <param name="nodeId">Id of the node to be removed</param>
+        /// <returns>Removed node</returns>
+        [HttpDelete]
+        public ActionResult<BaseResponse> DeleteNode(Guid scenarioId, string nodeId)
         {
-            var mappedConfiguration = LocalMapper.Map<BusinessLogic.Model.BlockchainConfiguration>(configuration);
-            return _simulationService.ChangeConfiguration(scenarioId, mappedConfiguration)
+            return _simulationService.DeleteNode(scenarioId, nodeId)
                 .GetActionResult<BusinessLogic.Model.Simulation, Simulation>(this);
         }
 
         /// <summary>
-        /// Starts the simulation
+        /// Deletes all statistics of the simulation
         /// </summary>
         /// <param name="scenarioId">The id of the scenario</param>
-        /// <param name="settings">The start settings of the simulation</param>
-        /// <returns>The started simulation</returns>
-        [HttpPost("start/{scenarioId}")]
-        public ActionResult<BaseResponse> Start(Guid scenarioId, [FromBody] SimulationSettings settings)
+        /// <returns>Deleted statistics</returns>
+        [HttpDelete("statistics/{scenarioId}")]
+        public ActionResult<BaseResponse> DeleteStatistics(Guid scenarioId)
         {
-            var mappedSetting = LocalMapper.Map<BusinessLogic.Model.SimulationSettings>(settings);
-            return _simulationService.StartSimulation(scenarioId, mappedSetting)
-                .GetActionResult<BusinessLogic.Model.Simulation, Simulation>(this);
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -110,14 +107,17 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         }
 
         /// <summary>
-        /// Deletes all statistics of the simulation
+        /// Starts the simulation
         /// </summary>
         /// <param name="scenarioId">The id of the scenario</param>
-        /// <returns>Deleted statistics</returns>
-        [HttpDelete("statistics/{scenarioId}")]
-        public ActionResult<BaseResponse> DeleteStatistics(Guid scenarioId)
+        /// <param name="settings">The start settings of the simulation</param>
+        /// <returns>The started simulation</returns>
+        [HttpPost("start/{scenarioId}")]
+        public ActionResult<BaseResponse> Start(Guid scenarioId, [FromBody] SimulationSettings settings)
         {
-            throw new NotImplementedException();
+            var mappedSetting = LocalMapper.Map<BusinessLogic.Model.SimulationSettings>(settings);
+            return _simulationService.StartSimulation(scenarioId, mappedSetting)
+                .GetActionResult<BusinessLogic.Model.Simulation, Simulation>(this);
         }
     }
 }

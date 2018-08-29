@@ -1,22 +1,22 @@
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Queues;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class TransactionService : ITransactionService
     {
-        private readonly ConcurrentDictionary<string, Transaction> _pendingTransactions;
-        private readonly IBlockchainConfiguration _configuration;
         private readonly IBlockchainService _blockchainService;
+        private readonly IBlockchainConfiguration _configuration;
         private readonly IMiningService _miningService;
+        private readonly ConcurrentDictionary<string, Transaction> _pendingTransactions;
         private readonly IMiningQueue _queue;
 
         public TransactionService(IBlockchainService blockchainService, IMiningService miningService,

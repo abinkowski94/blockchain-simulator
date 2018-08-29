@@ -1,19 +1,19 @@
+using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
+using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
+using BlockchainSimulator.Node.BusinessLogic.Providers;
+using BlockchainSimulator.Node.BusinessLogic.Queues;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
-using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
-using BlockchainSimulator.Node.BusinessLogic.Providers;
-using BlockchainSimulator.Node.BusinessLogic.Queues;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class MiningService : IMiningService
     {
-        private readonly IBlockProvider _blockProvider;
         private readonly IBlockchainService _blockchainService;
+        private readonly IBlockProvider _blockProvider;
         private readonly IConsensusService _consensusService;
         private readonly IMiningQueue _queue;
 

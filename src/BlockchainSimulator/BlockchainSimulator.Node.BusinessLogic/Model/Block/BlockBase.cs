@@ -1,12 +1,12 @@
-using System;
 using Newtonsoft.Json;
+using System;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Model.Block
 {
     public abstract class BlockBase
     {
-        [JsonProperty("id")]
-        public string Id { get; set; }
+        [JsonIgnore]
+        public string BlockJson => JsonConvert.SerializeObject(this);
 
         [JsonProperty("body")]
         public Body Body { get; set; }
@@ -14,13 +14,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Block
         [JsonProperty("header")]
         public Header Header { get; set; }
 
-        [JsonProperty("queueTime")] 
-        public TimeSpan QueueTime { set; get; }
-        
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
         [JsonProperty("isGenesis")]
         public abstract bool IsGenesis { get; }
 
-        [JsonIgnore] 
-        public string BlockJson => JsonConvert.SerializeObject(this);
+        [JsonProperty("queueTime")]
+        public TimeSpan QueueTime { set; get; }
     }
 }

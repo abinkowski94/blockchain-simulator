@@ -4,7 +4,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Transaction
 {
     public class Node : MerkleNode
     {
-        [JsonProperty("leftNode")] 
+        [JsonProperty("leftNode")]
         public MerkleNode LeftNode { get; set; }
 
         [JsonProperty("rightNode")]

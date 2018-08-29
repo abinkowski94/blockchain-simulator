@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
@@ -11,17 +6,22 @@ using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.BusinessLogic.Tests.Data;
 using Moq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
 {
     public class MiningServiceTests
     {
-        private readonly MiningService _miningService;
         private readonly Mock<IBlockchainService> _blockchainServiceMock;
         private readonly Mock<IBlockProvider> _blockProviderMock;
         private readonly Mock<IConsensusService> _consensusServiceMock;
         private readonly Mock<IMiningQueue> _miningQueueMock;
+        private readonly MiningService _miningService;
 
         public MiningServiceTests()
         {
@@ -38,7 +38,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         {
             // Arrange
             var transactions = TransactionDataSet.TransactionData
-                .Select(ts => (HashSet<Transaction>) ts.First()).Last().ToList();
+                .Select(ts => (HashSet<Transaction>)ts.First()).Last().ToList();
             var enqueueTime = new DateTime(1, 1, 1);
             var token = new CancellationToken();
 
@@ -61,13 +61,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
                 p.CreateBlock(It.IsAny<HashSet<Transaction>>(), enqueueTime, It.IsAny<BlockBase>()));
             _consensusServiceMock.Verify(p => p.AcceptBlockchain(It.IsAny<BlockBase>()));
         }
-        
+
         [Fact]
         public void MineBlocks_TransactionsDateAndToken_TaskAcceptFailed()
         {
             // Arrange
             var transactions = TransactionDataSet.TransactionData
-                .Select(ts => (HashSet<Transaction>) ts.First()).Last().ToList();
+                .Select(ts => (HashSet<Transaction>)ts.First()).Last().ToList();
             var enqueueTime = new DateTime(1, 1, 1);
             var token = new CancellationToken();
 

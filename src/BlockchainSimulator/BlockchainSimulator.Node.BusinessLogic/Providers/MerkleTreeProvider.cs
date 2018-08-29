@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-using System.Linq;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Services;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Providers
 {
@@ -16,11 +16,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
 
             var leafs = transactions.OrderByDescending(t => t.Fee)
                 .Select(t => new Leaf
-                    {
-                        TransactionId = t.Id,
-                        Transaction = t,
-                        Hash = EncryptionService.GetSha256Hash(t.TransactionJson)
-                    }
+                {
+                    TransactionId = t.Id,
+                    Transaction = t,
+                    Hash = EncryptionService.GetSha256Hash(t.TransactionJson)
+                }
                 ).Cast<MerkleNode>().ToList();
 
             return CombineNodes(leafs).FirstOrDefault() as Model.Transaction.Node;

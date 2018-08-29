@@ -1,16 +1,16 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using BlockchainSimulator.Node.DataAccess.Model.Block;
+﻿using BlockchainSimulator.Node.DataAccess.Model.Block;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BlockchainSimulator.Node.DataAccess.Converters.Specific
 {
     public class BlockConverter : JsonConverter
     {
-        [ExcludeFromCodeCoverage]
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override bool CanConvert(Type objectType)
         {
+            return objectType == typeof(BlockBase);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
@@ -32,9 +32,9 @@ namespace BlockchainSimulator.Node.DataAccess.Converters.Specific
             }
         }
 
-        public override bool CanConvert(Type objectType)
+        [ExcludeFromCodeCoverage]
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            return objectType == typeof(BlockBase);
         }
     }
 }

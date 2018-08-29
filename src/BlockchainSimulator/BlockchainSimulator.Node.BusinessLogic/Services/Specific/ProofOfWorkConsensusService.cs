@@ -1,9 +1,3 @@
-using System;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Common.Services;
@@ -15,6 +9,12 @@ using BlockchainSimulator.Node.DataAccess.Converters;
 using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Newtonsoft.Json;
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 {
@@ -63,12 +63,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 _queue.QueueBackgroundWorkItem(token => Task.Run(() =>
                 {
                     // The delay
-                    Thread.Sleep((int) node.Delay);
+                    Thread.Sleep((int)node.Delay);
 
                     var blockchain = _blockchainRepository.GetBlockchain();
                     var blockchainJson = JsonConvert.SerializeObject(blockchain);
                     var encodedBlockchain = Convert.ToBase64String(Encoding.UTF8.GetBytes(blockchainJson));
-                    var body = JsonConvert.SerializeObject(new {base64Blockchain = encodedBlockchain});
+                    var body = JsonConvert.SerializeObject(new { base64Blockchain = encodedBlockchain });
                     var content = new StringContent(body, Encoding.UTF8, "application/json");
 
                     _httpService.Post($"{node.HttpAddress}/api/consensus", content, TimeSpan.FromSeconds(10), token);

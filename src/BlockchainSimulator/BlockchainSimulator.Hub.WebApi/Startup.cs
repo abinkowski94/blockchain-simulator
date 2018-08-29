@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
-using BlockchainSimulator.Common.Queues;
+﻿using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Common.Services;
 using BlockchainSimulator.Hub.BusinessLogic.Services;
 using BlockchainSimulator.Hub.BusinessLogic.Storage;
@@ -12,6 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace BlockchainSimulator.Hub.WebApi
 {
@@ -111,7 +111,7 @@ namespace BlockchainSimulator.Hub.WebApi
         }
 
         /// <summary>
-        /// Cleans the remaining processes 
+        /// Cleans the remaining processes
         /// </summary>
         /// <param name="services">The service provider</param>
         private static void OnShutdown(IServiceProvider services)
@@ -120,7 +120,7 @@ namespace BlockchainSimulator.Hub.WebApi
 
             services.GetService<QueuedHostedService>().Dispose();
             services.GetService<IScenarioStorage>().Dispose();
-            
+
             Console.WriteLine("Cleanup complete!");
         }
     }

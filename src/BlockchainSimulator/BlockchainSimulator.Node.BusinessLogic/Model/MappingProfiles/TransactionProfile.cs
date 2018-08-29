@@ -12,7 +12,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
                 .ForMember(dst => dst.Sender, opt => opt.MapFrom(src => src.Sender))
                 .ForMember(dst => dst.Recipient, opt => opt.MapFrom(src => src.Recipient))
                 .ForMember(dst => dst.Amount, opt => opt.MapFrom(src => src.Amount))
-                .ForMember(dst => dst.Fee, opt => opt.MapFrom(src => src.Fee))                
+                .ForMember(dst => dst.Fee, opt => opt.MapFrom(src => src.Fee))
                 .ForMember(dst => dst.RegistrationTime, opt => opt.MapFrom(src => src.RegistrationTime))
                 .ForMember(dst => dst.TransactionJson, opt => opt.MapFrom(src => src.ToString()))
                 .ForAllOtherMembers(dst => dst.Ignore());
@@ -29,11 +29,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
             CreateMap<MerkleNode, Transaction.MerkleNode>()
                 .Include<DataAccess.Model.Transaction.Node, Transaction.Node>()
                 .Include<Leaf, Transaction.Leaf>();
-            
+
             CreateMap<Transaction.MerkleNode, MerkleNode>()
                 .Include<Transaction.Node, DataAccess.Model.Transaction.Node>()
                 .Include<Transaction.Leaf, Leaf>();
-            
+
             CreateMap<DataAccess.Model.Transaction.Node, Transaction.Node>().ReverseMap();
 
             CreateMap<Leaf, Transaction.Leaf>()

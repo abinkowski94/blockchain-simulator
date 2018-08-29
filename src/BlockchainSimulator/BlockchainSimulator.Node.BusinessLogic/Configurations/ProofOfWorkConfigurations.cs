@@ -4,9 +4,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Configurations
 {
     public class ProofOfWorkConfiguration : IBlockchainConfiguration
     {
-        public string Version { get; }
-        public string Target { get; }
         public int BlockSize { get; }
+        public string Target { get; }
+        public string Version { get; }
 
         public ProofOfWorkConfiguration(IConfiguration configuration)
         {

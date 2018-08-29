@@ -4,7 +4,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Transaction
 {
     public abstract class MerkleNode
     {
-        [JsonProperty("hash")] 
+        [JsonProperty("hash")]
         public string Hash { get; set; }
     }
 }

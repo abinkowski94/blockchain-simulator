@@ -6,8 +6,8 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
 {
     public class BlockchainRepository : IBlockchainRepository
     {
-        private readonly IFileRepository _fileRepository;
         private readonly string _blockchainFileName;
+        private readonly IFileRepository _fileRepository;
 
         public BlockchainRepository(IFileRepository fileRepository)
         {

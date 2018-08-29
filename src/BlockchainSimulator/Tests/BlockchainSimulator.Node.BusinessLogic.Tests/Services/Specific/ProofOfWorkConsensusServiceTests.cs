@@ -1,7 +1,3 @@
-using System;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Common.Services;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
@@ -15,6 +11,10 @@ using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Moq;
 using Newtonsoft.Json;
+using System;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
@@ -35,58 +35,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
 
             _consensusService = new ProofOfWorkConsensusService(_backgroundTaskQueueMock.Object,
                 _blockchainRepositoryMock.Object, _blockchainValidatorMock.Object, httpServiceMock.Object);
-        }
-
-        [Fact]
-        public void AcceptBlockchain_Null_ErrorResponse()
-        {
-            // Arrange
-
-            // Act
-            var result = _consensusService.AcceptBlockchain((string) null) as ErrorResponse<bool>;
-
-            // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchain(), Times.Never());
-            _blockchainValidatorMock.Verify(p => p.Validate(It.IsAny<BlockBase>()), Times.Never);
-            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<Blockchain>()), Times.Never());
-            _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
-                Times.Never);
-
-            Assert.NotNull(result);
-            Assert.False(result.Result);
-            Assert.Equal("The blockchain can not be null!", result.Message);
-        }
-
-        [Fact]
-        public void AcceptBlockchain_Encoded_ErrorResponseShorter()
-        {
-            // Arrange
-            const string blockchainJson =
-                "{\"blocks\":[{\"isGenesis\":true,\"id\":\"dc9fa87c-5419-4c80-a318-54bb85ca9fa5\",\"body\":{\"merkleTree\":{\"leftNode\":{\"transactionId\":\"7153a819-560e-4218-a5c4-6a2b3b784307\",\"hash\":\"9531f911d761cd47834b3fc6e21ee053b09bd376b54a5c7ff3bdfc3558c7820b\"},\"rightNode\":null,\"hash\":\"9531f911d761cd47834b3fc6e21ee053b09bd376b54a5c7ff3bdfc3558c7820b\"},\"transactions\":[{\"id\":\"7153a819-560e-4218-a5c4-6a2b3b784307\",\"sender\":\"000000000000000000000000000000000000000000000000000000000000000\",\"recipient\":\"MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAYnEJ5opsGtKxG6AJ9XxZznKVKcRuy\",\"amount\":1000.0,\"fee\":0.0}],\"transactionCounter\":1},\"header\":{\"version\":\"1\",\"parentHash\":null,\"merkleTreeRootHash\":\"9531f911d761cd47834b3fc6e21ee053b09bd376b54a5c7ff3bdfc3558c7820b\",\"timeStamp\":\"2018-08-06T15:43:20.8218729+02:00\",\"target\":\"0000\",\"nonce\":\"27288b6b4a31d141aeae211c1da8a838e3a5a5f51a96df1d296055746a0df569\"}},{\"parentId\":\"dc9fa87c-5419-4c80-a318-54bb85ca9fa5\",\"isGenesis\":false,\"id\":\"2ab6c4de-d991-4c7e-af71-de385deb73cb\",\"body\":{\"merkleTree\":{\"leftNode\":{\"transactionId\":\"62cf99a5-568d-4255-b1f3-694e8c712cfd\",\"hash\":\"1131f911d761cd47834b3fc6e21ee053b0123376b54a5c7ff3bdfc3558c7820b\"},\"rightNode\":{\"transactionId\":\"07e405bf-ebcd-48d7-87f5-695eeee09e8b\",\"hash\":\"2231f911d761cd47834b3fc6e21ee053b0123376b54a5c7ff3bdfc3558c7820b\"},\"hash\":\"3331f911d761cd47834b3fc6e21ee053b0123376b54a5c7ff3bdfc3558c7820b\"},\"transactions\":[{\"id\":\"62cf99a5-568d-4255-b1f3-694e8c712cfd\",\"sender\":\"MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAYnEJ5opsGtKxG6AJ9XxZznKVKcRuy\",\"recipient\":\"MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAftftrRRzQ9qg4k6528UexqpxjCLXd++OkzruIBY1RYRT8wThK3/bn4fgWCCCND/Rbgth3cO7OQt448R7yOoEPwIDAQAB\",\"amount\":21.0,\"fee\":1.0},{\"id\":\"07e405bf-ebcd-48d7-87f5-695eeee09e8b\",\"sender\":\"MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAYnEJ5opsGtKxG6AJ9XxZznKVKcRuy\",\"recipient\":\"MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKJ7lyKUiqKEDouTGJomrRWnVa7B1/Zd7+GIqFU50WeJF3jrfkgNqTF6dJou9xRJPOPBKBv2LJiCIHhrD8EXdYcCAwEAAQ==\",\"amount\":10.0,\"fee\":0.1}],\"transactionCounter\":2},\"header\":{\"version\":\"1\",\"parentHash\":\"312388b6b4a31d141a412312211c1da8a838e3a5a5f51a96df1d296055746a0df569\",\"merkleTreeRootHash\":\"3331f911d761cd47834b3fc6e21ee053b0123376b54a5c7ff3bdfc3558c7820b\",\"timeStamp\":\"2018-08-06T15:43:20.8218729+02:00\",\"target\":\"0000\",\"nonce\":\"31231231aeae211c1da8a838e3a5a5f51a96df1d296055746a0df569\"}}]}";
-
-            var blockchain = BlockchainConverter.DeserializeBlockchain(blockchainJson);
-
-            _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
-                .Returns(blockchain);
-
-            var inputBlockchain = BlockchainConverter.DeserializeBlockchain(blockchainJson);
-            inputBlockchain.Blocks.RemoveAt(1);
-            var jsonToEncode = JsonConvert.SerializeObject(inputBlockchain);
-            var encodedBlockchain = Convert.ToBase64String(Encoding.UTF8.GetBytes(jsonToEncode));
-
-            // Act
-            var result = _consensusService.AcceptBlockchain(encodedBlockchain) as ErrorResponse<bool>;
-
-            // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
-            _blockchainValidatorMock.Verify(p => p.Validate(It.IsAny<BlockBase>()), Times.Never);
-            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<Blockchain>()), Times.Never());
-            _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
-                Times.Never);
-
-            Assert.NotNull(result);
-            Assert.False(result.Result);
-            Assert.Equal("The incoming blockchain is shorter than the current!", result.Message);
         }
 
         [Fact]
@@ -126,9 +74,41 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
         }
 
         [Fact]
+        public void AcceptBlockchain_Encoded_ErrorResponseShorter()
+        {
+            // Arrange
+            const string blockchainJson =
+                "{\"blocks\":[{\"isGenesis\":true,\"id\":\"dc9fa87c-5419-4c80-a318-54bb85ca9fa5\",\"body\":{\"merkleTree\":{\"leftNode\":{\"transactionId\":\"7153a819-560e-4218-a5c4-6a2b3b784307\",\"hash\":\"9531f911d761cd47834b3fc6e21ee053b09bd376b54a5c7ff3bdfc3558c7820b\"},\"rightNode\":null,\"hash\":\"9531f911d761cd47834b3fc6e21ee053b09bd376b54a5c7ff3bdfc3558c7820b\"},\"transactions\":[{\"id\":\"7153a819-560e-4218-a5c4-6a2b3b784307\",\"sender\":\"000000000000000000000000000000000000000000000000000000000000000\",\"recipient\":\"MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAYnEJ5opsGtKxG6AJ9XxZznKVKcRuy\",\"amount\":1000.0,\"fee\":0.0}],\"transactionCounter\":1},\"header\":{\"version\":\"1\",\"parentHash\":null,\"merkleTreeRootHash\":\"9531f911d761cd47834b3fc6e21ee053b09bd376b54a5c7ff3bdfc3558c7820b\",\"timeStamp\":\"2018-08-06T15:43:20.8218729+02:00\",\"target\":\"0000\",\"nonce\":\"27288b6b4a31d141aeae211c1da8a838e3a5a5f51a96df1d296055746a0df569\"}},{\"parentId\":\"dc9fa87c-5419-4c80-a318-54bb85ca9fa5\",\"isGenesis\":false,\"id\":\"2ab6c4de-d991-4c7e-af71-de385deb73cb\",\"body\":{\"merkleTree\":{\"leftNode\":{\"transactionId\":\"62cf99a5-568d-4255-b1f3-694e8c712cfd\",\"hash\":\"1131f911d761cd47834b3fc6e21ee053b0123376b54a5c7ff3bdfc3558c7820b\"},\"rightNode\":{\"transactionId\":\"07e405bf-ebcd-48d7-87f5-695eeee09e8b\",\"hash\":\"2231f911d761cd47834b3fc6e21ee053b0123376b54a5c7ff3bdfc3558c7820b\"},\"hash\":\"3331f911d761cd47834b3fc6e21ee053b0123376b54a5c7ff3bdfc3558c7820b\"},\"transactions\":[{\"id\":\"62cf99a5-568d-4255-b1f3-694e8c712cfd\",\"sender\":\"MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAYnEJ5opsGtKxG6AJ9XxZznKVKcRuy\",\"recipient\":\"MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAftftrRRzQ9qg4k6528UexqpxjCLXd++OkzruIBY1RYRT8wThK3/bn4fgWCCCND/Rbgth3cO7OQt448R7yOoEPwIDAQAB\",\"amount\":21.0,\"fee\":1.0},{\"id\":\"07e405bf-ebcd-48d7-87f5-695eeee09e8b\",\"sender\":\"MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAYnEJ5opsGtKxG6AJ9XxZznKVKcRuy\",\"recipient\":\"MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKJ7lyKUiqKEDouTGJomrRWnVa7B1/Zd7+GIqFU50WeJF3jrfkgNqTF6dJou9xRJPOPBKBv2LJiCIHhrD8EXdYcCAwEAAQ==\",\"amount\":10.0,\"fee\":0.1}],\"transactionCounter\":2},\"header\":{\"version\":\"1\",\"parentHash\":\"312388b6b4a31d141a412312211c1da8a838e3a5a5f51a96df1d296055746a0df569\",\"merkleTreeRootHash\":\"3331f911d761cd47834b3fc6e21ee053b0123376b54a5c7ff3bdfc3558c7820b\",\"timeStamp\":\"2018-08-06T15:43:20.8218729+02:00\",\"target\":\"0000\",\"nonce\":\"31231231aeae211c1da8a838e3a5a5f51a96df1d296055746a0df569\"}}]}";
+
+            var blockchain = BlockchainConverter.DeserializeBlockchain(blockchainJson);
+
+            _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
+                .Returns(blockchain);
+
+            var inputBlockchain = BlockchainConverter.DeserializeBlockchain(blockchainJson);
+            inputBlockchain.Blocks.RemoveAt(1);
+            var jsonToEncode = JsonConvert.SerializeObject(inputBlockchain);
+            var encodedBlockchain = Convert.ToBase64String(Encoding.UTF8.GetBytes(jsonToEncode));
+
+            // Act
+            var result = _consensusService.AcceptBlockchain(encodedBlockchain) as ErrorResponse<bool>;
+
+            // Assert
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
+            _blockchainValidatorMock.Verify(p => p.Validate(It.IsAny<BlockBase>()), Times.Never);
+            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<Blockchain>()), Times.Never());
+            _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
+                Times.Never);
+
+            Assert.NotNull(result);
+            Assert.False(result.Result);
+            Assert.Equal("The incoming blockchain is shorter than the current!", result.Message);
+        }
+
+        [Fact]
         public void AcceptBlockchain_Encoded_SuccessResponse()
         {
-            // Arrange            
+            // Arrange
             const string blockchainJson =
                 "{\"blocks\":[{\"isGenesis\":true,\"id\":\"dc9fa87c-5419-4c80-a318-54bb85ca9fa5\",\"body\":{\"merkleTree\":{\"leftNode\":{\"transactionId\":\"7153a819-560e-4218-a5c4-6a2b3b784307\",\"hash\":\"9531f911d761cd47834b3fc6e21ee053b09bd376b54a5c7ff3bdfc3558c7820b\"},\"rightNode\":null,\"hash\":\"9531f911d761cd47834b3fc6e21ee053b09bd376b54a5c7ff3bdfc3558c7820b\"},\"transactions\":[{\"id\":\"7153a819-560e-4218-a5c4-6a2b3b784307\",\"sender\":\"000000000000000000000000000000000000000000000000000000000000000\",\"recipient\":\"MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAYnEJ5opsGtKxG6AJ9XxZznKVKcRuy\",\"amount\":1000.0,\"fee\":0.0}],\"transactionCounter\":1},\"header\":{\"version\":\"1\",\"parentHash\":null,\"merkleTreeRootHash\":\"9531f911d761cd47834b3fc6e21ee053b09bd376b54a5c7ff3bdfc3558c7820b\",\"timeStamp\":\"2018-08-06T15:43:20.8218729+02:00\",\"target\":\"0000\",\"nonce\":\"27288b6b4a31d141aeae211c1da8a838e3a5a5f51a96df1d296055746a0df569\"}},{\"parentId\":\"dc9fa87c-5419-4c80-a318-54bb85ca9fa5\",\"isGenesis\":false,\"id\":\"2ab6c4de-d991-4c7e-af71-de385deb73cb\",\"body\":{\"merkleTree\":{\"leftNode\":{\"transactionId\":\"62cf99a5-568d-4255-b1f3-694e8c712cfd\",\"hash\":\"1131f911d761cd47834b3fc6e21ee053b0123376b54a5c7ff3bdfc3558c7820b\"},\"rightNode\":{\"transactionId\":\"07e405bf-ebcd-48d7-87f5-695eeee09e8b\",\"hash\":\"2231f911d761cd47834b3fa6e21ee053b0123376b54a5c7ff3bdfc3558c7820b\"},\"hash\":\"3331f911d761cd47834b3fc6e21ee053b0123376b54a5c7ff3bdfc3558c7820b\"},\"transactions\":[{\"id\":\"62cf99a5-568d-4255-b1f3-694e8c712cfd\",\"sender\":\"MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAYnEJ5opsGtKxG6AJ9XxZznKVKcRuy\",\"recipient\":\"MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAftftrRRzQ9qg4k6528UexqpxjCLXd++OkzruIBY1RYRT8wThK3/bn4fgWCCCND/Rbgth3cO7OQt448R7yOoEPwIDAQAB\",\"amount\":21.0,\"fee\":1.0},{\"id\":\"07e405bf-ebcd-48d7-87f5-695eeee09e8b\",\"sender\":\"MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAYnEJ5opsGtKxG6AJ9XxZznKVKcRuy\",\"recipient\":\"MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKJ7lyKUiqKEDouTGJomrRWnVa7B1/Zd7+GIqFU50WeJF3jrfkgNqTF6dJou9xRJPOPBKBv2LJiCIHhrD8EXdYcCAwEAAQ==\",\"amount\":10.0,\"fee\":0.1}],\"transactionCounter\":2},\"header\":{\"version\":\"1\",\"parentHash\":\"312388b6b4a31d141a412312211c1da8a838e3a5a5f51a96df1d296055746a0df569\",\"merkleTreeRootHash\":\"3331f911d761cd47834b3fc6e21ee053b0123376b54a5c7ff3bdfc3558c7820b\",\"timeStamp\":\"2018-08-06T15:43:20.8218729+02:00\",\"target\":\"0000\",\"nonce\":\"31231231aeae211c1da8a838e3a5a5f51a96df1d296055746a0df569\"}}]}";
 
@@ -161,11 +141,31 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
         }
 
         [Fact]
+        public void AcceptBlockchain_Null_ErrorResponse()
+        {
+            // Arrange
+
+            // Act
+            var result = _consensusService.AcceptBlockchain((string)null) as ErrorResponse<bool>;
+
+            // Assert
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchain(), Times.Never());
+            _blockchainValidatorMock.Verify(p => p.Validate(It.IsAny<BlockBase>()), Times.Never);
+            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<Blockchain>()), Times.Never());
+            _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
+                Times.Never);
+
+            Assert.NotNull(result);
+            Assert.False(result.Result);
+            Assert.Equal("The blockchain can not be null!", result.Message);
+        }
+
+        [Fact]
         public async Task ReachConsensus_Empty_Void()
         {
             // Arrange
-            _consensusService.ConnectNode(new ServerNode {Id = "1", HttpAddress = "https://test:4200"});
-            _consensusService.ConnectNode(new ServerNode {Id = "2", HttpAddress = "https://test:4200"});
+            _consensusService.ConnectNode(new ServerNode { Id = "1", HttpAddress = "https://test:4200" });
+            _consensusService.ConnectNode(new ServerNode { Id = "2", HttpAddress = "https://test:4200" });
 
             var token = new CancellationToken();
             Func<CancellationToken, Task> queueTask = null;

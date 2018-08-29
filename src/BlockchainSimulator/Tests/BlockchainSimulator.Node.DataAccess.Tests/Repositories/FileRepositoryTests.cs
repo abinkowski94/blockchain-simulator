@@ -1,8 +1,8 @@
-using System.IO;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Moq;
+using System.IO;
 using Xunit;
 
 namespace BlockchainSimulator.Node.DataAccess.Tests.Repositories
@@ -20,20 +20,6 @@ namespace BlockchainSimulator.Node.DataAccess.Tests.Repositories
         }
 
         [Fact]
-        public void SaveFile_CorrectDataAndFileName_Void()
-        {
-            // Arrange
-            const string data = "{ \"test\": \"aaa\"}";
-            const string fileName = "test.json";
-            
-            // Act
-            _fileRepository.SaveFile(data, fileName);
-            
-            // Assert
-            _hostingEnvironmentMock.Verify(p => p.ContentRootPath);
-        }
-
-        [Fact]
         public void GetFile_CorrectFileName_CorrectData()
         {
             // Arrange
@@ -46,10 +32,10 @@ namespace BlockchainSimulator.Node.DataAccess.Tests.Repositories
 
             // Assert
             _hostingEnvironmentMock.Verify(p => p.ContentRootPath);
-            
+
             Assert.Equal(data, result);
         }
-        
+
         [Fact]
         public void GetFile_WrongFileName_Null()
         {
@@ -60,8 +46,22 @@ namespace BlockchainSimulator.Node.DataAccess.Tests.Repositories
 
             // Assert
             _hostingEnvironmentMock.Verify(p => p.ContentRootPath);
-            
+
             Assert.Null(result);
+        }
+
+        [Fact]
+        public void SaveFile_CorrectDataAndFileName_Void()
+        {
+            // Arrange
+            const string data = "{ \"test\": \"aaa\"}";
+            const string fileName = "test.json";
+
+            // Act
+            _fileRepository.SaveFile(data, fileName);
+
+            // Assert
+            _hostingEnvironmentMock.Verify(p => p.ContentRootPath);
         }
     }
 }

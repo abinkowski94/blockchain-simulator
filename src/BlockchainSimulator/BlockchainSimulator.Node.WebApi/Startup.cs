@@ -1,14 +1,14 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Reflection;
-using BlockchainSimulator.Node.WebApi.AppStart;
+﻿using BlockchainSimulator.Node.WebApi.AppStart;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Reflection;
 
 namespace BlockchainSimulator.Node.WebApi
 {

@@ -1,7 +1,7 @@
+using BlockchainSimulator.Node.BusinessLogic.Queues;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Node.BusinessLogic.Queues;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Queues

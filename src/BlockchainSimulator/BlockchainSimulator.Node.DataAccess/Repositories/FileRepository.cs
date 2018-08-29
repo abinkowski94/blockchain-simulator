@@ -1,6 +1,6 @@
-using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace BlockchainSimulator.Node.DataAccess.Repositories
 {

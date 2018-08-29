@@ -1,6 +1,6 @@
-using System.Linq;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace BlockchainSimulator.Node.WebApi.Controllers
 {

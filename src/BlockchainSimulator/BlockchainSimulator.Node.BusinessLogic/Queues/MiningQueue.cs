@@ -7,13 +7,21 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
 {
     public class MiningQueue : IMiningQueue
     {
-        private readonly ConcurrentQueue<Func<CancellationToken, Task>> _workItems;
         private readonly SemaphoreSlim _signal;
+        private readonly ConcurrentQueue<Func<CancellationToken, Task>> _workItems;
 
         public MiningQueue()
         {
             _workItems = new ConcurrentQueue<Func<CancellationToken, Task>>();
             _signal = new SemaphoreSlim(0);
+        }
+
+        public async Task<Func<CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken)
+        {
+            await _signal.WaitAsync(cancellationToken);
+            _workItems.TryDequeue(out var workItem);
+
+            return workItem;
         }
 
         public void QueueMiningTask(Func<CancellationToken, Task> workItem)
@@ -25,14 +33,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
 
             _workItems.Enqueue(workItem);
             _signal.Release();
-        }
-
-        public async Task<Func<CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken)
-        {
-            await _signal.WaitAsync(cancellationToken);
-            _workItems.TryDequeue(out var workItem);
-
-            return workItem;
         }
     }
 }

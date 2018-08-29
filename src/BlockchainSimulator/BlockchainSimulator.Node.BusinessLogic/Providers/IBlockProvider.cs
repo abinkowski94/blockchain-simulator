@@ -1,7 +1,7 @@
-using System;
-using System.Collections.Generic;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
+using System;
+using System.Collections.Generic;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Providers
 {

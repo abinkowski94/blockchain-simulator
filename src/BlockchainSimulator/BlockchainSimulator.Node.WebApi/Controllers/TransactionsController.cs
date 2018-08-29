@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using BlockchainSimulator.Common.Models.Responses;
+﻿using BlockchainSimulator.Common.Models.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.WebApi.Extensions;
 using BlockchainSimulator.Node.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace BlockchainSimulator.Node.WebApi.Controllers
 {
@@ -26,17 +26,19 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         {
             _transactionService = transactionService;
         }
-        
+
         /// <summary>
-        /// Gets a transaction with the specific id
+        /// Adds transactions to the pending list
         /// </summary>
-        /// <param name="id">Id of the transaction</param>
-        /// <returns>The transaction</returns>
-        [HttpGet("{id}")]
-        public ActionResult<BaseResponse> GetTransaction(string id)
+        /// <param name="transaction">The transaction</param>
+        /// <returns>The newly added transaction</returns>
+        [HttpPost]
+        public ActionResult<BaseResponse> AddTransaction([FromBody] Transaction transaction)
         {
-            var response = _transactionService.GetTransaction(id);
-            return response.GetActionResult<BusinessLogic.Model.Transaction.Transaction, Transaction>(this);
+            var mappedTransaction = LocalMapper.Map<BusinessLogic.Model.Transaction.Transaction>(transaction);
+            var result = _transactionService.AddTransaction(mappedTransaction);
+
+            return result.GetActionResult<BusinessLogic.Model.Transaction.Transaction, Transaction>(this);
         }
 
         /// <summary>
@@ -51,17 +53,15 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         }
 
         /// <summary>
-        /// Adds transactions to the pending list
+        /// Gets a transaction with the specific id
         /// </summary>
-        /// <param name="transaction">The transaction</param>
-        /// <returns>The newly added transaction</returns>
-        [HttpPost]
-        public ActionResult<BaseResponse> AddTransaction([FromBody] Transaction transaction)
+        /// <param name="id">Id of the transaction</param>
+        /// <returns>The transaction</returns>
+        [HttpGet("{id}")]
+        public ActionResult<BaseResponse> GetTransaction(string id)
         {
-            var mappedTransaction = LocalMapper.Map<BusinessLogic.Model.Transaction.Transaction>(transaction);
-            var result = _transactionService.AddTransaction(mappedTransaction);
-
-            return result.GetActionResult<BusinessLogic.Model.Transaction.Transaction, Transaction>(this);
+            var response = _transactionService.GetTransaction(id);
+            return response.GetActionResult<BusinessLogic.Model.Transaction.Transaction, Transaction>(this);
         }
     }
 }

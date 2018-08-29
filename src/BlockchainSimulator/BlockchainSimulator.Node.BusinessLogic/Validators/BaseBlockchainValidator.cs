@@ -13,8 +13,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators
             _merkleTreeValidator = merkleTreeValidator;
         }
 
-        protected abstract ValidationResult SpecificValidation(BlockBase blockchain);
-
         public ValidationResult Validate(BlockBase blockchain)
         {
             if (blockchain == null)
@@ -43,12 +41,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators
                     return validationResult;
                 }
 
-                blockchain = ((Block) blockchain).Parent;
+                blockchain = ((Block)blockchain).Parent;
             }
 
             validationResult = _merkleTreeValidator.Validate(blockchain.Body.MerkleTree);
             return !validationResult.IsSuccess ? validationResult : SpecificValidation(blockchain);
         }
+
+        protected abstract ValidationResult SpecificValidation(BlockBase blockchain);
 
         private static ValidationResult ValidateParentHash(Block blockchain)
         {

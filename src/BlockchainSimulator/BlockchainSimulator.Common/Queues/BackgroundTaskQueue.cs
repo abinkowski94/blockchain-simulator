@@ -10,8 +10,8 @@ namespace BlockchainSimulator.Common.Queues
     /// </summary>
     public class BackgroundTaskQueue : IBackgroundTaskQueue
     {
-        private readonly ConcurrentQueue<Func<CancellationToken, Task>> _workItems;
         private readonly SemaphoreSlim _signal;
+        private readonly ConcurrentQueue<Func<CancellationToken, Task>> _workItems;
 
         /// <summary>
         /// The constructor
@@ -20,22 +20,6 @@ namespace BlockchainSimulator.Common.Queues
         {
             _workItems = new ConcurrentQueue<Func<CancellationToken, Task>>();
             _signal = new SemaphoreSlim(0);
-        }
-        
-        /// <inheritdoc />
-        /// <summary>
-        /// Adds background work item to the queue
-        /// </summary>
-        /// <param name="workItem">The work item</param>
-        public void QueueBackgroundWorkItem(Func<CancellationToken, Task> workItem)
-        {
-            if (workItem == null)
-            {
-                throw new ArgumentNullException(nameof(workItem));
-            }
-
-            _workItems.Enqueue(workItem);
-            _signal.Release();
         }
 
         /// <inheritdoc />
@@ -50,6 +34,22 @@ namespace BlockchainSimulator.Common.Queues
             _workItems.TryDequeue(out var workItem);
 
             return workItem;
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Adds background work item to the queue
+        /// </summary>
+        /// <param name="workItem">The work item</param>
+        public void QueueBackgroundWorkItem(Func<CancellationToken, Task> workItem)
+        {
+            if (workItem == null)
+            {
+                throw new ArgumentNullException(nameof(workItem));
+            }
+
+            _workItems.Enqueue(workItem);
+            _signal.Release();
         }
     }
 }

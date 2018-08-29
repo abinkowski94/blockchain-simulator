@@ -29,7 +29,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Model
         /// Waiting for network
         /// </summary>
         WaitingForNetwork = 4,
-        
+
         /// <summary>
         /// Waiting for statistics to generate
         /// </summary>

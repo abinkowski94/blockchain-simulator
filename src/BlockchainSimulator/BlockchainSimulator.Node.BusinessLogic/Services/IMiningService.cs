@@ -1,7 +1,7 @@
+using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {

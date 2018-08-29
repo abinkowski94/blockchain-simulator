@@ -15,7 +15,7 @@ namespace BlockchainSimulator.Node.DataAccess.Converters
 
             var settings = new JsonSerializerSettings
             {
-                Converters = new JsonConverter[] {new BlockConverter(), new NodeConverter()}
+                Converters = new JsonConverter[] { new BlockConverter(), new NodeConverter() }
             };
             return JsonConvert.DeserializeObject<Blockchain>(json, settings);
         }

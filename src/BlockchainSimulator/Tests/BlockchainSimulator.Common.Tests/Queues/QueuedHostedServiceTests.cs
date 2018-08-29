@@ -1,7 +1,7 @@
+using BlockchainSimulator.Common.Queues;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Common.Queues;
 using Xunit;
 
 namespace BlockchainSimulator.Common.Tests.Queues

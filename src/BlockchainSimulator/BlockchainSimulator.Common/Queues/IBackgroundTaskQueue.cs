@@ -10,16 +10,16 @@ namespace BlockchainSimulator.Common.Queues
     public interface IBackgroundTaskQueue
     {
         /// <summary>
-        /// Adds background work item to the queue
-        /// </summary>
-        /// <param name="workItem">The work item</param>
-        void QueueBackgroundWorkItem(Func<CancellationToken, Task> workItem);
-
-        /// <summary>
         /// Dequeue the work item
         /// </summary>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The work item</returns>
         Task<Func<CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Adds background work item to the queue
+        /// </summary>
+        /// <param name="workItem">The work item</param>
+        void QueueBackgroundWorkItem(Func<CancellationToken, Task> workItem);
     }
 }

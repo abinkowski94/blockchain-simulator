@@ -1,5 +1,5 @@
-using System;
 using Newtonsoft.Json;
+using System;
 
 namespace BlockchainSimulator.Node.WebApi.Models
 {
@@ -33,16 +33,16 @@ namespace BlockchainSimulator.Node.WebApi.Models
         public string Recipient { get; set; }
 
         /// <summary>
-        /// The sender address
-        /// </summary>
-        [JsonProperty("sender")]
-        public string Sender { get; set; }
-        
-        /// <summary>
         /// The time when the transaction has been registered
         /// </summary>
         [JsonProperty("registrationTime")]
         public DateTime RegistrationTime { get; set; }
+
+        /// <summary>
+        /// The sender address
+        /// </summary>
+        [JsonProperty("sender")]
+        public string Sender { get; set; }
 
         /// <summary>
         /// The transaction details

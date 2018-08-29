@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
@@ -13,17 +8,22 @@ using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.BusinessLogic.Tests.Data;
 using Moq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
 {
     public class TransactionServiceTests
     {
-        private readonly Mock<IBlockchainService> _blockchainServiceMock;
         private readonly Mock<IBlockchainConfiguration> _blockchainConfigurationMock;
+        private readonly Mock<IBlockchainService> _blockchainServiceMock;
         private readonly Mock<IMiningQueue> _miningQueueMock;
-        private readonly TransactionService _transactionService;
         private readonly Mock<IMiningService> _miningServiceMock;
+        private readonly TransactionService _transactionService;
 
         public TransactionServiceTests()
         {
@@ -49,7 +49,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             };
 
             _blockchainConfigurationMock.Setup(p => p.BlockSize).Returns(10);
-
 
             // Act
             var result = _transactionService.AddTransaction(transaction) as SuccessResponse<Transaction>;
@@ -146,6 +145,28 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         }
 
         [Fact]
+        public void GetTransaction_Id_ErrorResponseNoTransaction()
+        {
+            // Arrange
+            const string id = "17fea80a-efa4-4357-be00-a7e0c670ef53";
+
+            _blockchainServiceMock.Setup(p => p.GetBlockchain())
+                .Returns(new SuccessResponse<BlockBase>("The blockchain!", null));
+
+            // Act
+            var result = _transactionService.GetTransaction(id) as ErrorResponse<Transaction>;
+
+            // Assert
+            _blockchainServiceMock.Verify(p => p.GetBlockchain());
+
+            Assert.NotNull(result);
+            Assert.Null(result.Result);
+            Assert.NotNull(result.Message);
+            Assert.Empty(result.Errors);
+            Assert.Equal($"Could not find the transaction id: {id}", result.Message);
+        }
+
+        [Fact]
         public void GetTransaction_Id_ErrorResponseWhenReading()
         {
             // Arrange
@@ -169,28 +190,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         }
 
         [Fact]
-        public void GetTransaction_Id_ErrorResponseNoTransaction()
-        {
-            // Arrange
-            const string id = "17fea80a-efa4-4357-be00-a7e0c670ef53";
-
-            _blockchainServiceMock.Setup(p => p.GetBlockchain())
-                .Returns(new SuccessResponse<BlockBase>("The blockchain!", null));
-
-            // Act
-            var result = _transactionService.GetTransaction(id) as ErrorResponse<Transaction>;
-
-            // Assert
-            _blockchainServiceMock.Verify(p => p.GetBlockchain());
-
-            Assert.NotNull(result);
-            Assert.Null(result.Result);
-            Assert.NotNull(result.Message);
-            Assert.Empty(result.Errors);
-            Assert.Equal($"Could not find the transaction id: {id}", result.Message);
-        }
-
-        [Fact]
         public void GetTransaction_Id_SuccessResponse()
         {
             // Arrange
@@ -201,7 +200,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             var blockchainProvider =
                 new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _blockchainConfigurationMock.Object);
 
-            var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>) ts.First())
+            var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>)ts.First())
                 .ToList();
 
             transactionSetList[1].First().Id = "111111";

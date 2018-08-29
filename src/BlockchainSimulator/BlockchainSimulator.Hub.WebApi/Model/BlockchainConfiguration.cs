@@ -8,27 +8,27 @@ namespace BlockchainSimulator.Hub.WebApi.Model
     public class BlockchainConfiguration
     {
         /// <summary>
-        /// The type of consensus algorithm
+        /// The block size
         /// </summary>
-        [JsonProperty("type")]
-        public string Type { get; set; }
-        
-        /// <summary>
-        /// Version of the protocol
-        /// </summary>
-        [JsonProperty("version")]
-        public string Version { get; set; }
-        
+        [JsonProperty("blockSize")]
+        public string BlockSize { get; set; }
+
         /// <summary>
         /// Target of proof of work
         /// </summary>
         [JsonProperty("target")]
         public string Target { get; set; }
-        
+
         /// <summary>
-        /// The block size
+        /// The type of consensus algorithm
         /// </summary>
-        [JsonProperty("blockSize")]
-        public string BlockSize { get; set; }
+        [JsonProperty("type")]
+        public string Type { get; set; }
+
+        /// <summary>
+        /// Version of the protocol
+        /// </summary>
+        [JsonProperty("version")]
+        public string Version { get; set; }
     }
 }

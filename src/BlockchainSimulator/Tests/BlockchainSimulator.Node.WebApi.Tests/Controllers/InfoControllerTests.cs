@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-using System.Linq;
 using BlockchainSimulator.Node.WebApi.Controllers;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace BlockchainSimulator.Node.WebApi.Tests.Controllers

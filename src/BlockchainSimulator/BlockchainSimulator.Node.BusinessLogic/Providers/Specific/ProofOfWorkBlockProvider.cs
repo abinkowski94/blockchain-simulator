@@ -1,7 +1,7 @@
-using System;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Services;
+using System;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Providers.Specific
 {

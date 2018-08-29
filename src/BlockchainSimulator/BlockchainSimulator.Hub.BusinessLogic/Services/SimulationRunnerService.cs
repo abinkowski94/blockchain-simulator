@@ -1,3 +1,10 @@
+using BlockchainSimulator.Common.Extensions;
+using BlockchainSimulator.Common.Queues;
+using BlockchainSimulator.Common.Services;
+using BlockchainSimulator.Hub.BusinessLogic.Model;
+using BlockchainSimulator.Node.WebApi.Models;
+using Microsoft.AspNetCore.Hosting;
+using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -6,24 +13,17 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using BlockchainSimulator.Common.Extensions;
-using BlockchainSimulator.Common.Queues;
-using BlockchainSimulator.Common.Services;
-using BlockchainSimulator.Hub.BusinessLogic.Model;
-using BlockchainSimulator.Node.WebApi.Models;
-using Microsoft.AspNetCore.Hosting;
-using Newtonsoft.Json;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {
     public class SimulationRunnerService : ISimulationRunnerService
     {
-        private readonly IBackgroundTaskQueue _queue;
-        private readonly IHttpService _httpService;
         private readonly string _directoryPath;
+        private readonly IHttpService _httpService;
         private readonly TimeSpan _nodeTimeout;
-        private readonly string _pathToLibrary;
         private readonly object _padlock = new object();
+        private readonly string _pathToLibrary;
+        private readonly IBackgroundTaskQueue _queue;
 
         public SimulationRunnerService(IBackgroundTaskQueue queue, IHttpService httpService,
             IHostingEnvironment environment)
@@ -50,6 +50,43 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             }
         }
 
+        private void ConnectNodes(Simulation simulation)
+        {
+            _queue.QueueBackgroundWorkItem(token => new Task(() =>
+            {
+                simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
+                {
+                    simulation.ServerNodes.Where(n => node.IsConnected == true && node.ConnectedTo.Contains(n.Id))
+                        .ForEach(otherNode =>
+                        {
+                            var body = JsonConvert.SerializeObject(otherNode);
+                            var content = new StringContent(body, Encoding.UTF8, "application/json");
+                            _httpService.Put($"{node.HttpAddress}/api/consensus", content, _nodeTimeout, token);
+                        });
+                }, token);
+            }, token));
+        }
+
+        private void PingServers(Simulation simulation)
+        {
+            _queue.QueueBackgroundWorkItem(token => new Task(() =>
+            {
+                simulation.ServerNodes.ParallelForEach(node =>
+                {
+                    try
+                    {
+                        var responseMessage = _httpService.Get($"{node.HttpAddress}/api/info", _nodeTimeout, token);
+                        node.IsConnected = responseMessage.IsSuccessStatusCode;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        node.IsConnected = false;
+                    }
+                }, token);
+            }, token));
+        }
+
         private void SendTransactions(Simulation simulation, SimulationSettings settings)
         {
             _queue.QueueBackgroundWorkItem(token => new Task(() =>
@@ -70,18 +107,18 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
                     if (settings.NodesAndTransactions.TryGetValue(node.Id, out var number))
                     {
-                        Enumerable.Range(0, (int) number).ForEach(i =>
-                        {
-                            var body = JsonConvert.SerializeObject(new Transaction
-                            {
-                                Sender = Guid.NewGuid().ToString(),
-                                Recipient = Guid.NewGuid().ToString(),
-                                Amount = randomGenerator.Next(1, 1000),
-                                Fee = (decimal) randomGenerator.NextDouble()
-                            });
-                            var content = new StringContent(body, Encoding.UTF8, "application/json");
-                            _httpService.Post($"{node.HttpAddress}/api/transactions", content, _nodeTimeout, token);
-                        });
+                        Enumerable.Range(0, (int)number).ForEach(i =>
+                       {
+                           var body = JsonConvert.SerializeObject(new Transaction
+                           {
+                               Sender = Guid.NewGuid().ToString(),
+                               Recipient = Guid.NewGuid().ToString(),
+                               Amount = randomGenerator.Next(1, 1000),
+                               Fee = (decimal)randomGenerator.NextDouble()
+                           });
+                           var content = new StringContent(body, Encoding.UTF8, "application/json");
+                           _httpService.Post($"{node.HttpAddress}/api/transactions", content, _nodeTimeout, token);
+                       });
                     }
                 }, token);
             }, token));
@@ -115,43 +152,6 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                         },
                         FileName = "dotnet"
                     });
-                }, token);
-            }, token));
-        }
-
-        private void PingServers(Simulation simulation)
-        {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
-            {
-                simulation.ServerNodes.ParallelForEach(node =>
-                {
-                    try
-                    {
-                        var responseMessage = _httpService.Get($"{node.HttpAddress}/api/info", _nodeTimeout, token);
-                        node.IsConnected = responseMessage.IsSuccessStatusCode;
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        node.IsConnected = false;
-                    }
-                }, token);
-            }, token));
-        }
-
-        private void ConnectNodes(Simulation simulation)
-        {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
-            {
-                simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
-                {
-                    simulation.ServerNodes.Where(n => node.IsConnected == true && node.ConnectedTo.Contains(n.Id))
-                        .ForEach(otherNode =>
-                        {
-                            var body = JsonConvert.SerializeObject(otherNode);
-                            var content = new StringContent(body, Encoding.UTF8, "application/json");
-                            _httpService.Put($"{node.HttpAddress}/api/consensus", content, _nodeTimeout, token);
-                        });
                 }, token);
             }, token));
         }

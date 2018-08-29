@@ -1,7 +1,7 @@
-using System.Collections.Generic;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
 using BlockchainSimulator.Node.BusinessLogic.Tests.Data;
+using System.Collections.Generic;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers
@@ -16,18 +16,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers
         }
 
         [Fact]
-        public void GetMerkleTree_Null_Null()
-        {
-            // Arrange
-
-            // Act
-            var result = _merkleTreeProvider.GetMerkleTree(null);
-
-            // Assert
-            Assert.Null(result);
-        }
-
-        [Fact]
         public void GetMerkleTree_EmptyList_Null()
         {
             // Arrange
@@ -35,6 +23,18 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers
 
             // Act
             var result = _merkleTreeProvider.GetMerkleTree(transactions);
+
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void GetMerkleTree_Null_Null()
+        {
+            // Arrange
+
+            // Act
+            var result = _merkleTreeProvider.GetMerkleTree(null);
 
             // Assert
             Assert.Null(result);

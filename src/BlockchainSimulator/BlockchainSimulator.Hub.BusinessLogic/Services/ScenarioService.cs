@@ -41,6 +41,21 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             return new SuccessResponse<Scenario>("The scenario has been created successfully!", scenario);
         }
 
+        public BaseResponse<Scenario> DuplicateScenario(Guid scenarioId)
+        {
+            var scenario = _scenarioStorage.GetScenario(scenarioId);
+            if (scenario == null)
+            {
+                return new ErrorResponse<Scenario>($"Could not find scenario with id: {scenarioId}!", null);
+            }
+
+            var duplicate = DuplicateScenario(scenario);
+            _scenarioStorage.AddScenario(duplicate);
+            _scenarioStorage.SaveChanges();
+
+            return new SuccessResponse<Scenario>("The scenario has been duplicated!", duplicate);
+        }
+
         public BaseResponse<Scenario> GetScenario(Guid scenarioId)
         {
             var scenario = _scenarioStorage.GetScenario(scenarioId);
@@ -48,8 +63,26 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 return new ErrorResponse<Scenario>($"Could not find scenario with id: {scenarioId}!", null);
             }
-            
+
             return new SuccessResponse<Scenario>("The scenario has been found!", scenario);
+        }
+
+        public BaseResponse<List<Scenario>> GetScenarios()
+        {
+            return new SuccessResponse<List<Scenario>>("The scenarios!", _scenarioStorage.GetScenarios());
+        }
+
+        public BaseResponse<Scenario> RemoveScenario(Guid scenarioId)
+        {
+            var scenario = _scenarioStorage.RemoveScenario(scenarioId);
+            if (scenario == null)
+            {
+                return new ErrorResponse<Scenario>($"Could not find scenario with id: {scenarioId}!", null);
+            }
+
+            _scenarioStorage.SaveChanges();
+
+            return new SuccessResponse<Scenario>("The scenario has been deleted!", scenario);
         }
 
         public BaseResponse<Scenario> RenameScenario(Guid scenarioId, string newName)
@@ -67,43 +100,10 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             return new SuccessResponse<Scenario>("The scenario has been renamed!", scenario);
         }
 
-        public BaseResponse<List<Scenario>> GetScenarios()
-        {
-            return new SuccessResponse<List<Scenario>>("The scenarios!", _scenarioStorage.GetScenarios());
-        }
-
-        public BaseResponse<Scenario> RemoveScenario(Guid scenarioId)
-        {
-            var scenario = _scenarioStorage.RemoveScenario(scenarioId);
-            if (scenario == null)
-            {
-                return new ErrorResponse<Scenario>($"Could not find scenario with id: {scenarioId}!", null);
-            }
-            
-            _scenarioStorage.SaveChanges();
-
-            return new SuccessResponse<Scenario>("The scenario has been deleted!", scenario);
-        }
-
-        public BaseResponse<Scenario> DuplicateScenario(Guid scenarioId)
-        {
-            var scenario = _scenarioStorage.GetScenario(scenarioId);
-            if (scenario == null)
-            {
-                return new ErrorResponse<Scenario>($"Could not find scenario with id: {scenarioId}!", null);
-            }
-
-            var duplicate = DuplicateScenario(scenario);
-            _scenarioStorage.AddScenario(duplicate);
-            _scenarioStorage.SaveChanges();
-            
-            return new SuccessResponse<Scenario>("The scenario has been duplicated!", duplicate);
-        }
-
         private static Scenario DuplicateScenario(Scenario scenario)
         {
             var newId = Guid.NewGuid();
-            
+
             return new Scenario
             {
                 Id = newId,

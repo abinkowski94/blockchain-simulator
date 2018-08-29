@@ -1,7 +1,7 @@
-using System.Linq;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Model.ValidationResults;
 using BlockchainSimulator.Node.BusinessLogic.Services;
+using System.Linq;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Validators
 {
@@ -16,7 +16,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators
 
             if (tree.GetType() == typeof(Model.Transaction.Node))
             {
-                var node = (Model.Transaction.Node) tree;
+                var node = (Model.Transaction.Node)tree;
                 var combinedHashes = $"{node.LeftNode.Hash}{node.RightNode?.Hash}";
                 var hash = EncryptionService.GetSha256Hash(combinedHashes);
 
@@ -38,19 +38,19 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators
 
             if (tree.GetType() == typeof(Leaf))
             {
-                var leaf = (Leaf) tree;
+                var leaf = (Leaf)tree;
                 var hash = EncryptionService.GetSha256Hash(leaf.Transaction.TransactionJson);
 
                 if (leaf.Hash != hash)
                 {
                     return new ValidationResult(false,
-                        new[] {$"Wrong hash for transaction with id: {leaf.TransactionId}"});
+                        new[] { $"Wrong hash for transaction with id: {leaf.TransactionId}" });
                 }
 
                 return new ValidationResult(true, new string[0]);
             }
 
-            return new ValidationResult(false, new[] {"Wrong type of merkle tree node!"});
+            return new ValidationResult(false, new[] { "Wrong type of merkle tree node!" });
         }
     }
 }

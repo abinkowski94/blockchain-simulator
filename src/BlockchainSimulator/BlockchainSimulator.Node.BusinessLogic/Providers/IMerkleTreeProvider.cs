@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
+using System.Collections.Generic;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Providers
 {

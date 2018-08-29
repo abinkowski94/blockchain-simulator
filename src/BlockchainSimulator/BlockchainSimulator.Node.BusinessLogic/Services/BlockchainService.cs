@@ -7,8 +7,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class BlockchainService : BaseService, IBlockchainService
     {
-        private readonly object _padlock = new object();
         private readonly IBlockchainRepository _blockchainRepository;
+        private readonly object _padlock = new object();
 
         public BlockchainService(IBlockchainRepository blockchainRepository)
         {

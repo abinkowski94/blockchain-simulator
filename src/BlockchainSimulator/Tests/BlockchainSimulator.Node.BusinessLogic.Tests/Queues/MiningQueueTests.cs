@@ -15,17 +15,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Queues
         }
 
         [Fact]
-        public void QueueMiningTask_Task_Void()
-        {
-            // Arrange
-
-            // Act
-            _taskQueue.QueueMiningTask(token => Task.Run(() => Thread.Sleep(100), token));
-
-            // Assert
-        }
-
-        [Fact]
         public async Task DequeueAsync_Task_String()
         {
             // Arrange
@@ -49,7 +38,18 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Queues
             void Action() => _taskQueue.QueueMiningTask(null);
 
             // Assert
-            Assert.Throws<ArgumentNullException>((Action) Action);
+            Assert.Throws<ArgumentNullException>((Action)Action);
+        }
+
+        [Fact]
+        public void QueueMiningTask_Task_Void()
+        {
+            // Arrange
+
+            // Act
+            _taskQueue.QueueMiningTask(token => Task.Run(() => Thread.Sleep(100), token));
+
+            // Assert
         }
     }
 }
