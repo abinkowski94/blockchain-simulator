@@ -1,9 +1,9 @@
+using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Common.Services;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
 using BlockchainSimulator.Node.BusinessLogic.Providers.Specific;
-using BlockchainSimulator.Node.BusinessLogic.Queues.BackgroundTasks;
-using BlockchainSimulator.Node.BusinessLogic.Queues.MiningQueue;
+using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.BusinessLogic.Services.Specific;
 using BlockchainSimulator.Node.BusinessLogic.Validators;

@@ -3,17 +3,31 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 
-namespace BlockchainSimulator.Node.BusinessLogic.Queues.MiningQueue
+namespace BlockchainSimulator.Common.Queues
 {
-    public class MiningHostedService : BackgroundService
+    /// <inheritdoc />
+    /// <summary>
+    /// The queue hosted service
+    /// </summary>
+    public class QueuedHostedService : BackgroundService
     {
-        private readonly IMiningQueue _taskQueue;
+        private readonly IBackgroundTaskQueue _taskQueue;
 
-        public MiningHostedService(IMiningQueue taskQueue)
+        /// <summary>
+        /// The constructor
+        /// </summary>
+        /// <param name="taskQueue">The queue</param>
+        public QueuedHostedService(IBackgroundTaskQueue taskQueue)
         {
             _taskQueue = taskQueue;
         }
 
+        /// <inheritdoc />
+        /// <summary>
+        /// Execute method
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>Task</returns>
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)

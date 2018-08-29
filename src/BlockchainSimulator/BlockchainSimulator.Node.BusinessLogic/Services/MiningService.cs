@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
-using BlockchainSimulator.Node.BusinessLogic.Queues.MiningQueue;
+using BlockchainSimulator.Node.BusinessLogic.Queues;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {

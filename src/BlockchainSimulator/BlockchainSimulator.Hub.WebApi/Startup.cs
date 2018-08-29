@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Common.Services;
-using BlockchainSimulator.Hub.BusinessLogic.Queues;
 using BlockchainSimulator.Hub.BusinessLogic.Services;
 using BlockchainSimulator.Hub.BusinessLogic.Storage;
 using BlockchainSimulator.Hub.DataAccess.Repositories;

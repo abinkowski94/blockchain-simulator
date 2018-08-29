@@ -1,10 +1,10 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Node.BusinessLogic.Queues.BackgroundTasks;
+using BlockchainSimulator.Common.Queues;
 using Xunit;
 
-namespace BlockchainSimulator.Node.BusinessLogic.Tests.Queues.BackgroundTasks
+namespace BlockchainSimulator.Common.Tests.Queues
 {
     public class BackgroundTaskQueueTests
     {

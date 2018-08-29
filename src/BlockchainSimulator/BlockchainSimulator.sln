@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockchainSimulator.Hub.Bus
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockchainSimulator.Hub.DataAccess", "BlockchainSimulator.Hub.DataAccess\BlockchainSimulator.Hub.DataAccess.csproj", "{03509E6F-CC6A-45F2-A94F-58DBFCE09552}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockchainSimulator.Common.Tests", "Tests\BlockchainSimulator.Common.Tests\BlockchainSimulator.Common.Tests.csproj", "{4076E19B-73D4-4B2F-A22A-B116C2B239F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,10 @@ Global
 		{03509E6F-CC6A-45F2-A94F-58DBFCE09552}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03509E6F-CC6A-45F2-A94F-58DBFCE09552}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{03509E6F-CC6A-45F2-A94F-58DBFCE09552}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4076E19B-73D4-4B2F-A22A-B116C2B239F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4076E19B-73D4-4B2F-A22A-B116C2B239F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4076E19B-73D4-4B2F-A22A-B116C2B239F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4076E19B-73D4-4B2F-A22A-B116C2B239F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -79,6 +85,7 @@ Global
 		{B92B8B23-4AF1-4A20-A14D-252F1B688D8F} = {55F1A5E8-C1F3-4D96-A129-A69285200CFB}
 		{72FA6A05-CAFD-4206-9E0E-64653C4AF824} = {55F1A5E8-C1F3-4D96-A129-A69285200CFB}
 		{6DC4A49A-8998-4C4F-A03B-06ED42631F23} = {55F1A5E8-C1F3-4D96-A129-A69285200CFB}
+		{4076E19B-73D4-4B2F-A22A-B116C2B239F4} = {55F1A5E8-C1F3-4D96-A129-A69285200CFB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B2A39F68-C93F-43C8-9098-BF4788D3AC16}

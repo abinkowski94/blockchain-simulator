@@ -14,14 +14,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.1.1"/>
+        <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
     </ItemGroup>
 
     <Target Name="IncludeDocFile" BeforeTargets="PrepareForPublish">
         <ItemGroup Condition=" '$(DocumentationFile)' != '' ">
-            <_DocumentationFile Include="$(DocumentationFile)" />
-            <ContentWithTargetPath Include="@(_DocumentationFile->'%(FullPath)')" RelativePath="%(_DocumentationFile.Identity)" TargetPath="%(_DocumentationFile.Filename)%(_DocumentationFile.Extension)" CopyToPublishDirectory="PreserveNewest" />
+            <_DocumentationFile Include="$(DocumentationFile)"/>
+            <ContentWithTargetPath Include="@(_DocumentationFile->'%(FullPath)')"
+                                   RelativePath="%(_DocumentationFile.Identity)"
+                                   TargetPath="%(_DocumentationFile.Filename)%(_DocumentationFile.Extension)"
+                                   CopyToPublishDirectory="PreserveNewest"/>
         </ItemGroup>
     </Target>
-    
+
 </Project>

@@ -9,7 +9,7 @@ using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
 using BlockchainSimulator.Node.BusinessLogic.Providers.Specific;
-using BlockchainSimulator.Node.BusinessLogic.Queues.MiningQueue;
+using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.BusinessLogic.Tests.Data;
 using Moq;

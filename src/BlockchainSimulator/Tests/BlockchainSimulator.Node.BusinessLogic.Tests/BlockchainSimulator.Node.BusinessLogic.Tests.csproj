@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
     <PropertyGroup>
         <TargetFramework>netcoreapp2.1</TargetFramework>
         <RuntimeFrameworkVersion>2.1.3</RuntimeFrameworkVersion>
@@ -17,4 +18,5 @@
     <ItemGroup>
         <ProjectReference Include="..\..\BlockchainSimulator.Node.BusinessLogic\BlockchainSimulator.Node.BusinessLogic.csproj"/>
     </ItemGroup>
+    
 </Project>

@@ -3,15 +3,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace BlockchainSimulator.Node.BusinessLogic.Tests.Queues.MiningQueue
+namespace BlockchainSimulator.Node.BusinessLogic.Tests.Queues
 {
     public class MiningQueueTests
     {
-        private readonly BusinessLogic.Queues.MiningQueue.MiningQueue _taskQueue;
+        private readonly BusinessLogic.Queues.MiningQueue _taskQueue;
 
         public MiningQueueTests()
         {
-            _taskQueue = new BusinessLogic.Queues.MiningQueue.MiningQueue();
+            _taskQueue = new BusinessLogic.Queues.MiningQueue();
         }
 
         [Fact]

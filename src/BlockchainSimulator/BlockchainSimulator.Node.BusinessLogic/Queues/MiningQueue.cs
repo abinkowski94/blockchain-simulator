@@ -3,20 +3,20 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BlockchainSimulator.Hub.BusinessLogic.Queues
+namespace BlockchainSimulator.Node.BusinessLogic.Queues
 {
-    public class BackgroundTaskQueue : IBackgroundTaskQueue
+    public class MiningQueue : IMiningQueue
     {
         private readonly ConcurrentQueue<Func<CancellationToken, Task>> _workItems;
         private readonly SemaphoreSlim _signal;
 
-        public BackgroundTaskQueue()
+        public MiningQueue()
         {
             _workItems = new ConcurrentQueue<Func<CancellationToken, Task>>();
             _signal = new SemaphoreSlim(0);
         }
 
-        public void QueueBackgroundWorkItem(Func<CancellationToken, Task> workItem)
+        public void QueueMiningTask(Func<CancellationToken, Task> workItem)
         {
             if (workItem == null)
             {

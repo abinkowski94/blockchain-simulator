@@ -1,20 +1,20 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Node.BusinessLogic.Queues.MiningQueue;
+using BlockchainSimulator.Common.Queues;
 using Xunit;
 
-namespace BlockchainSimulator.Node.BusinessLogic.Tests.Queues.MiningQueue
+namespace BlockchainSimulator.Common.Tests.Queues
 {
-    public class MiningHostedServiceTests
+    public class QueuedHostedServiceTests
     {
-        private readonly MiningHostedService _hostedService;
-        private readonly BusinessLogic.Queues.MiningQueue.MiningQueue _queue;
+        private readonly QueuedHostedService _hostedService;
+        private readonly BackgroundTaskQueue _queue;
 
-        public MiningHostedServiceTests()
+        public QueuedHostedServiceTests()
         {
-            _queue = new BusinessLogic.Queues.MiningQueue.MiningQueue();
-            _hostedService = new MiningHostedService(_queue);
+            _queue = new BackgroundTaskQueue();
+            _hostedService = new QueuedHostedService(_queue);
         }
 
         [Fact]
@@ -22,7 +22,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Queues.MiningQueue
         {
             // Arrange
             var token = new CancellationToken();
-            _queue.QueueMiningTask(t => Task.Run(() => Thread.Sleep(100), t));
+            _queue.QueueBackgroundWorkItem(t => Task.Run(() => Thread.Sleep(100), t));
 
             // Act
             await _hostedService.StartAsync(token);
@@ -36,7 +36,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Queues.MiningQueue
         {
             // Arrange
             var token = new CancellationToken();
-            _queue.QueueMiningTask(t => Task.Run(() => throw new Exception(), t));
+            _queue.QueueBackgroundWorkItem(t => Task.Run(() => throw new Exception(), t));
 
             // Act
             await _hostedService.StartAsync(token);

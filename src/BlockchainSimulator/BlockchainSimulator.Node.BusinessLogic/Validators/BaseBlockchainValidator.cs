@@ -19,7 +19,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators
         {
             if (blockchain == null)
             {
-                return new ValidationResult(false, new[] {"The block can not be null!"});
+                return new ValidationResult(false, "The block can not be null!");
             }
 
             ValidationResult validationResult;
@@ -47,24 +47,15 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators
             }
 
             validationResult = _merkleTreeValidator.Validate(blockchain.Body.MerkleTree);
-            if (!validationResult.IsSuccess)
-            {
-                return validationResult;
-            }
-
-            return SpecificValidation(blockchain);
+            return !validationResult.IsSuccess ? validationResult : SpecificValidation(blockchain);
         }
 
-        private ValidationResult ValidateParentHash(Block blockchain)
+        private static ValidationResult ValidateParentHash(Block blockchain)
         {
             var parentHash = EncryptionService.GetSha256Hash(blockchain.Parent.BlockJson);
-            if (parentHash != blockchain.Header.ParentHash)
-            {
-                return new ValidationResult(false,
-                    new[] {$"The parent hash is invalid for block with id: {blockchain.Id}"});
-            }
-
-            return new ValidationResult(true, new string[0]);
+            return parentHash != blockchain.Header.ParentHash
+                ? new ValidationResult(false, $"The parent hash is invalid for block with id: {blockchain.Id}")
+                : new ValidationResult(true);
         }
     }
 }
