@@ -59,5 +59,31 @@ namespace BlockchainSimulator.Common.Services
                 }
             }
         }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Requests the http post action
+        /// </summary>
+        /// <param name="uri">The endpoint</param>
+        /// <param name="body">The body of the request</param>
+        /// <param name="timeout">Timeout for request</param>
+        /// <param name="token">The cancellation token</param>
+        /// <returns>The http response message</returns>
+        public HttpResponseMessage Post(string uri, HttpContent body, TimeSpan? timeout = null,
+            CancellationToken? token = null)
+        {
+            using (var httpClientHandler = new HttpClientHandler())
+            {
+                // Turns off SSL
+                httpClientHandler.ServerCertificateCustomValidationCallback = (msg, cert, ch, err) => true;
+                using (var httpClient = new HttpClient(httpClientHandler)
+                    {Timeout = timeout ?? TimeSpan.FromSeconds(10)})
+                {
+                    var responseTask = httpClient.PostAsync(uri, body, token ?? CancellationToken.None);
+                    responseTask.Wait(token ?? CancellationToken.None);
+                    return responseTask.Result;
+                }
+            }
+        }
     }
 }

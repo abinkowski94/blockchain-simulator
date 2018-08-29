@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using BlockchainSimulator.Common.Services;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Consensus;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
@@ -24,15 +25,17 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
         private readonly Mock<IBlockchainRepository> _blockchainRepositoryMock;
         private readonly Mock<IBlockchainValidator> _blockchainValidatorMock;
         private readonly ProofOfWorkConsensusService _consensusService;
+        private readonly Mock<IHttpService> _httpServiceMock;
 
         public ProofOfWorkConsensusServiceTests()
         {
             _backgroundTaskQueueMock = new Mock<IBackgroundTaskQueue>();
             _blockchainRepositoryMock = new Mock<IBlockchainRepository>();
             _blockchainValidatorMock = new Mock<IBlockchainValidator>();
+            _httpServiceMock = new Mock<IHttpService>();
 
             _consensusService = new ProofOfWorkConsensusService(_backgroundTaskQueueMock.Object,
-                _blockchainRepositoryMock.Object, _blockchainValidatorMock.Object);
+                _blockchainRepositoryMock.Object, _blockchainValidatorMock.Object, _httpServiceMock.Object);
         }
 
         [Fact]
@@ -41,7 +44,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
             // Arrange
 
             // Act
-            var result = _consensusService.AcceptBlockchain(null) as ErrorResponse<bool>;
+            var result = _consensusService.AcceptBlockchain((string) null) as ErrorResponse<bool>;
 
             // Assert
             _blockchainRepositoryMock.Verify(p => p.GetBlockchain(), Times.Never());

@@ -26,6 +26,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
             return blocks.LastOrDefault();
         }
 
+        public static Blockchain ManualMap(this IMapper mapper, BlockBase blockBase)
+        {
+            return GetBlockchain(mapper, blockBase);
+        }
+
         private static void SetupTransactions(MerkleNode merkleNode, HashSet<Transaction.Transaction> transactions)
         {
             if (merkleNode is Leaf leaf)
@@ -37,6 +42,33 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
                 SetupTransactions(node.LeftNode, transactions);
                 SetupTransactions(node.RightNode, transactions);
             }
+        }
+
+        private static Blockchain GetBlockchain(IMapper mapper, BlockBase blockBase, List<BlockBase> blocks = null)
+        {
+            if (blockBase == null)
+            {
+                return null;
+            }
+
+            if (blocks == null)
+            {
+                blocks = new List<BlockBase>();
+            }
+
+            switch (blockBase)
+            {
+                case Block.Block block:
+                    blocks.Insert(0, block);
+                    GetBlockchain(mapper, block.Parent, blocks);
+                    break;
+                case GenesisBlock genesisBlock:
+                    blocks.Insert(0, genesisBlock);
+                    break;
+            }
+
+            var mappedBlocks = mapper.Map<List<DataAccess.Model.Block.BlockBase>>(blocks);
+            return new Blockchain {Blocks = mappedBlocks};
         }
     }
 }

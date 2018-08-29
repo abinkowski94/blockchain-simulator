@@ -10,6 +10,7 @@ using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Common.Services;
 using BlockchainSimulator.Hub.BusinessLogic.Model;
 using BlockchainSimulator.Hub.BusinessLogic.Queues;
+using BlockchainSimulator.Node.WebApi.Models;
 using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
 
@@ -45,7 +46,45 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 SpawnServers(simulation);
                 PingServers(simulation);
                 ConnectNodes(simulation);
+                SendTransactions(simulation, settings);
             }
+        }
+
+        private void SendTransactions(Simulation simulation, SimulationSettings settings)
+        {
+            _queue.QueueBackgroundWorkItem(token => new Task(() =>
+            {
+                var randomGenerator = new Random();
+                simulation.LastRunTime = DateTime.UtcNow;
+                simulation.Status = SimulationStatuses.Running;
+                simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
+                {
+                    if (settings.ForceEndAfter.HasValue)
+                    {
+                        var timeDifference = DateTime.UtcNow - simulation.LastRunTime.Value;
+                        if (timeDifference < settings.ForceEndAfter)
+                        {
+                            return;
+                        }
+                    }
+
+                    if (settings.NodesAndTransactions.TryGetValue(node.Id, out var number))
+                    {
+                        Enumerable.Range(0, (int) number).ForEach(i =>
+                        {
+                            var body = JsonConvert.SerializeObject(new Transaction
+                            {
+                                Sender = Guid.NewGuid().ToString(),
+                                Recipient = Guid.NewGuid().ToString(),
+                                Amount = randomGenerator.Next(1, 1000),
+                                Fee = (decimal) randomGenerator.NextDouble()
+                            });
+                            var content = new StringContent(body, Encoding.UTF8, "application/json");
+                            _httpService.Post($"{node.HttpAddress}/api/transactions", content, _nodeTimeout, token);
+                        });
+                    }
+                }, token);
+            }, token));
         }
 
         private void SpawnServers(Simulation simulation)
@@ -106,12 +145,13 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
                 {
-                    simulation.ServerNodes.Where(n => node.ConnectedTo.Contains(n.Id)).ForEach(otherNode =>
-                    {
-                        var body = JsonConvert.SerializeObject(otherNode);
-                        var content = new StringContent(body, Encoding.UTF8, "application/json");
-                        _httpService.Put($"{node.HttpAddress}/api/consensus", content, _nodeTimeout, token);
-                    });
+                    simulation.ServerNodes.Where(n => node.IsConnected == true && node.ConnectedTo.Contains(n.Id))
+                        .ForEach(otherNode =>
+                        {
+                            var body = JsonConvert.SerializeObject(otherNode);
+                            var content = new StringContent(body, Encoding.UTF8, "application/json");
+                            _httpService.Put($"{node.HttpAddress}/api/consensus", content, _nodeTimeout, token);
+                        });
                 }, token);
             }, token));
         }

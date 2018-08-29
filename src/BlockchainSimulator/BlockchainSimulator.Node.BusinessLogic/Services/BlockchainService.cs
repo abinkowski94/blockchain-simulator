@@ -1,8 +1,6 @@
-using System.Collections.Generic;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
-using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
@@ -27,42 +25,22 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 {
                     return new ErrorResponse<BlockBase>("The blockchain does not contain blocks", null);
                 }
-                
+
                 var result = LocalMapper.ManualMap(blockchain);
 
                 return new SuccessResponse<BlockBase>("The blockchain from local storage.", result);
             }
         }
 
-        public void SaveBlockchain(BlockBase blockBase, List<BlockBase> blocks = null)
+        public void SaveBlockchain(BlockBase blockBase)
         {
-            if (blockBase == null)
-            {
-                return;
-            }
-
-            if (blocks == null)
-            {
-                blocks = new List<BlockBase>();
-            }
-
-            switch (blockBase)
-            {
-                case Block block:
-                    blocks.Insert(0, block);
-                    SaveBlockchain(block.Parent, blocks);
-                    break;
-                case GenesisBlock genesisBlock:
-                    blocks.Insert(0, genesisBlock);
-                    break;
-            }
-
-            var mappedBlocks = LocalMapper.Map<List<DataAccess.Model.Block.BlockBase>>(blocks);
-            var blockchain = new Blockchain {Blocks = mappedBlocks};
-
             lock (_padlock)
             {
-                _blockchainRepository.SaveBlockchain(blockchain);
+                var blockchain = LocalMapper.ManualMap(blockBase);
+                if (blockchain != null)
+                {
+                    _blockchainRepository.SaveBlockchain(blockchain);
+                }
             }
         }
     }

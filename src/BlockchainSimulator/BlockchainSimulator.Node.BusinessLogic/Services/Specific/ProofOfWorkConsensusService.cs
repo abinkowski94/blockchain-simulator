@@ -3,12 +3,16 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using BlockchainSimulator.Common.Extensions;
+using BlockchainSimulator.Common.Services;
+using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Queues.BackgroundTasks;
 using BlockchainSimulator.Node.BusinessLogic.Validators;
 using BlockchainSimulator.Node.DataAccess.Converters;
+using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Newtonsoft.Json;
 
@@ -18,12 +22,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
     {
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly IBlockchainValidator _blockchainValidator;
+        private readonly IHttpService _httpService;
 
         public ProofOfWorkConsensusService(IBackgroundTaskQueue queue, IBlockchainRepository blockchainRepository,
-            IBlockchainValidator blockchainValidator) : base(queue)
+            IBlockchainValidator blockchainValidator, IHttpService httpService) : base(queue)
         {
             _blockchainRepository = blockchainRepository;
             _blockchainValidator = blockchainValidator;
+            _httpService = httpService;
         }
 
         public override BaseResponse<bool> AcceptBlockchain(string base64Blockchain)
@@ -35,8 +41,44 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
             var blockchainJson = Encoding.UTF8.GetString(Convert.FromBase64String(base64Blockchain));
             var incomingBlockchain = BlockchainConverter.DeserializeBlockchain(blockchainJson);
-            var currentBlockchain = _blockchainRepository.GetBlockchain();
 
+            return AcceptBlockchain(incomingBlockchain);
+        }
+
+        public override BaseResponse<bool> AcceptBlockchain(BlockBase blockBase)
+        {
+            if (blockBase == null)
+            {
+                return new ErrorResponse<bool>("The blockchain can not be null!", false);
+            }
+
+            var incomingBlockchain = LocalMapper.ManualMap(blockBase);
+            return AcceptBlockchain(incomingBlockchain);
+        }
+
+        public override void ReachConsensus()
+        {
+            _serverNodes.Select(kv => kv.Value).ForEach(node =>
+            {
+                _queue.QueueBackgroundWorkItem(token => Task.Run(() =>
+                {
+                    // The delay
+                    Thread.Sleep((int) node.Delay);
+
+                    var blockchain = _blockchainRepository.GetBlockchain();
+                    var blockchainJson = JsonConvert.SerializeObject(blockchain);
+                    var encodedBlockchain = Convert.ToBase64String(Encoding.UTF8.GetBytes(blockchainJson));
+                    var body = JsonConvert.SerializeObject(new {base64Blockchain = encodedBlockchain});
+                    var content = new StringContent(body, Encoding.UTF8, "application/json");
+
+                    _httpService.Post($"{node.HttpAddress}/api/consensus", content, TimeSpan.FromSeconds(10), token);
+                }, token));
+            });
+        }
+
+        private BaseResponse<bool> AcceptBlockchain(Blockchain incomingBlockchain)
+        {
+            var currentBlockchain = _blockchainRepository.GetBlockchain();
             if (currentBlockchain != null && incomingBlockchain.Blocks.Count <= currentBlockchain.Blocks.Count)
             {
                 return new ErrorResponse<bool>("The incoming blockchain is shorter than the current!", false);
@@ -53,41 +95,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             ReachConsensus();
 
             return new SuccessResponse<bool>("The blockchain has been accepted and swapped!", true);
-        }
-
-        public override void ReachConsensus()
-        {
-            _serverNodes.Select(kv => kv.Value).ForEach(node =>
-            {
-                _queue.QueueBackgroundWorkItem(async token =>
-                {
-                    // The delay
-                    Thread.Sleep((int) node.Delay);
-                    
-                    var blockchain = _blockchainRepository.GetBlockchain();
-                    var blockchainJson = JsonConvert.SerializeObject(blockchain);
-                    var encodedBlockchain = Convert.ToBase64String(Encoding.UTF8.GetBytes(blockchainJson));
-                    var body = JsonConvert.SerializeObject(new {base64Blockchain = encodedBlockchain});
-
-                    try
-                    {
-                        using (var handler = new HttpClientHandler())
-                        {
-                            handler.ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) => true;
-                            using (var httpClient = new HttpClient(handler))
-                            {
-                                var content = new StringContent(body, Encoding.UTF8, "application/json");
-                                await httpClient.PostAsync($"{node.HttpAddress}/api/consensus", content, token);
-                            }
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        // TODO: log errors
-                        Console.WriteLine(e);
-                    }
-                });
-            });
         }
     }
 }

@@ -1,3 +1,4 @@
+using BlockchainSimulator.Common.Services;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
 using BlockchainSimulator.Node.BusinessLogic.Providers.Specific;
@@ -41,6 +42,7 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
             services.AddSingleton<IBlockchainService, BlockchainService>();
             services.AddSingleton<ITransactionService, TransactionService>();
             services.AddSingleton<IMiningService, MiningService>();
+            services.AddTransient<IHttpService, HttpService>();
 
             // Specific
             switch (configuration["Node:Type"])

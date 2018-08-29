@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Consensus;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Queues.BackgroundTasks;
@@ -21,6 +22,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         }
 
         public abstract BaseResponse<bool> AcceptBlockchain(string base64Blockchain);
+
+        public abstract BaseResponse<bool> AcceptBlockchain(BlockBase blockBase);
 
         public abstract void ReachConsensus();
 
