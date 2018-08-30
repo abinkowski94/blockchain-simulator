@@ -12,10 +12,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AutoMapper" Version="7.0.1" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="3.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.3" />
-        <PackageReference Update="Microsoft.NETCore.App" Version="2.1.3" />
+        <PackageReference Include="AutoMapper" Version="7.0.1"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="3.0.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.3"/>
+        <PackageReference Update="Microsoft.NETCore.App" Version="2.1.3"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -31,22 +31,24 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\BlockchainSimulator.Common\BlockchainSimulator.Common.csproj" />
-        <ProjectReference Include="..\BlockchainSimulator.Hub.BusinessLogic\BlockchainSimulator.Hub.BusinessLogic.csproj" />
-        <ProjectReference Include="..\BlockchainSimulator.Hub.DataAccess\BlockchainSimulator.Hub.DataAccess.csproj" />
+        <ProjectReference Include="..\BlockchainSimulator.Common\BlockchainSimulator.Common.csproj"/>
+        <ProjectReference Include="..\BlockchainSimulator.Hub.BusinessLogic\BlockchainSimulator.Hub.BusinessLogic.csproj"/>
+        <ProjectReference Include="..\BlockchainSimulator.Hub.DataAccess\BlockchainSimulator.Hub.DataAccess.csproj"/>
     </ItemGroup>
+
 
     <Target Name="IncludeDocFile" BeforeTargets="PrepareForPublish">
         <ItemGroup Condition=" '$(DocumentationFile)' != '' ">
-            <_DocumentationFile Include="$(DocumentationFile)" />
-            <ContentWithTargetPath Include="@(_DocumentationFile->'%(FullPath)')" RelativePath="%(_DocumentationFile.Identity)" TargetPath="%(_DocumentationFile.Filename)%(_DocumentationFile.Extension)" CopyToPublishDirectory="PreserveNewest" />
+            <_DocumentationFile Include="$(DocumentationFile)"/>
+            <ContentWithTargetPath Include="@(_DocumentationFile->'%(FullPath)')"
+                                   RelativePath="%(_DocumentationFile.Identity)"
+                                   TargetPath="%(_DocumentationFile.Filename)%(_DocumentationFile.Extension)"
+                                   CopyToPublishDirectory="PreserveNewest"/>
         </ItemGroup>
     </Target>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="xcopy /Y &quot;$(SolutionDir)BlockchainSimulator.Node.WebApi\bin\$(Configuration)\$(TargetFramework)\BlockchainSimulator.Node.WebApi.deps.json&quot; &quot;$(OutputPath)&quot;" />
-        <Exec Command="xcopy /Y &quot;$(SolutionDir)BlockchainSimulator.Node.WebApi\bin\$(Configuration)\$(TargetFramework)\BlockchainSimulator.Node.WebApi.runtimeconfig.dev.json&quot; &quot;$(OutputPath)&quot;" />
-        <Exec Command="xcopy /Y &quot;$(SolutionDir)BlockchainSimulator.Node.WebApi\bin\$(Configuration)\$(TargetFramework)\BlockchainSimulator.Node.WebApi.runtimeconfig.json&quot; &quot;$(OutputPath)&quot;" />
+        <Exec Command="xcopy &quot;$(SolutionDir)BlockchainSimulator.Node.WebApi\bin\$(Configuration)\$(TargetFramework)&quot; &quot;$(OutputPath)Node\&quot; /S /Y /I"/>
     </Target>
 
 </Project>

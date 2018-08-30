@@ -19,13 +19,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.Node.We
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.Common", "BlockchainSimulator.Common\BlockchainSimulator.Common.csproj", "{0B065A46-3E58-4F73-9827-CC1C33E16A89}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockchainSimulator.Hub.WebApi", "BlockchainSimulator.Hub.WebApi\BlockchainSimulator.Hub.WebApi.csproj", "{92FDBEB6-41BB-4107-94B3-032C483A847A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.Hub.WebApi", "BlockchainSimulator.Hub.WebApi\BlockchainSimulator.Hub.WebApi.csproj", "{92FDBEB6-41BB-4107-94B3-032C483A847A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F5D38176-E02B-41F3-9668-5D9C423526B8} = {F5D38176-E02B-41F3-9668-5D9C423526B8}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockchainSimulator.Hub.BusinessLogic", "BlockchainSimulator.Hub.BusinessLogic\BlockchainSimulator.Hub.BusinessLogic.csproj", "{7BB76F6F-0F9F-49D4-B717-12B61FC60DE6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.Hub.BusinessLogic", "BlockchainSimulator.Hub.BusinessLogic\BlockchainSimulator.Hub.BusinessLogic.csproj", "{7BB76F6F-0F9F-49D4-B717-12B61FC60DE6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockchainSimulator.Hub.DataAccess", "BlockchainSimulator.Hub.DataAccess\BlockchainSimulator.Hub.DataAccess.csproj", "{03509E6F-CC6A-45F2-A94F-58DBFCE09552}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.Hub.DataAccess", "BlockchainSimulator.Hub.DataAccess\BlockchainSimulator.Hub.DataAccess.csproj", "{03509E6F-CC6A-45F2-A94F-58DBFCE09552}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockchainSimulator.Common.Tests", "Tests\BlockchainSimulator.Common.Tests\BlockchainSimulator.Common.Tests.csproj", "{4076E19B-73D4-4B2F-A22A-B116C2B239F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockchainSimulator.Common.Tests", "Tests\BlockchainSimulator.Common.Tests\BlockchainSimulator.Common.Tests.csproj", "{4076E19B-73D4-4B2F-A22A-B116C2B239F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

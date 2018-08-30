@@ -8,8 +8,8 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
     /// <summary>
     /// The info controller
     /// </summary>
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class InfoController
     {
         private readonly IConfiguration _configuration;

@@ -2,7 +2,6 @@ using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Common.Services;
 using BlockchainSimulator.Hub.BusinessLogic.Model;
-using BlockchainSimulator.Node.WebApi.Models;
 using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
 using System;
@@ -14,6 +13,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using BlockchainSimulator.Common.Models;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {
@@ -22,6 +22,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
         private readonly string _directoryPath;
         private readonly IHttpService _httpService;
         private readonly TimeSpan _nodeTimeout;
+        private readonly TimeSpan _hostingTime;
+        private readonly int _hostingRetryCount;
         private readonly object _padlock = new object();
         private readonly string _pathToLibrary;
         private readonly IBackgroundTaskQueue _queue;
@@ -32,11 +34,14 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             _queue = queue;
             _httpService = httpService;
             _directoryPath = environment.ContentRootPath ?? Directory.GetCurrentDirectory();
+
             //TODO: Add timeout configuration
             _nodeTimeout = TimeSpan.FromSeconds(10);
+            _hostingTime = TimeSpan.FromSeconds(5);
+            _hostingRetryCount = 5;
 
             var pathToFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-            _pathToLibrary = $@"{pathToFolder}\{nameof(BlockchainSimulator)}.{nameof(Node)}.{nameof(Node.WebApi)}.dll";
+            _pathToLibrary = $@"{pathToFolder}\Node\BlockchainSimulator.Node.WebApi.dll";
         }
 
         public void RunSimulation(Simulation simulation, SimulationSettings settings)
@@ -48,6 +53,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 PingServers(simulation);
                 ConnectNodes(simulation);
                 SendTransactions(simulation, settings);
+                WaitForNetwork(simulation, settings);
+                WaitForStatistics(simulation);
             }
         }
 
@@ -74,7 +81,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 simulation.ServerNodes.ParallelForEach(node =>
                 {
-                    var counter = 5;
+                    var counter = _hostingRetryCount;
                     while (counter > 0 && node.IsConnected != true)
                     {
                         try
@@ -133,35 +140,88 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
         private void SpawnServers(Simulation simulation)
         {
+            _queue.QueueBackgroundWorkItem(token =>
+            {
+                return new Task(() =>
+                {
+                    simulation.Status = SimulationStatuses.Preparing;
+                    simulation.ServerNodes.Where(n => n.NeedsSpawn).ParallelForEach(node =>
+                    {
+                        var pathToDirectory = $@"{_directoryPath}\nodes\{node.Id}";
+                        if (!Directory.Exists(pathToDirectory))
+                        {
+                            Directory.CreateDirectory(pathToDirectory);
+                        }
+
+                        node.NodeThread = Process.Start(new ProcessStartInfo
+                        {
+                            ArgumentList =
+                            {
+                                _pathToLibrary,
+                                $"urls|-|{node.HttpAddress}",
+                                $@"contentRoot|-|{pathToDirectory}",
+                                $"Node:Id|-|{node.Id}",
+                                $"Node:Type|-|{simulation.BlockchainConfiguration.Type}",
+                                $"BlockchainConfiguration:Version|-|{simulation.BlockchainConfiguration.Version}",
+                                $"BlockchainConfiguration:Target|-|{simulation.BlockchainConfiguration.Target}",
+                                $"BlockchainConfiguration:BlockSize|-|{simulation.BlockchainConfiguration.BlockSize}"
+                            },
+                            FileName = "dotnet"
+                        });
+                    }, token);
+
+                    Thread.Sleep(_hostingTime);
+                }, token);
+            });
+        }
+
+        private void WaitForNetwork(Simulation simulation, SimulationSettings settings)
+        {
             _queue.QueueBackgroundWorkItem(token => new Task(() =>
             {
-                simulation.Status = SimulationStatuses.Preparing;
-                simulation.ServerNodes.Where(n => n.NeedsSpawn).ParallelForEach(node =>
+                simulation.Status = SimulationStatuses.WaitingForNetwork;
+                bool wait;
+
+                do
                 {
-                    var pathToDirectory = $@"{_directoryPath}\nodes\{node.Id}";
-                    if (!Directory.Exists(pathToDirectory))
+                    wait = !simulation.ServerNodes.Where(n => n.IsConnected == true).All(node =>
                     {
-                        Directory.CreateDirectory(pathToDirectory);
-                    }
-
-                    node.NodeThread = Process.Start(new ProcessStartInfo
-                    {
-                        ArgumentList =
+                        try
                         {
-                            _pathToLibrary,
-                            $"urls|-|{node.HttpAddress}",
-                            $@"contentRoot|-|{pathToDirectory}",
-                            $"Node:Id|-|{node.Id}",
-                            $"Node:Type|-|{simulation.BlockchainConfiguration.Type}",
-                            $"BlockchainConfiguration:Version|-|{simulation.BlockchainConfiguration.Version}",
-                            $"BlockchainConfiguration:Target|-|{simulation.BlockchainConfiguration.Target}",
-                            $"BlockchainConfiguration:BlockSize|-|{simulation.BlockchainConfiguration.BlockSize}"
-                        },
-                        FileName = "dotnet"
-                    });
-                }, token);
+                            var response = _httpService.Get($"{node.HttpAddress}/api/statistic/mining-queue",
+                                _nodeTimeout, token);
+                            var contentTask = response.Content.ReadAsStringAsync();
+                            contentTask.Wait(token);
+                            var content = contentTask.Result;
+                            var miningQueueStatus = JsonConvert.DeserializeObject<MiningQueueStatus>(content);
 
-                Thread.Sleep(5000);
+                            return miningQueueStatus.IsEmpty;
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            return false;
+                        }
+                    });
+
+                    if (wait && settings.ForceEndAfter.HasValue && simulation.LastRunTime.HasValue)
+                    {
+                        var timeDifference = DateTime.UtcNow - simulation.LastRunTime.Value;
+                        if (timeDifference < settings.ForceEndAfter)
+                        {
+                            wait = false;
+                        }
+                    }
+                } while (wait);
+            }, token));
+        }
+
+        private void WaitForStatistics(Simulation simulation)
+        {
+            _queue.QueueBackgroundWorkItem(token => new Task(() =>
+            {
+                simulation.Status = SimulationStatuses.WaitingForStatistics;
+                //TODO
             }, token));
         }
     }

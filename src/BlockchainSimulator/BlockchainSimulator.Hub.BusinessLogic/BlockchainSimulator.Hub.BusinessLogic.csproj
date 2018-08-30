@@ -12,7 +12,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\BlockchainSimulator.Hub.DataAccess\BlockchainSimulator.Hub.DataAccess.csproj" />
-        <ProjectReference Include="..\BlockchainSimulator.Node.WebApi\BlockchainSimulator.Node.WebApi.csproj" />
+        <ProjectReference Include="..\BlockchainSimulator.Common\BlockchainSimulator.Common.csproj" />
     </ItemGroup>
 
 </Project>
