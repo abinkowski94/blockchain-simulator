@@ -4,6 +4,7 @@ namespace BlockchainSimulator.Node.DataAccess.Model.Transaction
 {
     public abstract class MerkleNode
     {
-        [JsonProperty("hash")] public string Hash { get; set; }
+        [JsonProperty("hash", Order = 1)]
+        public string Hash { get; set; }
     }
 }

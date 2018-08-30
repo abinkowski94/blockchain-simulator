@@ -11,19 +11,19 @@ namespace BlockchainSimulator.Common.Models.Responses
         /// <summary>
         /// Id of the response (used for event tracking)
         /// </summary>
-        [JsonProperty("id")]
+        [JsonProperty("id", Order = 1)]
         public Guid Id { get; set; }
 
         /// <summary>
         /// The message of the response
         /// </summary>
-        [JsonProperty("message")]
+        [JsonProperty("message", Order = 2)]
         public string Message { get; set; }
 
         /// <summary>
         /// The result of the method
         /// </summary>
-        [JsonProperty("result")]
+        [JsonProperty("result", Order = 4)]
         public object Result { get; set; }
     }
 }

@@ -59,7 +59,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
             {
                 newBlock = new Block
                 {
-                    Id = Convert.ToString(long.Parse(parentBlock.Id) + 1, 16),
+                    Id = Convert.ToString(Convert.ToInt32(parentBlock.Id, 16) + 1, 16),
                     QueueTime = DateTime.UtcNow - enqueueTime,
                     ParentId = parentBlock.Id,
                     Parent = parentBlock

@@ -11,8 +11,8 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
     /// <summary>
     /// The transaction controller
     /// </summary>
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class TransactionsController : BaseController
     {
         private readonly ITransactionService _transactionService;

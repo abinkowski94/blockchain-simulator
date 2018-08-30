@@ -5,6 +5,7 @@ namespace BlockchainSimulator.Node.DataAccess.Model
 {
     public class Blockchain
     {
-        [JsonProperty("blocks")] public List<Block.BlockBase> Blocks { get; set; }
+        [JsonProperty("blocks", Order = 1)]
+        public List<Block.BlockBase> Blocks { get; set; }
     }
 }

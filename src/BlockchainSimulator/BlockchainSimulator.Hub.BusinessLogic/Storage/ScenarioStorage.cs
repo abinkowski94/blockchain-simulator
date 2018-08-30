@@ -33,7 +33,12 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Storage
         public void Dispose()
         {
             GetScenarios().SelectMany(s => s.Simulation.ServerNodes).Where(n => n.NodeThread != null)
-                .ForEach(n => n.NodeThread.Kill());
+                .ForEach(n =>
+                {
+                    n.NodeThread.Kill();
+                    n.NodeThread.Dispose();
+                    n.NodeThread = null;
+                });
         }
 
         public Scenario GetScenario(Guid scenarioId)

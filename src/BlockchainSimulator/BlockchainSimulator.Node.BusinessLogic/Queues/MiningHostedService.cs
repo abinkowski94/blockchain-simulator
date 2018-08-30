@@ -23,9 +23,16 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
                 try
                 {
                     var task = workItem(cancellationToken);
-                    if (task.Status == TaskStatus.Created)
+                    try
                     {
-                        task.Start();
+                        if (task.Status == TaskStatus.Created)
+                        {
+                            task.Start();
+                        }
+                    }
+                    catch
+                    {
+                        // ignored
                     }
 
                     await task;

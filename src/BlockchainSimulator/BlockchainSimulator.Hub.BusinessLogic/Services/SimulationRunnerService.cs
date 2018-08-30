@@ -12,6 +12,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
@@ -73,15 +74,21 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 simulation.ServerNodes.ParallelForEach(node =>
                 {
-                    try
+                    var counter = 5;
+                    while (counter > 0 && node.IsConnected != true)
                     {
-                        var responseMessage = _httpService.Get($"{node.HttpAddress}/api/info", _nodeTimeout, token);
-                        node.IsConnected = responseMessage.IsSuccessStatusCode;
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        node.IsConnected = false;
+                        try
+                        {
+                            var responseMessage = _httpService.Get($"{node.HttpAddress}/api/info", _nodeTimeout, token);
+                            node.IsConnected = responseMessage.IsSuccessStatusCode;
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            node.IsConnected = false;
+                        }
+
+                        counter--;
                     }
                 }, token);
             }, token));
@@ -107,18 +114,18 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
                     if (settings.NodesAndTransactions.TryGetValue(node.Id, out var number))
                     {
-                        Enumerable.Range(0, (int)number).ForEach(i =>
-                       {
-                           var body = JsonConvert.SerializeObject(new Transaction
-                           {
-                               Sender = Guid.NewGuid().ToString(),
-                               Recipient = Guid.NewGuid().ToString(),
-                               Amount = randomGenerator.Next(1, 1000),
-                               Fee = (decimal)randomGenerator.NextDouble()
-                           });
-                           var content = new StringContent(body, Encoding.UTF8, "application/json");
-                           _httpService.Post($"{node.HttpAddress}/api/transactions", content, _nodeTimeout, token);
-                       });
+                        Enumerable.Range(0, (int) number).ForEach(i =>
+                        {
+                            var body = JsonConvert.SerializeObject(new Transaction
+                            {
+                                Sender = Guid.NewGuid().ToString(),
+                                Recipient = Guid.NewGuid().ToString(),
+                                Amount = randomGenerator.Next(1, 1000),
+                                Fee = (decimal) randomGenerator.NextDouble()
+                            });
+                            var content = new StringContent(body, Encoding.UTF8, "application/json");
+                            _httpService.Post($"{node.HttpAddress}/api/transactions", content, _nodeTimeout, token);
+                        });
                     }
                 }, token);
             }, token));
@@ -153,6 +160,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                         FileName = "dotnet"
                     });
                 }, token);
+
+                Thread.Sleep(5000);
             }, token));
         }
     }

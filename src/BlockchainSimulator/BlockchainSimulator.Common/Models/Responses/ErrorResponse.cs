@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace BlockchainSimulator.Common.Models.Responses
 {
     /// <inheritdoc />
@@ -9,6 +11,7 @@ namespace BlockchainSimulator.Common.Models.Responses
         /// <summary>
         /// The error list
         /// </summary>
+        [JsonProperty("errors", Order = 3)]
         public string[] Errors { get; set; }
     }
 }

@@ -15,13 +15,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators.Specific
             var hash = EncryptionService.GetSha256Hash(blockchain.BlockJson);
             if (hash.StartsWith(blockchain.Header.Target))
             {
-                return new ValidationResult(true, new string[] { });
+                return new ValidationResult(true);
             }
 
-            return new ValidationResult(false, new[]
-            {
-                $"The hash h: {hash} of block id: {blockchain.Id} does not match the target t: {blockchain.Header.Target}"
-            });
+            return new ValidationResult(false,
+                $"The hash h: {hash} of block id: {blockchain.Id} does not match the target t: {blockchain.Header.Target}");
         }
     }
 }

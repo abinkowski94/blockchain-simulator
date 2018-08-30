@@ -16,6 +16,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
             _signal = new SemaphoreSlim(0);
         }
 
+        public int Length => _workItems.Count;
+
         public async Task<Func<CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken)
         {
             await _signal.WaitAsync(cancellationToken);
