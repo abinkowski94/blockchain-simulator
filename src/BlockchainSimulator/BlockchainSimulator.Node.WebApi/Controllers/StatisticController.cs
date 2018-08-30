@@ -1,7 +1,9 @@
-using System;
 using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Common.Models.Responses;
+using BlockchainSimulator.Node.BusinessLogic.Model.Statistics;
 using BlockchainSimulator.Node.BusinessLogic.Queues;
+using BlockchainSimulator.Node.BusinessLogic.Services;
+using BlockchainSimulator.Node.WebApi.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlockchainSimulator.Node.WebApi.Controllers
@@ -15,15 +17,18 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
     public class StatisticController : BaseController
     {
         private readonly IMiningQueue _miningQueue;
+        private readonly IStatisticService _statisticService;
 
         /// <inheritdoc />
         /// <summary>
         /// The constructor
         /// </summary>
         /// <param name="miningQueue">The mining queue</param>
-        public StatisticController(IMiningQueue miningQueue)
+        /// <param name="statisticService">The statistic service</param>
+        public StatisticController(IMiningQueue miningQueue, IStatisticService statisticService)
         {
             _miningQueue = miningQueue;
+            _statisticService = statisticService;
         }
 
         /// <summary>
@@ -33,7 +38,8 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         [HttpGet]
         public ActionResult<BaseResponse> GetStatistics()
         {
-            throw new NotImplementedException();
+            return _statisticService.GetStatistics()
+                .GetActionResult<Statistic, Models.Statistic>(this);
         }
 
         /// <summary>
