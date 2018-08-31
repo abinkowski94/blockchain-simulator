@@ -1,10 +1,10 @@
 using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Common.Models.Responses;
-using BlockchainSimulator.Node.BusinessLogic.Model.Statistics;
 using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.WebApi.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Statistic = BlockchainSimulator.Node.BusinessLogic.Model.Statistics.Statistic;
 
 namespace BlockchainSimulator.Node.WebApi.Controllers
 {
@@ -39,7 +39,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         public ActionResult<BaseResponse> GetStatistics()
         {
             return _statisticService.GetStatistics()
-                .GetActionResult<Statistic, Models.Statistic>(this);
+                .GetActionResult<Statistic, Common.Models.Statistic>(this);
         }
 
         /// <summary>
