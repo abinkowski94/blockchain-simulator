@@ -11,8 +11,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Statistics
         public string NodeType { get; set; }
 
         public BlockchainStatistics BlockchainStatistics { get; set; }
-        
-        public CommunicationQueueStatistics CommunicationQueueStatistics { get; set; }
 
         public MiningQueueStatistics MiningQueueStatistics { get; set; }
     }

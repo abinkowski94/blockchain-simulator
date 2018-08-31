@@ -41,7 +41,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             var result = new Statistic();
 
             AddSessionConfiguration(result);
-            AddCommunicationQueueStatistics(result);
             AddMiningQueueStatistics(result);
             AddBlockchainStatistics(result, blockChain);
 
@@ -54,13 +53,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             result.Target = _blockchainConfiguration.Target;
             result.Version = _blockchainConfiguration.Version;
             result.NodeType = _configuration["Node:Type"];
-        }
-
-        private void AddCommunicationQueueStatistics(Statistic result)
-        {
-            result.CommunicationQueueStatistics = new CommunicationQueueStatistics
-            {
-            };
         }
 
         private void AddMiningQueueStatistics(Statistic result)

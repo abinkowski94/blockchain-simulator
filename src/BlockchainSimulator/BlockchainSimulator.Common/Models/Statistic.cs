@@ -38,15 +38,9 @@ namespace BlockchainSimulator.Common.Models
         public MiningQueueStatistics MiningQueueStatistics { get; set; }
 
         /// <summary>
-        /// The communication queue statistics
-        /// </summary>
-        [JsonProperty("communicationQueueStatistics", Order = 6)]
-        public CommunicationQueueStatistics CommunicationQueueStatistics { get; set; }
-
-        /// <summary>
         /// The statistics of the blockchain
         /// </summary>
-        [JsonProperty("blockchainStatistics", Order = 7)]
+        [JsonProperty("blockchainStatistics", Order = 6)]
         public BlockchainStatistics BlockchainStatistics { get; set; }
     }
 }

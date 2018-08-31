@@ -18,7 +18,6 @@ namespace BlockchainSimulator.Node.WebApi.Models.MappingProfiles
             CreateMap<BS.Statistic, Statistic>();
             CreateMap<BS.BlockchainStatistics, BlockchainStatistics>();
             CreateMap<BS.MiningQueueStatistics, MiningQueueStatistics>();
-            CreateMap<BS.CommunicationQueueStatistics, CommunicationQueueStatistics>();
         }
     }
 }
