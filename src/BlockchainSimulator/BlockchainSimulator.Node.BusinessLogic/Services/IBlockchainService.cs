@@ -6,7 +6,5 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
     public interface IBlockchainService
     {
         BaseResponse<BlockBase> GetBlockchain();
-
-        void SaveBlockchain(BlockBase blockBase);
     }
 }

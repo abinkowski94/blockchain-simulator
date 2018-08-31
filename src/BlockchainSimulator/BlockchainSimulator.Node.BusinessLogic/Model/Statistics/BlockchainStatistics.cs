@@ -7,5 +7,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Statistics
         public int BlocksCount { get; set; }
         
         public TimeSpan TotalQueueTimeForBlocks { get; set; }
+        
+        public int TotalTransactionsCount { get; set; }
     }
 }

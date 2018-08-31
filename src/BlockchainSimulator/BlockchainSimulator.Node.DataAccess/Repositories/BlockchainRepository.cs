@@ -8,6 +8,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
     {
         private readonly string _blockchainFileName;
         private readonly IFileRepository _fileRepository;
+        private readonly object _padlock = new object();
 
         public BlockchainRepository(IFileRepository fileRepository)
         {
@@ -23,10 +24,13 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
 
         public Blockchain SaveBlockchain(Blockchain blockchain)
         {
-            var serializedObject = JsonConvert.SerializeObject(blockchain);
-            _fileRepository.SaveFile(serializedObject, _blockchainFileName);
+            lock (_padlock)
+            {
+                var serializedObject = JsonConvert.SerializeObject(blockchain);
+                _fileRepository.SaveFile(serializedObject, _blockchainFileName);
 
-            return blockchain;
+                return blockchain;
+            }
         }
     }
 }

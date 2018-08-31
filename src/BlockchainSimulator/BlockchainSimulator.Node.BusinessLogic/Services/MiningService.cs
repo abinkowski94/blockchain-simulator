@@ -17,6 +17,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IConsensusService _consensusService;
         private readonly IMiningQueue _queue;
 
+        public int MiningAttemptsCount { get; private set; }
+        public int AbandonedBlocksCount { get; private set; }
+
         public MiningService(IBlockchainService blockchainService, IBlockProvider blockProvider,
             IConsensusService consensusService, IMiningQueue queue)
         {
@@ -24,10 +27,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _blockProvider = blockProvider;
             _consensusService = consensusService;
             _queue = queue;
+
+            AbandonedBlocksCount = 0;
+            MiningAttemptsCount = 0;
         }
 
         public void MineBlocks(IEnumerable<Transaction> transactions, DateTime enqueueTime, CancellationToken token)
         {
+            MiningAttemptsCount++;
             var transactionSet = transactions.ToHashSet();
             var blockchainResponse = _blockchainService.GetBlockchain();
             var newBlock = _blockProvider.CreateBlock(transactionSet, enqueueTime, blockchainResponse.Result);
@@ -35,6 +42,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             var response = _consensusService.AcceptBlockchain(newBlock);
             if (response is ErrorResponse<bool> errorResponse && !errorResponse.Result)
             {
+                AbandonedBlocksCount++;
                 _queue.QueueMiningTask(t => new Task(() => MineBlocks(transactionSet, enqueueTime, token)));
             }
         }

@@ -16,7 +16,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
             _merkleTreeProvider = merkleTreeProvider;
         }
 
-        public BlockBase CreateBlock(HashSet<Transaction> transactions, DateTime enqueueTime, BlockBase parentBlock = null)
+        public BlockBase CreateBlock(HashSet<Transaction> transactions, DateTime enqueueTime,
+            BlockBase parentBlock = null)
         {
             if (transactions == null)
             {

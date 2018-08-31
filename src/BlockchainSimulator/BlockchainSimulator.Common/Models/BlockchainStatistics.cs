@@ -19,5 +19,11 @@ namespace BlockchainSimulator.Common.Models
         /// </summary>
         [JsonProperty("totalQueueTimeForBlocks", Order = 2)]
         public TimeSpan TotalQueueTimeForBlocks { get; set; }
+        
+        /// <summary>
+        /// The total transactions count
+        /// </summary>
+        [JsonProperty("totalTransactionsCount", Order = 3)]
+        public int TotalTransactionsCount { get; set; }
     }
 }

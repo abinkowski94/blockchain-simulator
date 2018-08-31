@@ -11,5 +11,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Statistics
         public TimeSpan TotalQueueTime { get; set; }
         
         public TimeSpan AverageQueueTime { get; set; }
+        
+        public int AbandonedBlocksCount { get; set; }
+        
+        public int TotalMiningAttemptsCount { get; set; }
     }
 }
