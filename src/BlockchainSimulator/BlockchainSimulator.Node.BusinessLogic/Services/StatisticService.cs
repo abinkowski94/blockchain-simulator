@@ -41,8 +41,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             var result = new Statistic();
 
             AddSessionConfiguration(result);
+            AddCommunicationQueueStatistics(result);
+            AddMiningQueueStatistics(result);
             AddBlockchainStatistics(result, blockChain);
-            AddQueueStatistics(result);
 
             return new SuccessResponse<Statistic>($"The statistics has been generated on: {DateTime.UtcNow}", result);
         }
@@ -55,17 +56,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             result.NodeType = _configuration["Node:Type"];
         }
 
-        private static void AddBlockchainStatistics(Statistic result, Blockchain blockChain)
+        private void AddCommunicationQueueStatistics(Statistic result)
         {
-            result.BlockchainStatistics = new BlockchainStatistics
+            result.CommunicationQueueStatistics = new CommunicationQueueStatistics
             {
-                BlocksCount = blockChain.Blocks.Count,
-                TotalQueueTimeForBlocks = blockChain.Blocks.Sum(b => b.QueueTime),
-                TotalTransactionsCount = blockChain.Blocks.Sum(b => b.Body.TransactionCounter)
             };
         }
 
-        private void AddQueueStatistics(Statistic result)
+        private void AddMiningQueueStatistics(Statistic result)
         {
             result.MiningQueueStatistics = new MiningQueueStatistics
             {
@@ -76,6 +74,16 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                                    (_miningQueue.MaxQueueLength != 0 ? _miningQueue.MaxQueueLength : 1),
                 AbandonedBlocksCount = _miningService.AbandonedBlocksCount,
                 TotalMiningAttemptsCount = _miningService.MiningAttemptsCount
+            };
+        }
+
+        private static void AddBlockchainStatistics(Statistic result, Blockchain blockChain)
+        {
+            result.BlockchainStatistics = new BlockchainStatistics
+            {
+                BlocksCount = blockChain.Blocks.Count,
+                TotalQueueTimeForBlocks = blockChain.Blocks.Sum(b => b.QueueTime),
+                TotalTransactionsCount = blockChain.Blocks.Sum(b => b.Body.TransactionCounter)
             };
         }
     }

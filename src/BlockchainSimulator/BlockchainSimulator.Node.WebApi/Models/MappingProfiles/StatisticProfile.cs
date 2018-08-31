@@ -1,5 +1,6 @@
 using AutoMapper;
 using BlockchainSimulator.Common.Models;
+using BS = BlockchainSimulator.Node.BusinessLogic.Model.Statistics;
 
 namespace BlockchainSimulator.Node.WebApi.Models.MappingProfiles
 {
@@ -14,9 +15,10 @@ namespace BlockchainSimulator.Node.WebApi.Models.MappingProfiles
         /// </summary>
         public StatisticProfile()
         {
-            CreateMap<BlockchainSimulator.Node.BusinessLogic.Model.Statistics.Statistic, Statistic>();
-            CreateMap<BlockchainSimulator.Node.BusinessLogic.Model.Statistics.BlockchainStatistics, BlockchainStatistics>();
-            CreateMap<BlockchainSimulator.Node.BusinessLogic.Model.Statistics.MiningQueueStatistics, MiningQueueStatistics>();
+            CreateMap<BS.Statistic, Statistic>();
+            CreateMap<BS.BlockchainStatistics, BlockchainStatistics>();
+            CreateMap<BS.MiningQueueStatistics, MiningQueueStatistics>();
+            CreateMap<BS.CommunicationQueueStatistics, CommunicationQueueStatistics>();
         }
     }
 }

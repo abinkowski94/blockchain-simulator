@@ -30,17 +30,23 @@ namespace BlockchainSimulator.Common.Models
         /// </summary>
         [JsonProperty("nodeType", Order = 4)]
         public string NodeType { get; set; }
-        
-        /// <summary>
-        /// The statistics of the blockchain
-        /// </summary>
-        [JsonProperty("blockchainStatistics", Order = 5)]
-        public BlockchainStatistics BlockchainStatistics { get; set; }
 
         /// <summary>
         /// The statistics of the mining queue
         /// </summary>
-        [JsonProperty("miningQueueStatistics", Order = 6)]
+        [JsonProperty("miningQueueStatistics", Order = 5)]
         public MiningQueueStatistics MiningQueueStatistics { get; set; }
+
+        /// <summary>
+        /// The communication queue statistics
+        /// </summary>
+        [JsonProperty("communicationQueueStatistics", Order = 6)]
+        public CommunicationQueueStatistics CommunicationQueueStatistics { get; set; }
+
+        /// <summary>
+        /// The statistics of the blockchain
+        /// </summary>
+        [JsonProperty("blockchainStatistics", Order = 7)]
+        public BlockchainStatistics BlockchainStatistics { get; set; }
     }
 }

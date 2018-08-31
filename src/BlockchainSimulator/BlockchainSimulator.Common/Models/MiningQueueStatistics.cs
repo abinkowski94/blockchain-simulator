@@ -9,28 +9,28 @@ namespace BlockchainSimulator.Common.Models
     public class MiningQueueStatistics
     {
         /// <summary>
-        /// The max queue length
-        /// </summary>
-        [JsonProperty("maxQueueLength", Order = 1)]
-        public int MaxQueueLength { get; set; }
-
-        /// <summary>
-        /// Current queue length
-        /// </summary>
-        [JsonProperty("currentQueueLength", Order = 2)]
-        public int CurrentQueueLength { get; set; }
-
-        /// <summary>
         /// The number of mining attempts
         /// </summary>
-        [JsonProperty("totalMiningAttemptsCount", Order = 3)]
+        [JsonProperty("totalMiningAttemptsCount", Order = 1)]
         public int TotalMiningAttemptsCount { get; set; }
 
         /// <summary>
         /// The number of abandoned blocks work
         /// </summary>
-        [JsonProperty("abandonedBlocksCount", Order = 4)]
+        [JsonProperty("abandonedBlocksCount", Order = 2)]
         public int AbandonedBlocksCount { get; set; }
+        
+        /// <summary>
+        /// The max queue length
+        /// </summary>
+        [JsonProperty("maxQueueLength", Order = 3)]
+        public int MaxQueueLength { get; set; }
+
+        /// <summary>
+        /// Current queue length
+        /// </summary>
+        [JsonProperty("currentQueueLength", Order = 4)]
+        public int CurrentQueueLength { get; set; }
 
         /// <summary>
         /// Total queue time
