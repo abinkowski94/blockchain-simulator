@@ -27,7 +27,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
         public void AddTransaction_Transaction_Transaction()
         {
             // Arrange
-            var transaction = new Models.Transaction { Id = "1", Amount = 10, Fee = 11 };
+            var transaction = new Models.Transactions.Transaction { Id = "1", Amount = 10, Fee = 11 };
 
             _transactionServiceMock.Setup(p => p.AddTransaction(It.IsAny<Transaction>()))
                 .Returns((Transaction tr) => new SuccessResponse<Transaction>("Transaction has been added", tr));
@@ -35,7 +35,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
             // Act
             var result = _transactionsController.AddTransaction(transaction);
             var response = (result?.Result as ObjectResult)?.Value as BaseResponse;
-            var resultTransaction = response?.Result as Models.Transaction;
+            var resultTransaction = response?.Result as Models.Transactions.Transaction;
 
             // Assert
             _transactionServiceMock.Verify(p => p.AddTransaction(It.IsAny<Transaction>()));
@@ -76,7 +76,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
             // Act
             var result = _transactionsController.GetPendingTransactions();
             var transactions =
-                ((result?.Result as ObjectResult)?.Value as BaseResponse)?.Result as List<Models.Transaction>;
+                ((result?.Result as ObjectResult)?.Value as BaseResponse)?.Result as List<Models.Transactions.Transaction>;
             var transaction = transactions?.First();
 
             // Assert
@@ -123,7 +123,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
 
             // Act
             var result = _transactionsController.GetTransaction(id);
-            var transaction = ((result?.Result as ObjectResult)?.Value as BaseResponse)?.Result as Models.Transaction;
+            var transaction = ((result?.Result as ObjectResult)?.Value as BaseResponse)?.Result as Models.Transactions.Transaction;
 
             // Assert
             _transactionServiceMock.Verify(p => p.GetTransaction(id));
@@ -152,7 +152,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
             // Act
             var result = _transactionsController.GetTransaction(null);
             var errorResponse = (result?.Result as ObjectResult)?.Value as ErrorResponse;
-            var transaction = errorResponse?.Result as Models.Transaction;
+            var transaction = errorResponse?.Result as Models.Transactions.Transaction;
 
             // Assert
             _transactionServiceMock.Verify(p => p.GetTransaction(null));

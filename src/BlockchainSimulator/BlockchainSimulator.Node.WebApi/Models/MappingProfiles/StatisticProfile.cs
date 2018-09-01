@@ -1,5 +1,6 @@
 using AutoMapper;
 using BlockchainSimulator.Common.Models;
+using BlockchainSimulator.Common.Models.Statistics;
 using BS = BlockchainSimulator.Node.BusinessLogic.Model.Statistics;
 
 namespace BlockchainSimulator.Node.WebApi.Models.MappingProfiles

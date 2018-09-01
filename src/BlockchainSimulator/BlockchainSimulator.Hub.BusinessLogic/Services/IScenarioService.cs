@@ -2,6 +2,7 @@
 using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
 using System;
 using System.Collections.Generic;
+using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {

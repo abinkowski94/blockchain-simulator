@@ -1,8 +1,8 @@
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Newtonsoft.Json;
 
-namespace BlockchainSimulator.Hub.BusinessLogic.Model
+namespace BlockchainSimulator.Hub.BusinessLogic.Model.Consensus
 {
     /// <summary>
     /// The other node of the network

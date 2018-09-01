@@ -1,4 +1,5 @@
 using AutoMapper;
+using BlockchainSimulator.Node.WebApi.Models.Transactions;
 
 namespace BlockchainSimulator.Node.WebApi.Models.MappingProfiles
 {

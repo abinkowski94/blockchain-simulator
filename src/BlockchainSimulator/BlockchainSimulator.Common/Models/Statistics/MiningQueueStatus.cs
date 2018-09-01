@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace BlockchainSimulator.Common.Models
+namespace BlockchainSimulator.Common.Models.Statistics
 {
     /// <summary>
     /// The status of the mining queue

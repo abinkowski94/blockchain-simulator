@@ -14,6 +14,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BlockchainSimulator.Common.Models;
+using BlockchainSimulator.Common.Models.Statistics;
+using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
+using BlockchainSimulator.Hub.BusinessLogic.Model.Transactions;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {

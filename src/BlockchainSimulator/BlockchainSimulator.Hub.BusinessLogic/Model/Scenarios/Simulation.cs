@@ -1,9 +1,9 @@
-using BlockchainSimulator.Common.Models;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using BlockchainSimulator.Hub.BusinessLogic.Model.Consensus;
+using Newtonsoft.Json;
 
-namespace BlockchainSimulator.Hub.WebApi.Model
+namespace BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios
 {
     /// <summary>
     /// The simulation
@@ -37,7 +37,7 @@ namespace BlockchainSimulator.Hub.WebApi.Model
         /// <summary>
         /// The current status of simulation
         /// </summary>
-        [JsonProperty("status")]
+        [JsonIgnore]
         public SimulationStatuses Status { get; set; }
     }
 }

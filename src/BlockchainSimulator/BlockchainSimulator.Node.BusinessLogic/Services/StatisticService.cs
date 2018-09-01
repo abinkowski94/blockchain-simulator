@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
@@ -77,6 +78,29 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 TotalQueueTimeForBlocks = blockChain.Blocks.Sum(b => b.QueueTime),
                 TotalTransactionsCount = blockChain.Blocks.Sum(b => b.Body.TransactionCounter)
             };
+            
+            AddTransactionsStatistics(result.BlockchainStatistics, blockChain);
+        }
+
+        private static void AddTransactionsStatistics(BlockchainStatistics blockchainStatistics, Blockchain blockChain)
+        {
+            blockchainStatistics.TransactionsStatistics = new List<TransactionStatistics>();
+            
+            blockChain.Blocks.ForEach(b =>
+            {
+                b.Body.Transactions.ForEach(t =>
+                {
+                    blockchainStatistics.TransactionsStatistics.Add(new TransactionStatistics
+                    {
+                        BlockId = b.Id,
+                        BlockQueueTime = b.QueueTime,
+                        TransactionRegistrationTime = t.RegistrationTime,
+                        TransactionId = t.Id,
+                        TransactionFee = t.Fee,
+                        TransactionConfirmationTime = b.Header.TimeStamp - t.RegistrationTime
+                    });
+                });
+            });
         }
     }
 }

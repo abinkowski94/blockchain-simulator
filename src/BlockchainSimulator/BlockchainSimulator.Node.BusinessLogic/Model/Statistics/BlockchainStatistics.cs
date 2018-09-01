@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Model.Statistics
 {
@@ -9,5 +10,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Statistics
         public TimeSpan TotalQueueTimeForBlocks { get; set; }
         
         public int TotalTransactionsCount { get; set; }
+        
+        public List<TransactionStatistics> TransactionsStatistics { get; set; }
     }
 }

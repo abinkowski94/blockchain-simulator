@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace BlockchainSimulator.Node.WebApi.Models
+namespace BlockchainSimulator.Node.WebApi.Models.Blockchain
 {
     /// <summary>
     /// The encoded blockchain

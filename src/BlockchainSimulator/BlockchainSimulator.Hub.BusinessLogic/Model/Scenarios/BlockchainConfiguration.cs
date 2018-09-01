@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace BlockchainSimulator.Hub.BusinessLogic.Model
+namespace BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios
 {
     /// <summary>
     /// The settings of the simulation

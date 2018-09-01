@@ -1,4 +1,4 @@
-namespace BlockchainSimulator.Hub.BusinessLogic.Model
+namespace BlockchainSimulator.Hub.WebApi.Model.Scenarios
 {
     /// <summary>
     /// The

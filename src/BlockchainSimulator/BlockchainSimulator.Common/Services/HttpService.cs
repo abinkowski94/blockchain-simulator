@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BlockchainSimulator.Common.Services
 {
@@ -20,18 +21,7 @@ namespace BlockchainSimulator.Common.Services
         /// <returns>The http response message</returns>
         public HttpResponseMessage Get(string uri, TimeSpan? timeout = null, CancellationToken? token = null)
         {
-            using (var httpClientHandler = new HttpClientHandler())
-            {
-                // Turns off SSL
-                httpClientHandler.ServerCertificateCustomValidationCallback = (msg, cert, ch, err) => true;
-                using (var httpClient = new HttpClient(httpClientHandler)
-                { Timeout = timeout ?? TimeSpan.FromSeconds(10) })
-                {
-                    var responseTask = httpClient.GetAsync(uri, token ?? CancellationToken.None);
-                    responseTask.Wait(token ?? CancellationToken.None);
-                    return responseTask.Result;
-                }
-            }
+            return CallHttpRequest(httpClient => httpClient.GetAsync(uri, token ?? CancellationToken.None));
         }
 
         /// <inheritdoc />
@@ -46,18 +36,7 @@ namespace BlockchainSimulator.Common.Services
         public HttpResponseMessage Post(string uri, HttpContent body, TimeSpan? timeout = null,
             CancellationToken? token = null)
         {
-            using (var httpClientHandler = new HttpClientHandler())
-            {
-                // Turns off SSL
-                httpClientHandler.ServerCertificateCustomValidationCallback = (msg, cert, ch, err) => true;
-                using (var httpClient = new HttpClient(httpClientHandler)
-                { Timeout = timeout ?? TimeSpan.FromSeconds(10) })
-                {
-                    var responseTask = httpClient.PostAsync(uri, body, token ?? CancellationToken.None);
-                    responseTask.Wait(token ?? CancellationToken.None);
-                    return responseTask.Result;
-                }
-            }
+            return CallHttpRequest(httpClient => httpClient.PostAsync(uri, body, token ?? CancellationToken.None));
         }
 
         /// <inheritdoc />
@@ -72,14 +51,20 @@ namespace BlockchainSimulator.Common.Services
         public HttpResponseMessage Put(string uri, HttpContent body, TimeSpan? timeout = null,
             CancellationToken? token = null)
         {
+            return CallHttpRequest(httpClient => httpClient.PutAsync(uri, body, token ?? CancellationToken.None));
+        }
+
+        private static HttpResponseMessage CallHttpRequest(Func<HttpClient, Task<HttpResponseMessage>> func,
+            TimeSpan? timeout = null, CancellationToken? token = null)
+        {
             using (var httpClientHandler = new HttpClientHandler())
             {
                 // Turns off SSL
                 httpClientHandler.ServerCertificateCustomValidationCallback = (msg, cert, ch, err) => true;
                 using (var httpClient = new HttpClient(httpClientHandler)
-                { Timeout = timeout ?? TimeSpan.FromSeconds(10) })
+                    {Timeout = timeout ?? TimeSpan.FromSeconds(10)})
                 {
-                    var responseTask = httpClient.PutAsync(uri, body, token ?? CancellationToken.None);
+                    var responseTask = func(httpClient);
                     responseTask.Wait(token ?? CancellationToken.None);
                     return responseTask.Result;
                 }

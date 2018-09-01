@@ -6,6 +6,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Storage
 {

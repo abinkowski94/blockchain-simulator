@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Collections.Generic;
 using System.Linq;
+using BlockchainSimulator.Common.Models.Consensus;
+using BlockchainSimulator.Node.WebApi.Models.Blockchain;
 using Xunit;
 
 namespace BlockchainSimulator.Node.WebApi.Tests.Controllers

@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace BlockchainSimulator.Hub.WebApi.Model
+namespace BlockchainSimulator.Hub.WebApi.Model.Scenarios
 {
     /// <summary>
     /// The settings of the simulation

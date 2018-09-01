@@ -1,5 +1,6 @@
 using AutoMapper;
 using BlockchainSimulator.Common.Models;
+using BlockchainSimulator.Common.Models.Consensus;
 
 namespace BlockchainSimulator.Node.WebApi.Models.MappingProfiles
 {

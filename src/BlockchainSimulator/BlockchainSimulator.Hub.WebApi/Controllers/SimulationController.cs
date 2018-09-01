@@ -5,6 +5,8 @@ using BlockchainSimulator.Hub.WebApi.Extensions;
 using BlockchainSimulator.Hub.WebApi.Model;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using BlockchainSimulator.Common.Models.Consensus;
+using BlockchainSimulator.Hub.WebApi.Model.Scenarios;
 
 namespace BlockchainSimulator.Hub.WebApi.Controllers
 {
@@ -37,9 +39,9 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         [HttpPost]
         public ActionResult<BaseResponse> AddNode(Guid scenarioId, [FromBody] ServerNode serverNode)
         {
-            var mappedNode = LocalMapper.Map<BusinessLogic.Model.ServerNode>(serverNode);
+            var mappedNode = LocalMapper.Map<BusinessLogic.Model.Consensus.ServerNode>(serverNode);
             return _simulationService.AddNode(scenarioId, mappedNode)
-                .GetActionResult<BusinessLogic.Model.Simulation, Simulation>(this);
+                .GetActionResult<BusinessLogic.Model.Scenarios.Simulation, Simulation>(this);
         }
 
         /// <summary>
@@ -52,9 +54,9 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         public ActionResult<BaseResponse> ChangeConfiguration(Guid scenarioId,
             [FromBody] BlockchainConfiguration configuration)
         {
-            var mappedConfiguration = LocalMapper.Map<BusinessLogic.Model.BlockchainConfiguration>(configuration);
+            var mappedConfiguration = LocalMapper.Map<BusinessLogic.Model.Scenarios.BlockchainConfiguration>(configuration);
             return _simulationService.ChangeConfiguration(scenarioId, mappedConfiguration)
-                .GetActionResult<BusinessLogic.Model.Simulation, Simulation>(this);
+                .GetActionResult<BusinessLogic.Model.Scenarios.Simulation, Simulation>(this);
         }
 
         /// <summary>
@@ -68,7 +70,7 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         public ActionResult<BaseResponse> ConnectNodes(Guid scenarioId, string nodeId1, string nodeId2)
         {
             return _simulationService.ConnectNodes(scenarioId, nodeId1, nodeId2)
-                .GetActionResult<BusinessLogic.Model.Simulation, Simulation>(this);
+                .GetActionResult<BusinessLogic.Model.Scenarios.Simulation, Simulation>(this);
         }
 
         /// <summary>
@@ -81,7 +83,7 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         public ActionResult<BaseResponse> DeleteNode(Guid scenarioId, string nodeId)
         {
             return _simulationService.DeleteNode(scenarioId, nodeId)
-                .GetActionResult<BusinessLogic.Model.Simulation, Simulation>(this);
+                .GetActionResult<BusinessLogic.Model.Scenarios.Simulation, Simulation>(this);
         }
 
         /// <summary>
@@ -115,9 +117,9 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         [HttpPost("start/{scenarioId}")]
         public ActionResult<BaseResponse> Start(Guid scenarioId, [FromBody] SimulationSettings settings)
         {
-            var mappedSetting = LocalMapper.Map<BusinessLogic.Model.SimulationSettings>(settings);
+            var mappedSetting = LocalMapper.Map<BusinessLogic.Model.Scenarios.SimulationSettings>(settings);
             return _simulationService.StartSimulation(scenarioId, mappedSetting)
-                .GetActionResult<BusinessLogic.Model.Simulation, Simulation>(this);
+                .GetActionResult<BusinessLogic.Model.Scenarios.Simulation, Simulation>(this);
         }
     }
 }

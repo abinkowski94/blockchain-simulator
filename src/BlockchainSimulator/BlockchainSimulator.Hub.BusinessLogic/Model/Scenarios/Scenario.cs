@@ -1,7 +1,7 @@
-using Newtonsoft.Json;
 using System;
+using Newtonsoft.Json;
 
-namespace BlockchainSimulator.Hub.WebApi.Model
+namespace BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios
 {
     /// <summary>
     /// The test scenario

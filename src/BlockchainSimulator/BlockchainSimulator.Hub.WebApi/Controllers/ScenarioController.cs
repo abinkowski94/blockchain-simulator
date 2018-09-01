@@ -5,6 +5,7 @@ using BlockchainSimulator.Hub.WebApi.Model;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using BlockchainSimulator.Hub.WebApi.Model.Scenarios;
 
 namespace BlockchainSimulator.Hub.WebApi.Controllers
 {
@@ -36,10 +37,10 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         [HttpPost]
         public ActionResult<BaseResponse> CreateScenario([FromBody] Scenario scenario)
         {
-            var mappedScenario = LocalMapper.Map<BusinessLogic.Model.Scenario>(scenario);
+            var mappedScenario = LocalMapper.Map<BusinessLogic.Model.Scenarios.Scenario>(scenario);
             var response = _scenarioService.CreateScenario(mappedScenario);
 
-            return response.GetActionResult<BusinessLogic.Model.Scenario, Scenario>(this);
+            return response.GetActionResult<BusinessLogic.Model.Scenarios.Scenario, Scenario>(this);
         }
 
         /// <summary>
@@ -51,7 +52,7 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         public ActionResult<BaseResponse> DeleteScenario(Guid id)
         {
             return _scenarioService.RemoveScenario(id)
-                .GetActionResult<BusinessLogic.Model.Scenario, Scenario>(this);
+                .GetActionResult<BusinessLogic.Model.Scenarios.Scenario, Scenario>(this);
         }
 
         /// <summary>
@@ -63,7 +64,7 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         public ActionResult<BaseResponse> DuplicateScenario(Guid id)
         {
             return _scenarioService.DuplicateScenario(id)
-                .GetActionResult<BusinessLogic.Model.Scenario, Scenario>(this);
+                .GetActionResult<BusinessLogic.Model.Scenarios.Scenario, Scenario>(this);
         }
 
         /// <summary>
@@ -75,7 +76,7 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         public ActionResult<BaseResponse> GetScenario(Guid id)
         {
             return _scenarioService.GetScenario(id)
-                .GetActionResult<BusinessLogic.Model.Scenario, Scenario>(this);
+                .GetActionResult<BusinessLogic.Model.Scenarios.Scenario, Scenario>(this);
         }
 
         /// <summary>
@@ -86,7 +87,7 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         public ActionResult<BaseResponse> GetScenarios()
         {
             return _scenarioService.GetScenarios()
-                .GetActionResult<List<BusinessLogic.Model.Scenario>, List<Scenario>>(this);
+                .GetActionResult<List<BusinessLogic.Model.Scenarios.Scenario>, List<Scenario>>(this);
         }
 
         /// <summary>
@@ -99,7 +100,7 @@ namespace BlockchainSimulator.Hub.WebApi.Controllers
         public ActionResult<BaseResponse> RenameScenario(Guid id, string newName)
         {
             return _scenarioService.RenameScenario(id, newName)
-                .GetActionResult<BusinessLogic.Model.Scenario, Scenario>(this);
+                .GetActionResult<BusinessLogic.Model.Scenarios.Scenario, Scenario>(this);
         }
     }
 }

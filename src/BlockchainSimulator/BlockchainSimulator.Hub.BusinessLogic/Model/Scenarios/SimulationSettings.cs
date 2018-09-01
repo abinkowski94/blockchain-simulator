@@ -1,8 +1,7 @@
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
-namespace BlockchainSimulator.Hub.WebApi.Model
+namespace BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios
 {
     /// <summary>
     /// The simulation settings
@@ -12,13 +11,11 @@ namespace BlockchainSimulator.Hub.WebApi.Model
         /// <summary>
         /// Ends the simulation after given time
         /// </summary>
-        [JsonProperty("forceEndAfter")]
         public TimeSpan? ForceEndAfter { get; set; }
 
         /// <summary>
         /// Dictionary of nodes and number of transactions to be sent
         /// </summary>
-        [JsonProperty("nodesAndTransactions")]
         public Dictionary<string, long> NodesAndTransactions { get; set; }
     }
 }

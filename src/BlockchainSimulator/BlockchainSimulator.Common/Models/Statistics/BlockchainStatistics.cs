@@ -1,7 +1,8 @@
 using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace BlockchainSimulator.Common.Models
+namespace BlockchainSimulator.Common.Models.Statistics
 {
     /// <summary>
     /// The blockchain statistics
@@ -25,5 +26,11 @@ namespace BlockchainSimulator.Common.Models
         /// </summary>
         [JsonProperty("totalQueueTimeForBlocks", Order = 3)]
         public TimeSpan TotalQueueTimeForBlocks { get; set; }
+
+        /// <summary>
+        /// The transactions statistics
+        /// </summary>
+        [JsonProperty("transactionsStatistics", Order = 4)]
+        public List<TransactionStatistics> TransactionsStatistics { get; set; }
     }
 }
