@@ -4,6 +4,7 @@ using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Consensus;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Model.ValidationResults;
+using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.BusinessLogic.Services.Specific;
 using BlockchainSimulator.Node.BusinessLogic.Validators;
 using BlockchainSimulator.Node.DataAccess.Converters;
@@ -34,7 +35,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
             var httpServiceMock = new Mock<IHttpService>();
 
             _consensusService = new ProofOfWorkConsensusService(_backgroundTaskQueueMock.Object,
-                _blockchainRepositoryMock.Object, _blockchainValidatorMock.Object, httpServiceMock.Object);
+                _blockchainRepositoryMock.Object, _blockchainValidatorMock.Object, httpServiceMock.Object,
+                new Mock<IStatisticService>().Object);
         }
 
         [Fact]

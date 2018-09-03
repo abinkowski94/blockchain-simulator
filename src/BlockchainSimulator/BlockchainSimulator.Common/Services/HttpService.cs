@@ -64,9 +64,21 @@ namespace BlockchainSimulator.Common.Services
                 using (var httpClient = new HttpClient(httpClientHandler)
                 { Timeout = timeout ?? TimeSpan.FromSeconds(10) })
                 {
-                    var responseTask = func(httpClient);
-                    responseTask.Wait(token ?? CancellationToken.None);
-                    return responseTask.Result;
+                    try
+                    {
+                        var responseTask = func(httpClient);
+                        if (!responseTask.IsCanceled)
+                        {
+                            responseTask.Wait(token ?? CancellationToken.None);
+                            return responseTask.Result;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        // TODO
+                    }
+
+                    return null;
                 }
             }
         }

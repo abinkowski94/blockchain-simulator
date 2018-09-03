@@ -1,3 +1,6 @@
+using BlockchainSimulator.Node.BusinessLogic.Queues;
+using BlockchainSimulator.Node.BusinessLogic.Services;
+using Moq;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,11 +10,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Queues
 {
     public class MiningQueueTests
     {
-        private readonly BusinessLogic.Queues.MiningQueue _taskQueue;
+        private readonly MiningQueue _taskQueue;
 
         public MiningQueueTests()
         {
-            _taskQueue = new BusinessLogic.Queues.MiningQueue();
+            _taskQueue = new MiningQueue(new Mock<IStatisticService>().Object);
         }
 
         [Fact]

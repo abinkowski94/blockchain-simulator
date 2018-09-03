@@ -42,7 +42,7 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
             services.AddSingleton<IBlockchainService, BlockchainService>();
             services.AddSingleton<ITransactionService, TransactionService>();
             services.AddSingleton<IMiningService, MiningService>();
-            services.AddTransient<IStatisticService, StatisticService>();
+            services.AddSingleton<IStatisticService, StatisticService>();
             services.AddTransient<IHttpService, HttpService>();
 
             // Specific

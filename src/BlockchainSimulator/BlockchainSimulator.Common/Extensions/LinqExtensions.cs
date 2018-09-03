@@ -11,7 +11,7 @@ namespace BlockchainSimulator.Common.Extensions
     public static class LinqExtensions
     {
         /// <summary>
-        /// The foreach extension
+        /// The for each extension
         /// </summary>
         /// <param name="source">The source collection</param>
         /// <param name="action">The action to perform</param>
@@ -25,7 +25,7 @@ namespace BlockchainSimulator.Common.Extensions
         }
 
         /// <summary>
-        /// The parallel foreach
+        /// The parallel for each
         /// </summary>
         /// <param name="source">The source collection</param>
         /// <param name="action">The action</param>
@@ -50,12 +50,12 @@ namespace BlockchainSimulator.Common.Extensions
         }
 
         /// <summary>
-        /// Sums the timespans
+        /// Sums the time spans
         /// </summary>
         /// <param name="source">The collection</param>
         /// <param name="timeSpan">The requested timespan</param>
         /// <typeparam name="T">The generic type</typeparam>
-        /// <returns>The sum of timespans</returns>
+        /// <returns>The sum of time spans</returns>
         public static TimeSpan Sum<T>(this IEnumerable<T> source, Func<T, TimeSpan> timeSpan)
         {
             var result = new TimeSpan();

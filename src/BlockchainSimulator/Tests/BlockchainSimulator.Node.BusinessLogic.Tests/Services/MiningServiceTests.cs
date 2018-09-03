@@ -30,7 +30,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             _consensusServiceMock = new Mock<IConsensusService>();
             _miningQueueMock = new Mock<IMiningQueue>();
             _miningService = new MiningService(_blockchainServiceMock.Object, _blockProviderMock.Object,
-                _consensusServiceMock.Object, _miningQueueMock.Object);
+                _consensusServiceMock.Object, _miningQueueMock.Object, new Mock<IStatisticService>().Object);
         }
 
         [Fact]

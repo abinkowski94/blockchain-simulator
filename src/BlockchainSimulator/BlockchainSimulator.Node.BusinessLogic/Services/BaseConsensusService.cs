@@ -2,7 +2,6 @@ using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Consensus;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
-using BlockchainSimulator.Node.BusinessLogic.Model.Statistics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,10 +14,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
     {
         protected readonly IBackgroundTaskQueue _queue;
         protected readonly ConcurrentDictionary<string, ServerNode> _serverNodes;
-
-        public abstract List<List<BlockInfo>> BlockchainBranches { get; protected set; }
-
-        public abstract int RejectedIncomingBlockchainCount { get; protected set; }
 
         protected BaseConsensusService(IBackgroundTaskQueue queue)
         {

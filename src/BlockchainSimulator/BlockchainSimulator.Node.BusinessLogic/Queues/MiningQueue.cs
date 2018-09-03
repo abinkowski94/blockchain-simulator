@@ -1,3 +1,4 @@
+using BlockchainSimulator.Node.BusinessLogic.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -8,27 +9,24 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
     public class MiningQueue : IMiningQueue
     {
         private readonly SemaphoreSlim _signal;
+        private readonly IStatisticService _statisticService;
         private readonly ConcurrentQueue<Tuple<DateTime, Func<CancellationToken, Task>>> _workItems;
 
         public int Length => _workItems.Count;
-        public int MaxQueueLength { get; private set; }
-        public TimeSpan TotalQueueTime { get; private set; }
 
-        public MiningQueue()
+        public MiningQueue(IStatisticService statisticService)
         {
             _workItems = new ConcurrentQueue<Tuple<DateTime, Func<CancellationToken, Task>>>();
             _signal = new SemaphoreSlim(0);
-
-            MaxQueueLength = 0;
-            TotalQueueTime = new TimeSpan();
+            _statisticService = statisticService;
         }
 
         public async Task<Func<CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken)
         {
             await _signal.WaitAsync(cancellationToken);
-            _workItems.TryDequeue(out var workItem);
 
-            TotalQueueTime += DateTime.UtcNow - workItem.Item1;
+            _workItems.TryDequeue(out var workItem);
+            _statisticService.RegisterQueueTime(DateTime.UtcNow - workItem.Item1);
 
             return workItem.Item2;
         }
@@ -41,12 +39,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
             }
 
             _workItems.Enqueue(new Tuple<DateTime, Func<CancellationToken, Task>>(DateTime.UtcNow, workItem));
-
-            if (_workItems.Count > MaxQueueLength)
-            {
-                MaxQueueLength = _workItems.Count;
-            }
-
+            _statisticService.RegisterQueueLengthChange(Length);
             _signal.Release();
         }
     }
