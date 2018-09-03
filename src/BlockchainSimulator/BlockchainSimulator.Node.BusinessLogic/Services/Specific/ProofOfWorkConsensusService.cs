@@ -25,25 +25,35 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
         private readonly IHttpService _httpService;
         private readonly object _padlock = new object();
 
+        public sealed override int RejectedIncomingBlockchainCount { get; protected set; }
+
         public ProofOfWorkConsensusService(IBackgroundTaskQueue queue, IBlockchainRepository blockchainRepository,
             IBlockchainValidator blockchainValidator, IHttpService httpService) : base(queue)
         {
             _blockchainRepository = blockchainRepository;
             _blockchainValidator = blockchainValidator;
             _httpService = httpService;
+            RejectedIncomingBlockchainCount = 0;
         }
 
         public override BaseResponse<bool> AcceptBlockchain(string base64Blockchain)
         {
             if (base64Blockchain == null)
             {
+                RejectedIncomingBlockchainCount++;
                 return new ErrorResponse<bool>("The blockchain can not be null!", false);
             }
 
             var blockchainJson = Encoding.UTF8.GetString(Convert.FromBase64String(base64Blockchain));
             var incomingBlockchain = BlockchainConverter.DeserializeBlockchain(blockchainJson);
 
-            return AcceptBlockchain(incomingBlockchain);
+            var result = AcceptBlockchain(incomingBlockchain);
+            if (!result.IsSuccess)
+            {
+                RejectedIncomingBlockchainCount++;
+            }
+
+            return result;
         }
 
         public override BaseResponse<bool> AcceptBlockchain(BlockBase blockBase)

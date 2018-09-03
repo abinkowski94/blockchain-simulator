@@ -7,6 +7,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public interface IConsensusService
     {
+        int RejectedIncomingBlockchainCount { get; }
+        
         BaseResponse<bool> AcceptBlockchain(string base64Blockchain);
 
         BaseResponse<bool> AcceptBlockchain(BlockBase blockBase);

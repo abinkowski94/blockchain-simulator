@@ -1,5 +1,4 @@
 ﻿using BlockchainSimulator.Common.Extensions;
-using BlockchainSimulator.Hub.BusinessLogic.Model;
 using BlockchainSimulator.Hub.DataAccess.Repositories;
 using Newtonsoft.Json;
 using System;

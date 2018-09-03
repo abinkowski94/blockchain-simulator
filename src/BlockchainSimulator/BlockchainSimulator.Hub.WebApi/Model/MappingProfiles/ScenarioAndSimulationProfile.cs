@@ -1,5 +1,4 @@
 using AutoMapper;
-using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Common.Models.Consensus;
 using BlockchainSimulator.Hub.WebApi.Model.Scenarios;
 

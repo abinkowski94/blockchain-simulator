@@ -1,5 +1,4 @@
-﻿using BlockchainSimulator.Hub.BusinessLogic.Model;
-using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
+﻿using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Hub.BusinessLogic.Storage;
 using System;
 using System.Collections.Generic;
@@ -121,11 +120,12 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     {
                         BlockSize = scenario.Simulation.BlockchainConfiguration.BlockSize,
                         Target = scenario.Simulation.BlockchainConfiguration.Target,
-                        Version = scenario.Simulation.BlockchainConfiguration.Version
+                        Version = scenario.Simulation.BlockchainConfiguration.Version,
+                        Type = scenario.Simulation.BlockchainConfiguration.Type
                     },
                     ServerNodes = new List<ServerNode>(scenario.Simulation.ServerNodes.Select(n => new ServerNode
                     {
-                        Id = Guid.NewGuid().ToString(),
+                        Id = n.Id,
                         Delay = n.Delay,
                         HttpAddress = n.HttpAddress,
                         IsConnected = n.IsConnected,

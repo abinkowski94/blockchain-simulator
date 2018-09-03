@@ -1,4 +1,3 @@
-using BlockchainSimulator.Hub.BusinessLogic.Model;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Hub.BusinessLogic.Storage;
 using System;

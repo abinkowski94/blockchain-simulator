@@ -1,4 +1,3 @@
-using BlockchainSimulator.Hub.BusinessLogic.Model;
 using System;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
 

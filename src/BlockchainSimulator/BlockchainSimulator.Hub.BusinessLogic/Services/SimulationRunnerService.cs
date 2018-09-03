@@ -1,7 +1,6 @@
 using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Common.Services;
-using BlockchainSimulator.Hub.BusinessLogic.Model;
 using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
 using System;
@@ -13,7 +12,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Common.Models.Statistics;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Transactions;

@@ -43,5 +43,11 @@ namespace BlockchainSimulator.Common.Models.Statistics
         /// </summary>
         [JsonProperty("averageQueueTime", Order = 6)]
         public TimeSpan AverageQueueTime { get; set; }
+        
+        /// <summary>
+        /// The number of rejected incoming blockchains
+        /// </summary>
+        [JsonProperty("rejectedIncomingBlockchainCount", Order = 7)]
+        public int RejectedIncomingBlockchainCount { get; set; }
     }
 }

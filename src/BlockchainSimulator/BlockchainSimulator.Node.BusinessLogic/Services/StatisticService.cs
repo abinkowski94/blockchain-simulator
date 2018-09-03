@@ -19,16 +19,18 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IBlockchainConfiguration _blockchainConfiguration;
         private readonly IConfiguration _configuration;
         private readonly IMiningService _miningService;
+        private readonly IConsensusService _consensusService;
 
         public StatisticService(IBlockchainRepository blockchainRepository, IMiningQueue miningQueue,
             IBlockchainConfiguration blockchainConfiguration, IConfiguration configuration,
-            IMiningService miningService)
+            IMiningService miningService, IConsensusService consensusService)
         {
             _blockchainRepository = blockchainRepository;
             _miningQueue = miningQueue;
             _blockchainConfiguration = blockchainConfiguration;
             _configuration = configuration;
             _miningService = miningService;
+            _consensusService = consensusService;
         }
 
         public BaseResponse<Statistic> GetStatistics()
@@ -66,7 +68,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 AverageQueueTime = _miningQueue.TotalQueueTime /
                                    (_miningQueue.MaxQueueLength != 0 ? _miningQueue.MaxQueueLength : 1),
                 AbandonedBlocksCount = _miningService.AbandonedBlocksCount,
-                TotalMiningAttemptsCount = _miningService.MiningAttemptsCount
+                TotalMiningAttemptsCount = _miningService.MiningAttemptsCount,
+                RejectedIncomingBlockchainCount = _consensusService.RejectedIncomingBlockchainCount
             };
         }
 

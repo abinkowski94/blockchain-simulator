@@ -1,4 +1,3 @@
-using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Common.Models.Responses;
 using BlockchainSimulator.Common.Models.Statistics;
 using BlockchainSimulator.Node.BusinessLogic.Queues;

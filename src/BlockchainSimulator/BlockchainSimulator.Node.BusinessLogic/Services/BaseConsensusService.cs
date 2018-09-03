@@ -21,6 +21,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _queue = queue;
         }
 
+        public abstract int RejectedIncomingBlockchainCount { get; protected set; }
+
         public abstract BaseResponse<bool> AcceptBlockchain(string base64Blockchain);
 
         public abstract BaseResponse<bool> AcceptBlockchain(BlockBase blockBase);

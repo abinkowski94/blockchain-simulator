@@ -15,5 +15,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Statistics
         public int AbandonedBlocksCount { get; set; }
         
         public int TotalMiningAttemptsCount { get; set; }
+        
+        public int RejectedIncomingBlockchainCount { get; set; }
     }
 }
