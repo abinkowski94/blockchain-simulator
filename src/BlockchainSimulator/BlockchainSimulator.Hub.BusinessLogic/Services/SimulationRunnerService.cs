@@ -4,6 +4,7 @@ using BlockchainSimulator.Common.Services;
 using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -13,6 +14,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BlockchainSimulator.Common.Models.Statistics;
+using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Transactions;
 
@@ -28,12 +30,14 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
         private readonly object _padlock = new object();
         private readonly string _pathToLibrary;
         private readonly IBackgroundTaskQueue _queue;
+        private readonly IStatisticService _statisticService;
 
         public SimulationRunnerService(IBackgroundTaskQueue queue, IHttpService httpService,
-            IHostingEnvironment environment)
+            IHostingEnvironment environment, IStatisticService statisticService)
         {
             _queue = queue;
             _httpService = httpService;
+            _statisticService = statisticService;
             _directoryPath = environment.ContentRootPath ?? Directory.GetCurrentDirectory();
 
             //TODO: Add timeout configuration
@@ -111,19 +115,19 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 simulation.Status = SimulationStatuses.Running;
                 simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
                 {
-                    if (settings.ForceEndAfter.HasValue)
-                    {
-                        var timeDifference = DateTime.UtcNow - simulation.LastRunTime.Value;
-                        if (timeDifference < settings.ForceEndAfter)
-                        {
-                            return;
-                        }
-                    }
-
                     if (settings.NodesAndTransactions.TryGetValue(node.Id, out var number))
                     {
                         Enumerable.Range(0, (int) number).ForEach(i =>
                         {
+                            if (settings.ForceEndAfter.HasValue)
+                            {
+                                var timeDifference = DateTime.UtcNow - simulation.LastRunTime.Value;
+                                if (timeDifference > settings.ForceEndAfter)
+                                {
+                                    return;
+                                }
+                            }
+                            
                             var body = JsonConvert.SerializeObject(new Transaction
                             {
                                 Sender = Guid.NewGuid().ToString(),
@@ -208,7 +212,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     if (wait && settings.ForceEndAfter.HasValue && simulation.LastRunTime.HasValue)
                     {
                         var timeDifference = DateTime.UtcNow - simulation.LastRunTime.Value;
-                        if (timeDifference < settings.ForceEndAfter)
+                        if (timeDifference > settings.ForceEndAfter)
                         {
                             wait = false;
                         }
@@ -222,7 +226,26 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             _queue.QueueBackgroundWorkItem(token => new Task(() =>
             {
                 simulation.Status = SimulationStatuses.WaitingForStatistics;
-                //TODO
+                var statistics = new ConcurrentBag<Statistic>();
+                simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
+                {
+                    try
+                    {
+                        var response = _httpService.Get($"{node.HttpAddress}/api/statistic", _nodeTimeout, token);
+                        var contentTask = response.Content.ReadAsStringAsync();
+                        contentTask.Wait(token);
+                        var content = contentTask.Result;
+                        var statistic = JsonConvert.DeserializeObject<SuccessResponse<Statistic>>(content);
+
+                        statistics.Add(statistic.Result);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                }, token);
+
+                _statisticService.ExtractAndSaveStatistics(statistics.ToList());
             }, token));
         }
     }

@@ -27,6 +27,7 @@ namespace BlockchainSimulator.Hub.WebApi.AppStart
             services.AddHostedService<QueuedHostedService>();
             services.AddTransient<IScenarioService, ScenarioService>();
             services.AddTransient<ISimulationService, SimulationService>();
+            services.AddTransient<IStatisticService, StatisticService>();
         }
     }
 }

@@ -10,11 +10,13 @@ using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using BlockchainSimulator.Node.BusinessLogic.Model.Statistics;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 {
@@ -26,6 +28,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
         private readonly object _padlock = new object();
 
         public sealed override int RejectedIncomingBlockchainCount { get; protected set; }
+        public sealed override List<List<BlockInfo>> BlockchainBranches { get; protected set; }
 
         public ProofOfWorkConsensusService(IBackgroundTaskQueue queue, IBlockchainRepository blockchainRepository,
             IBlockchainValidator blockchainValidator, IHttpService httpService) : base(queue)
@@ -34,6 +37,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             _blockchainValidator = blockchainValidator;
             _httpService = httpService;
             RejectedIncomingBlockchainCount = 0;
+            BlockchainBranches = new List<List<BlockInfo>>();
         }
 
         public override BaseResponse<bool> AcceptBlockchain(string base64Blockchain)
@@ -47,7 +51,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             var blockchainJson = Encoding.UTF8.GetString(Convert.FromBase64String(base64Blockchain));
             var incomingBlockchain = BlockchainConverter.DeserializeBlockchain(blockchainJson);
 
-            var result = AcceptBlockchain(incomingBlockchain);
+            var result = AcceptBlockchain(incomingBlockchain, true);
             if (!result.IsSuccess)
             {
                 RejectedIncomingBlockchainCount++;
@@ -87,7 +91,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             });
         }
 
-        private BaseResponse<bool> AcceptBlockchain(Blockchain incomingBlockchain)
+        private BaseResponse<bool> AcceptBlockchain(Blockchain incomingBlockchain, bool externalBlockchainSource = false)
         {
             lock (_padlock)
             {
@@ -105,11 +109,26 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                         validationResult.Errors);
                 }
 
+                if (externalBlockchainSource)
+                {
+                    AddBlockchainBranch(incomingBlockchain);
+                }
+
                 _blockchainRepository.SaveBlockchain(incomingBlockchain);
                 ReachConsensus();
 
                 return new SuccessResponse<bool>("The blockchain has been accepted and swapped!", true);
             }
+        }
+
+        private void AddBlockchainBranch(Blockchain incomingBlockchain)
+        {
+            BlockchainBranches.Add(incomingBlockchain.Blocks.Select(b => new BlockInfo
+            {
+                Id = b.Id,
+                TimeStamp = b.Header.TimeStamp,
+                Nonce = b.Header.Nonce
+            }).ToList());
         }
     }
 }

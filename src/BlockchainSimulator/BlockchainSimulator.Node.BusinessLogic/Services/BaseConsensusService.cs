@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using BlockchainSimulator.Node.BusinessLogic.Model.Statistics;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
@@ -22,6 +23,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         }
 
         public abstract int RejectedIncomingBlockchainCount { get; protected set; }
+
+        public abstract List<List<BlockInfo>> BlockchainBranches { get; protected set; }
 
         public abstract BaseResponse<bool> AcceptBlockchain(string base64Blockchain);
 

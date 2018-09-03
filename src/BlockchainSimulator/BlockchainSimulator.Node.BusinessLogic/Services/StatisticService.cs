@@ -73,7 +73,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             };
         }
 
-        private static void AddBlockchainStatistics(Statistic result, Blockchain blockChain)
+        private void AddBlockchainStatistics(Statistic result, Blockchain blockChain)
         {
             result.BlockchainStatistics = new BlockchainStatistics
             {
@@ -81,14 +81,20 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 TotalQueueTimeForBlocks = blockChain.Blocks.Sum(b => b.QueueTime),
                 TotalTransactionsCount = blockChain.Blocks.Sum(b => b.Body.TransactionCounter)
             };
-            
+
+            AddBlockchainTrees(result.BlockchainStatistics);
             AddTransactionsStatistics(result.BlockchainStatistics, blockChain);
+        }
+
+        private void AddBlockchainTrees(BlockchainStatistics blockchainStatistics)
+        {
+            blockchainStatistics.BlockchainBranches = _consensusService.BlockchainBranches;
         }
 
         private static void AddTransactionsStatistics(BlockchainStatistics blockchainStatistics, Blockchain blockChain)
         {
             blockchainStatistics.TransactionsStatistics = new List<TransactionStatistics>();
-            
+
             blockChain.Blocks.ForEach(b =>
             {
                 b.Body.Transactions.ForEach(t =>

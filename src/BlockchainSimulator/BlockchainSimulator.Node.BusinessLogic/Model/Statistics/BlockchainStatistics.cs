@@ -12,5 +12,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Statistics
         public int TotalTransactionsCount { get; set; }
         
         public List<TransactionStatistics> TransactionsStatistics { get; set; }
+        
+        public List<List<BlockInfo>> BlockchainBranches { get; set; }
     }
 }
