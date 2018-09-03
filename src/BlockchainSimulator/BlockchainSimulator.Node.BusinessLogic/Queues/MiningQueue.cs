@@ -27,6 +27,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
 
             _workItems.TryDequeue(out var workItem);
             _statisticService.RegisterQueueTime(DateTime.UtcNow - workItem.Item1);
+            _statisticService.RegisterQueueLengthChange(Length);
 
             return workItem.Item2;
         }
