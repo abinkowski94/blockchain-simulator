@@ -10,7 +10,7 @@ namespace BlockchainSimulator.Node.DataAccess.Model.Block
 
         [JsonProperty("transactionCounter", Order = 1)]
         public int TransactionCounter => Transactions.Count;
-        
+
         [JsonProperty("transactions", Order = 2)]
         public HashSet<Transaction.Transaction> Transactions { get; set; }
     }

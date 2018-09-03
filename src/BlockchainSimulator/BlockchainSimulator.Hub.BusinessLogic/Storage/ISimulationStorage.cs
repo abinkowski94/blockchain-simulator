@@ -1,5 +1,5 @@
-using System;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
+using System;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Storage
 {

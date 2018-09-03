@@ -7,9 +7,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public interface IMiningService
     {
-        int MiningAttemptsCount { get; }
-
         int AbandonedBlocksCount { get; }
+        int MiningAttemptsCount { get; }
 
         void MineBlocks(IEnumerable<Transaction> transactions, DateTime enqueueTime, CancellationToken token);
     }

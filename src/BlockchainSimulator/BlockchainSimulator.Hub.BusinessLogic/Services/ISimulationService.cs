@@ -1,7 +1,7 @@
-using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
-using System;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Consensus;
+using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
+using System;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {

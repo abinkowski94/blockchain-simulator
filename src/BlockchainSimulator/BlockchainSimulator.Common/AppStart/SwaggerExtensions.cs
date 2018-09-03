@@ -1,9 +1,9 @@
-using System;
-using System.IO;
-using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace BlockchainSimulator.Common.AppStart
 {
@@ -12,20 +12,6 @@ namespace BlockchainSimulator.Common.AppStart
     /// </summary>
     public static class SwaggerExtensions
     {
-        /// <summary>
-        /// Use swagger
-        /// </summary>
-        /// <param name="app">Application builder</param>
-        /// <param name="name">Name of the swagger application</param>
-        public static void UseSwagger(this IApplicationBuilder app, string name)
-        {
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
-
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", name); });
-        }
-
         /// <summary>
         /// Adds swagger
         /// </summary>
@@ -57,6 +43,20 @@ namespace BlockchainSimulator.Common.AppStart
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
+        }
+
+        /// <summary>
+        /// Use swagger
+        /// </summary>
+        /// <param name="app">Application builder</param>
+        /// <param name="name">Name of the swagger application</param>
+        public static void UseSwagger(this IApplicationBuilder app, string name)
+        {
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", name); });
         }
     }
 }

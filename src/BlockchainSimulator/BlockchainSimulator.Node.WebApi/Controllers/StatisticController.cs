@@ -49,7 +49,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         [HttpGet("mining-queue")]
         public ActionResult<MiningQueueStatus> GetStatus()
         {
-            return new MiningQueueStatus {Length = _miningQueue.Length};
+            return new MiningQueueStatus { Length = _miningQueue.Length };
         }
     }
 }

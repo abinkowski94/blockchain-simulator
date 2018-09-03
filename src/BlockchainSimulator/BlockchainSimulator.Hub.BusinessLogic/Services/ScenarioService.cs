@@ -1,10 +1,10 @@
-﻿using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
+﻿using BlockchainSimulator.Hub.BusinessLogic.Model.Consensus;
+using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
+using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
 using BlockchainSimulator.Hub.BusinessLogic.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BlockchainSimulator.Hub.BusinessLogic.Model.Consensus;
-using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {

@@ -11,6 +11,15 @@ namespace BlockchainSimulator.Common.AppStart
     public static class DefaultConfigurationExtensions
     {
         /// <summary>
+        /// Adds default configuration
+        /// </summary>
+        /// <param name="services">The services container</param>
+        public static void AddDefaultConfiguration(this IServiceCollection services)
+        {
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+        }
+
+        /// <summary>
         /// Uses default configuration
         /// </summary>
         /// <param name="app">The application builder</param>
@@ -28,15 +37,6 @@ namespace BlockchainSimulator.Common.AppStart
 
             app.UseHttpsRedirection();
             app.UseMvc();
-        }
-
-        /// <summary>
-        /// Adds default configuration
-        /// </summary>
-        /// <param name="services">The services container</param>
-        public static void AddDefaultConfiguration(this IServiceCollection services)
-        {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
     }
 }

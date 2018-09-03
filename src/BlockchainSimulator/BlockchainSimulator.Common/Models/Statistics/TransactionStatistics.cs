@@ -1,5 +1,5 @@
-using System;
 using Newtonsoft.Json;
+using System;
 
 namespace BlockchainSimulator.Common.Models.Statistics
 {
@@ -21,10 +21,10 @@ namespace BlockchainSimulator.Common.Models.Statistics
         public TimeSpan BlockQueueTime { get; set; }
 
         /// <summary>
-        /// The transaction id
+        /// The transaction confirmation time
         /// </summary>
-        [JsonProperty("transactionId", Order = 3)]
-        public string TransactionId { get; set; }
+        [JsonProperty("transactionConfirmationTime", Order = 6)]
+        public TimeSpan TransactionConfirmationTime { get; set; }
 
         /// <summary>
         /// The transaction fee
@@ -33,15 +33,15 @@ namespace BlockchainSimulator.Common.Models.Statistics
         public decimal TransactionFee { get; set; }
 
         /// <summary>
+        /// The transaction id
+        /// </summary>
+        [JsonProperty("transactionId", Order = 3)]
+        public string TransactionId { get; set; }
+
+        /// <summary>
         /// The transaction registration time
         /// </summary>
         [JsonProperty("transactionRegistrationTime", Order = 5)]
         public DateTime TransactionRegistrationTime { get; set; }
-
-        /// <summary>
-        /// The transaction confirmation time
-        /// </summary>
-        [JsonProperty("transactionConfirmationTime", Order = 6)]
-        public TimeSpan TransactionConfirmationTime { get; set; }
     }
 }

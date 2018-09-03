@@ -1,5 +1,5 @@
-using System;
 using Newtonsoft.Json;
+using System;
 
 namespace BlockchainSimulator.Hub.WebApi.Model.Scenarios
 {

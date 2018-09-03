@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using BlockchainSimulator.Common.Models.Statistics;
+using System.Collections.Generic;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {

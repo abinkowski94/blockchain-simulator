@@ -1,7 +1,7 @@
-using System;
-using System.Collections.Generic;
 using BlockchainSimulator.Common.Models.Consensus;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 namespace BlockchainSimulator.Hub.WebApi.Model.Scenarios
 {

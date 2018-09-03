@@ -16,7 +16,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators
 
             if (tree.GetType() == typeof(Model.Transaction.Node))
             {
-                var node = (Model.Transaction.Node) tree;
+                var node = (Model.Transaction.Node)tree;
                 var combinedHashes = $"{node.LeftNode.Hash}{node.RightNode?.Hash}";
                 var hash = EncryptionService.GetSha256Hash(combinedHashes);
 
@@ -38,7 +38,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators
                 return new ValidationResult(false, "Wrong type of merkle tree node!");
             }
 
-            var leaf = (Leaf) tree;
+            var leaf = (Leaf)tree;
             var transactionHash = EncryptionService.GetSha256Hash(leaf.Transaction.TransactionJson);
 
             return leaf.Hash != transactionHash

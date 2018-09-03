@@ -1,6 +1,10 @@
 using BlockchainSimulator.Common.Extensions;
+using BlockchainSimulator.Common.Models.Statistics;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Common.Services;
+using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
+using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
+using BlockchainSimulator.Hub.BusinessLogic.Model.Transactions;
 using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
 using System;
@@ -13,20 +17,16 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Common.Models.Statistics;
-using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
-using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
-using BlockchainSimulator.Hub.BusinessLogic.Model.Transactions;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {
     public class SimulationRunnerService : ISimulationRunnerService
     {
         private readonly string _directoryPath;
+        private readonly int _hostingRetryCount;
+        private readonly TimeSpan _hostingTime;
         private readonly IHttpService _httpService;
         private readonly TimeSpan _nodeTimeout;
-        private readonly TimeSpan _hostingTime;
-        private readonly int _hostingRetryCount;
         private readonly object _padlock = new object();
         private readonly string _pathToLibrary;
         private readonly IBackgroundTaskQueue _queue;
@@ -117,27 +117,27 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 {
                     if (settings.NodesAndTransactions.TryGetValue(node.Id, out var number))
                     {
-                        Enumerable.Range(0, (int) number).ForEach(i =>
-                        {
-                            if (settings.ForceEndAfter.HasValue)
-                            {
-                                var timeDifference = DateTime.UtcNow - simulation.LastRunTime.Value;
-                                if (timeDifference > settings.ForceEndAfter)
-                                {
-                                    return;
-                                }
-                            }
-                            
-                            var body = JsonConvert.SerializeObject(new Transaction
-                            {
-                                Sender = Guid.NewGuid().ToString(),
-                                Recipient = Guid.NewGuid().ToString(),
-                                Amount = randomGenerator.Next(1, 1000),
-                                Fee = (decimal) randomGenerator.NextDouble()
-                            });
-                            var content = new StringContent(body, Encoding.UTF8, "application/json");
-                            _httpService.Post($"{node.HttpAddress}/api/transactions", content, _nodeTimeout, token);
-                        });
+                        Enumerable.Range(0, (int)number).ForEach(i =>
+                       {
+                           if (settings.ForceEndAfter.HasValue)
+                           {
+                               var timeDifference = DateTime.UtcNow - simulation.LastRunTime.Value;
+                               if (timeDifference > settings.ForceEndAfter)
+                               {
+                                   return;
+                               }
+                           }
+
+                           var body = JsonConvert.SerializeObject(new Transaction
+                           {
+                               Sender = Guid.NewGuid().ToString(),
+                               Recipient = Guid.NewGuid().ToString(),
+                               Amount = randomGenerator.Next(1, 1000),
+                               Fee = (decimal)randomGenerator.NextDouble()
+                           });
+                           var content = new StringContent(body, Encoding.UTF8, "application/json");
+                           _httpService.Post($"{node.HttpAddress}/api/transactions", content, _nodeTimeout, token);
+                       });
                     }
                 }, token);
             }, token));

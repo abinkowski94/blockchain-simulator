@@ -6,7 +6,7 @@ namespace BlockchainSimulator.Node.DataAccess.Model.Block
     {
         [JsonProperty("isGenesis", Order = 2)]
         public override bool IsGenesis => false;
-        
+
         [JsonProperty("parentId", Order = 3)]
         public string ParentId { get; set; }
     }

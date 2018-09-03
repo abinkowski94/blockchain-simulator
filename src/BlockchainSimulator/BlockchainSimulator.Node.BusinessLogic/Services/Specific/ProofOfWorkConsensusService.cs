@@ -4,6 +4,7 @@ using BlockchainSimulator.Common.Services;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
+using BlockchainSimulator.Node.BusinessLogic.Model.Statistics;
 using BlockchainSimulator.Node.BusinessLogic.Validators;
 using BlockchainSimulator.Node.DataAccess.Converters;
 using BlockchainSimulator.Node.DataAccess.Model;
@@ -16,7 +17,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Node.BusinessLogic.Model.Statistics;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 {
@@ -27,8 +27,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
         private readonly IHttpService _httpService;
         private readonly object _padlock = new object();
 
-        public sealed override int RejectedIncomingBlockchainCount { get; protected set; }
         public sealed override List<List<BlockInfo>> BlockchainBranches { get; protected set; }
+        public sealed override int RejectedIncomingBlockchainCount { get; protected set; }
 
         public ProofOfWorkConsensusService(IBackgroundTaskQueue queue, IBlockchainRepository blockchainRepository,
             IBlockchainValidator blockchainValidator, IHttpService httpService) : base(queue)
@@ -78,12 +78,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 _queue.QueueBackgroundWorkItem(token => Task.Run(() =>
                 {
                     // The delay
-                    Thread.Sleep((int) node.Delay);
+                    Thread.Sleep((int)node.Delay);
 
                     var blockchain = _blockchainRepository.GetBlockchain();
                     var blockchainJson = JsonConvert.SerializeObject(blockchain);
                     var encodedBlockchain = Convert.ToBase64String(Encoding.UTF8.GetBytes(blockchainJson));
-                    var body = JsonConvert.SerializeObject(new {base64Blockchain = encodedBlockchain});
+                    var body = JsonConvert.SerializeObject(new { base64Blockchain = encodedBlockchain });
                     var content = new StringContent(body, Encoding.UTF8, "application/json");
 
                     _httpService.Post($"{node.HttpAddress}/api/consensus", content, TimeSpan.FromSeconds(10), token);

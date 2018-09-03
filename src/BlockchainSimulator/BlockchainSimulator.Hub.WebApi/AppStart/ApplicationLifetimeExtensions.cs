@@ -1,9 +1,9 @@
-using System;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Hub.BusinessLogic.Storage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace BlockchainSimulator.Hub.WebApi.AppStart
 {
@@ -21,7 +21,7 @@ namespace BlockchainSimulator.Hub.WebApi.AppStart
             var applicationLifetime = app.ApplicationServices.GetRequiredService<IApplicationLifetime>();
             applicationLifetime.ApplicationStopping.Register(() => OnShutdown(app.ApplicationServices));
         }
-        
+
         /// <summary>
         /// Cleans the remaining processes
         /// </summary>

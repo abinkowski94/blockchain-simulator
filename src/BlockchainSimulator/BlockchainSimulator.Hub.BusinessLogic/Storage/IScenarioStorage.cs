@@ -1,6 +1,6 @@
-﻿using System;
+﻿using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
+using System;
 using System.Collections.Generic;
-using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Storage
 {

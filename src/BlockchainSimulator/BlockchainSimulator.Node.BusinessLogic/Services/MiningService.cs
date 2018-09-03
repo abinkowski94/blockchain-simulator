@@ -17,8 +17,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IConsensusService _consensusService;
         private readonly IMiningQueue _queue;
 
-        public int MiningAttemptsCount { get; private set; }
         public int AbandonedBlocksCount { get; private set; }
+        public int MiningAttemptsCount { get; private set; }
 
         public MiningService(IBlockchainService blockchainService, IBlockProvider blockProvider,
             IConsensusService consensusService, IMiningQueue queue)

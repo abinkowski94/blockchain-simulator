@@ -48,7 +48,7 @@ namespace BlockchainSimulator.Common.Extensions
                 }
             });
         }
-        
+
         /// <summary>
         /// Sums the timespans
         /// </summary>

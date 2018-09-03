@@ -1,13 +1,13 @@
+using BlockchainSimulator.Common.Models.Consensus;
 using BlockchainSimulator.Common.Models.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.WebApi.Controllers;
+using BlockchainSimulator.Node.WebApi.Models.Blockchain;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Collections.Generic;
 using System.Linq;
-using BlockchainSimulator.Common.Models.Consensus;
-using BlockchainSimulator.Node.WebApi.Models.Blockchain;
 using Xunit;
 
 namespace BlockchainSimulator.Node.WebApi.Tests.Controllers

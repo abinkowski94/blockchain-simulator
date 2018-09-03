@@ -1,6 +1,6 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace BlockchainSimulator.Common.Models.Statistics
 {
@@ -10,16 +10,16 @@ namespace BlockchainSimulator.Common.Models.Statistics
     public class BlockchainStatistics
     {
         /// <summary>
+        /// The blockchain branches
+        /// </summary>
+        [JsonProperty("blockchainBranches", Order = 4)]
+        public List<List<BlockInfo>> BlockchainBranches { get; set; }
+
+        /// <summary>
         /// The number of blocks in blockchain
         /// </summary>
         [JsonProperty("blocksCount", Order = 1)]
         public int BlocksCount { get; set; }
-
-        /// <summary>
-        /// The total transactions count
-        /// </summary>
-        [JsonProperty("totalTransactionsCount", Order = 2)]
-        public int TotalTransactionsCount { get; set; }
 
         /// <summary>
         /// The total queue time for all blocks
@@ -28,10 +28,10 @@ namespace BlockchainSimulator.Common.Models.Statistics
         public TimeSpan TotalQueueTimeForBlocks { get; set; }
 
         /// <summary>
-        /// The blockchain branches
+        /// The total transactions count
         /// </summary>
-        [JsonProperty("blockchainBranches", Order = 4)]
-        public List<List<BlockInfo>> BlockchainBranches { get; set; }
+        [JsonProperty("totalTransactionsCount", Order = 2)]
+        public int TotalTransactionsCount { get; set; }
 
         /// <summary>
         /// The transactions statistics

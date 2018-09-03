@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
@@ -9,17 +6,20 @@ using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class StatisticService : IStatisticService
     {
-        private readonly IBlockchainRepository _blockchainRepository;
-        private readonly IMiningQueue _miningQueue;
         private readonly IBlockchainConfiguration _blockchainConfiguration;
+        private readonly IBlockchainRepository _blockchainRepository;
         private readonly IConfiguration _configuration;
-        private readonly IMiningService _miningService;
         private readonly IConsensusService _consensusService;
+        private readonly IMiningQueue _miningQueue;
+        private readonly IMiningService _miningService;
 
         public StatisticService(IBlockchainRepository blockchainRepository, IMiningQueue miningQueue,
             IBlockchainConfiguration blockchainConfiguration, IConfiguration configuration,
@@ -50,27 +50,25 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             return new SuccessResponse<Statistic>($"The statistics has been generated on: {DateTime.UtcNow}", result);
         }
 
-        private void AddSessionConfiguration(Statistic result)
+        private static void AddTransactionsStatistics(BlockchainStatistics blockchainStatistics, Blockchain blockChain)
         {
-            result.BlockSize = _blockchainConfiguration.BlockSize;
-            result.Target = _blockchainConfiguration.Target;
-            result.Version = _blockchainConfiguration.Version;
-            result.NodeType = _configuration["Node:Type"];
-        }
+            blockchainStatistics.TransactionsStatistics = new List<TransactionStatistics>();
 
-        private void AddMiningQueueStatistics(Statistic result)
-        {
-            result.MiningQueueStatistics = new MiningQueueStatistics
+            blockChain.Blocks.ForEach(b =>
             {
-                CurrentQueueLength = _miningQueue.Length,
-                MaxQueueLength = _miningQueue.MaxQueueLength,
-                TotalQueueTime = _miningQueue.TotalQueueTime,
-                AverageQueueTime = _miningQueue.TotalQueueTime /
-                                   (_miningQueue.MaxQueueLength != 0 ? _miningQueue.MaxQueueLength : 1),
-                AbandonedBlocksCount = _miningService.AbandonedBlocksCount,
-                TotalMiningAttemptsCount = _miningService.MiningAttemptsCount,
-                RejectedIncomingBlockchainCount = _consensusService.RejectedIncomingBlockchainCount
-            };
+                b.Body.Transactions.ForEach(t =>
+                {
+                    blockchainStatistics.TransactionsStatistics.Add(new TransactionStatistics
+                    {
+                        BlockId = b.Id,
+                        BlockQueueTime = b.QueueTime,
+                        TransactionRegistrationTime = t.RegistrationTime,
+                        TransactionId = t.Id,
+                        TransactionFee = t.Fee,
+                        TransactionConfirmationTime = b.Header.TimeStamp - t.RegistrationTime
+                    });
+                });
+            });
         }
 
         private void AddBlockchainStatistics(Statistic result, Blockchain blockChain)
@@ -91,25 +89,27 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             blockchainStatistics.BlockchainBranches = _consensusService.BlockchainBranches;
         }
 
-        private static void AddTransactionsStatistics(BlockchainStatistics blockchainStatistics, Blockchain blockChain)
+        private void AddMiningQueueStatistics(Statistic result)
         {
-            blockchainStatistics.TransactionsStatistics = new List<TransactionStatistics>();
-
-            blockChain.Blocks.ForEach(b =>
+            result.MiningQueueStatistics = new MiningQueueStatistics
             {
-                b.Body.Transactions.ForEach(t =>
-                {
-                    blockchainStatistics.TransactionsStatistics.Add(new TransactionStatistics
-                    {
-                        BlockId = b.Id,
-                        BlockQueueTime = b.QueueTime,
-                        TransactionRegistrationTime = t.RegistrationTime,
-                        TransactionId = t.Id,
-                        TransactionFee = t.Fee,
-                        TransactionConfirmationTime = b.Header.TimeStamp - t.RegistrationTime
-                    });
-                });
-            });
+                CurrentQueueLength = _miningQueue.Length,
+                MaxQueueLength = _miningQueue.MaxQueueLength,
+                TotalQueueTime = _miningQueue.TotalQueueTime,
+                AverageQueueTime = _miningQueue.TotalQueueTime /
+                                   (_miningQueue.MaxQueueLength != 0 ? _miningQueue.MaxQueueLength : 1),
+                AbandonedBlocksCount = _miningService.AbandonedBlocksCount,
+                TotalMiningAttemptsCount = _miningService.MiningAttemptsCount,
+                RejectedIncomingBlockchainCount = _consensusService.RejectedIncomingBlockchainCount
+            };
+        }
+
+        private void AddSessionConfiguration(Statistic result)
+        {
+            result.BlockSize = _blockchainConfiguration.BlockSize;
+            result.Target = _blockchainConfiguration.Target;
+            result.Version = _blockchainConfiguration.Version;
+            result.NodeType = _configuration["Node:Type"];
         }
     }
 }
