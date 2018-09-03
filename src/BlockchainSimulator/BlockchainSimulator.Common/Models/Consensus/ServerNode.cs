@@ -11,7 +11,7 @@ namespace BlockchainSimulator.Common.Models.Consensus
         /// <summary>
         /// Collection of id that the node is connected to
         /// </summary>
-        [JsonProperty("connectedTo", Order = 5, NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("connectedTo", Order = 6, NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<string> ConnectedTo { get; set; }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace BlockchainSimulator.Common.Models.Consensus
         /// <summary>
         /// Indicates if the server needs to be spawned
         /// </summary>
-        [JsonProperty("needsSpawn", Order = 6, NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("needsSpawn", Order = 5, NullValueHandling = NullValueHandling.Ignore)]
         public bool NeedsSpawn { get; set; }
     }
 }
