@@ -39,5 +39,15 @@ namespace BlockchainSimulator.Common.Services
         /// <returns>The http response message</returns>
         HttpResponseMessage Put(string uri, HttpContent body, TimeSpan? timeout = null,
             CancellationToken? token = null);
+
+        /// <summary>
+        /// Requests the http get action
+        /// </summary>
+        /// <param name="uri">The endpoint</param>
+        /// <param name="timeout">Timeout for request</param>
+        /// <param name="retryCount">The retry count</param>
+        /// <param name="token">The cancellation token</param>
+        /// <returns>The http response message</returns>
+        HttpResponseMessage Get(string uri, TimeSpan timeout, int retryCount, CancellationToken? token = null);
     }
 }

@@ -12,8 +12,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
         {
             var contentRoot = environment.ContentRootPath ?? Directory.GetCurrentDirectory();
             var type = configuration["Node:Type"] ?? "PoW";
-            var nodeId = configuration["Node:Id"] ?? "1";
-            _directoryPath = $"{contentRoot}\\{type}\\{nodeId}";
+            _directoryPath = $"{contentRoot}\\{type}";
 
             if (!Directory.Exists(_directoryPath))
             {

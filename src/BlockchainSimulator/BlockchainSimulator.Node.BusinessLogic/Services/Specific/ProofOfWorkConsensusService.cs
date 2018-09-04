@@ -22,12 +22,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
     {
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly IBlockchainValidator _blockchainValidator;
+        private readonly IStatisticService _statisticService;
         private readonly IHttpService _httpService;
         private readonly object _padlock = new object();
-        private readonly IStatisticService _statisticService;
 
         public ProofOfWorkConsensusService(IBackgroundTaskQueue queue, IBlockchainRepository blockchainRepository,
-            IBlockchainValidator blockchainValidator, IHttpService httpService, IStatisticService statisticService) : base(queue)
+            IBlockchainValidator blockchainValidator, IHttpService httpService,
+            IStatisticService statisticService) : base(queue)
         {
             _blockchainRepository = blockchainRepository;
             _blockchainValidator = blockchainValidator;
@@ -73,12 +74,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 _queue.QueueBackgroundWorkItem(token => Task.Run(() =>
                 {
                     // The delay
-                    Thread.Sleep((int)node.Delay);
+                    Thread.Sleep((int) node.Delay);
 
                     var blockchain = _blockchainRepository.GetBlockchain();
                     var blockchainJson = JsonConvert.SerializeObject(blockchain);
                     var encodedBlockchain = Convert.ToBase64String(Encoding.UTF8.GetBytes(blockchainJson));
-                    var body = JsonConvert.SerializeObject(new { base64Blockchain = encodedBlockchain });
+                    var body = JsonConvert.SerializeObject(new {base64Blockchain = encodedBlockchain});
                     var content = new StringContent(body, Encoding.UTF8, "application/json");
 
                     _httpService.Post($"{node.HttpAddress}/api/consensus", content, TimeSpan.FromSeconds(10), token);
@@ -86,7 +87,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             });
         }
 
-        private BaseResponse<bool> AcceptBlockchain(Blockchain incomingBlockchain, bool externalBlockchainSource = false)
+        private BaseResponse<bool> AcceptBlockchain(Blockchain incomingBlockchain,
+            bool externalBlockchainSource = false)
         {
             lock (_padlock)
             {

@@ -18,8 +18,11 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
 
         public Blockchain GetBlockchain()
         {
-            var json = _fileRepository.GetFile(_blockchainFileName);
-            return BlockchainConverter.DeserializeBlockchain(json);
+            lock (_padlock)
+            {
+                var json = _fileRepository.GetFile(_blockchainFileName);
+                return BlockchainConverter.DeserializeBlockchain(json);
+            }
         }
 
         public Blockchain SaveBlockchain(Blockchain blockchain)

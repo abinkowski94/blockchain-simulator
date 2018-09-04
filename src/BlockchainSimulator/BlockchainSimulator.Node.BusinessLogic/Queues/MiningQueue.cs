@@ -8,16 +8,16 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
 {
     public class MiningQueue : IMiningQueue
     {
-        private readonly SemaphoreSlim _signal;
+        private readonly SemaphoreSlim _signal = new SemaphoreSlim(0);
         private readonly IStatisticService _statisticService;
-        private readonly ConcurrentQueue<Tuple<DateTime, Func<CancellationToken, Task>>> _workItems;
+
+        private readonly ConcurrentQueue<Tuple<DateTime, Func<CancellationToken, Task>>> _workItems =
+            new ConcurrentQueue<Tuple<DateTime, Func<CancellationToken, Task>>>();
 
         public int Length => _workItems.Count;
 
         public MiningQueue(IStatisticService statisticService)
         {
-            _workItems = new ConcurrentQueue<Tuple<DateTime, Func<CancellationToken, Task>>>();
-            _signal = new SemaphoreSlim(0);
             _statisticService = statisticService;
         }
 

@@ -5,22 +5,16 @@ using System.Threading.Tasks;
 
 namespace BlockchainSimulator.Common.Queues
 {
+    /// <inheritdoc />
     /// <summary>
     /// The background queue
     /// </summary>
     public class BackgroundTaskQueue : IBackgroundTaskQueue
     {
-        private readonly SemaphoreSlim _signal;
-        private readonly ConcurrentQueue<Func<CancellationToken, Task>> _workItems;
+        private readonly SemaphoreSlim _signal = new SemaphoreSlim(0);
 
-        /// <summary>
-        /// The constructor
-        /// </summary>
-        public BackgroundTaskQueue()
-        {
-            _workItems = new ConcurrentQueue<Func<CancellationToken, Task>>();
-            _signal = new SemaphoreSlim(0);
-        }
+        private readonly ConcurrentQueue<Func<CancellationToken, Task>> _workItems =
+            new ConcurrentQueue<Func<CancellationToken, Task>>();
 
         /// <inheritdoc />
         /// <summary>
