@@ -54,8 +54,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             lock (_padlock)
             {
                 simulation.Status = SimulationStatuses.Pending;
-                SpawnServers(simulation);
-                PingServers(simulation);
+                SpawnServers(simulation, settings);
+                PingServers(simulation, settings);
                 ConnectNodes(simulation);
                 SendTransactions(simulation, settings);
                 WaitForNetwork(simulation, settings);
@@ -69,7 +69,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
                 {
-                    simulation.ServerNodes.Where(n => node.IsConnected == true && node.ConnectedTo.Contains(n.Id))
+                    simulation.ServerNodes.Where(n => n.IsConnected == true && node.ConnectedTo.Contains(n.Id))
                         .ForEach(otherNode =>
                         {
                             var body = JsonConvert.SerializeObject(otherNode);
@@ -80,24 +80,25 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             }, token));
         }
 
-        private void PingServers(Simulation simulation)
+        private void PingServers(Simulation simulation, SimulationSettings settings)
         {
             _queue.QueueBackgroundWorkItem(token => new Task(() =>
             {
-                simulation.ServerNodes.ParallelForEach(node =>
-                {
-                    try
+                simulation.ServerNodes.Where(n => settings.NodesAndTransactions.Keys.Contains(n.Id))
+                    .ParallelForEach(node =>
                     {
-                        var responseMessage = _httpService.Get($"{node.HttpAddress}/api/info", _nodeTimeout,
-                            _hostingRetryCount, token);
-                        node.IsConnected = responseMessage.IsSuccessStatusCode;
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        node.IsConnected = false;
-                    }
-                }, token);
+                        try
+                        {
+                            var responseMessage = _httpService.Get($"{node.HttpAddress}/api/info", _nodeTimeout,
+                                _hostingRetryCount, token);
+                            node.IsConnected = responseMessage.IsSuccessStatusCode;
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            node.IsConnected = false;
+                        }
+                    }, token);
             }, token));
         }
 
@@ -114,7 +115,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     {
                         Enumerable.Range(0, (int) number).ForEach(i =>
                         {
-                            if (HasSimulationTimeElapsed(simulation, settings, true))
+                            if (HasSimulationTimeElapsed(simulation, settings))
                             {
                                 return;
                             }
@@ -134,37 +135,38 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             }, token));
         }
 
-        private void SpawnServers(Simulation simulation)
+        private void SpawnServers(Simulation simulation, SimulationSettings settings)
         {
             _queue.QueueBackgroundWorkItem(token =>
             {
                 return new Task(() =>
                 {
                     simulation.Status = SimulationStatuses.Preparing;
-                    simulation.ServerNodes.Where(n => n.NeedsSpawn).ParallelForEach(node =>
-                    {
-                        var pathToDirectory = $@"{_directoryPath}\nodes\{node.Id}";
-                        if (!Directory.Exists(pathToDirectory))
+                    simulation.ServerNodes.Where(n => n.NeedsSpawn && settings.NodesAndTransactions.Keys.Contains(n.Id))
+                        .ParallelForEach(node =>
                         {
-                            Directory.CreateDirectory(pathToDirectory);
-                        }
-
-                        node.NodeThread = Process.Start(new ProcessStartInfo
-                        {
-                            ArgumentList =
+                            var pathToDirectory = $@"{_directoryPath}\nodes\{node.Id}";
+                            if (!Directory.Exists(pathToDirectory))
                             {
-                                _pathToLibrary,
-                                $"urls|-|{node.HttpAddress}",
-                                $@"contentRoot|-|{pathToDirectory}",
-                                $"Node:Id|-|{node.Id}",
-                                $"Node:Type|-|{simulation.BlockchainConfiguration.Type}",
-                                $"BlockchainConfiguration:Version|-|{simulation.BlockchainConfiguration.Version}",
-                                $"BlockchainConfiguration:Target|-|{simulation.BlockchainConfiguration.Target}",
-                                $"BlockchainConfiguration:BlockSize|-|{simulation.BlockchainConfiguration.BlockSize}"
-                            },
-                            FileName = "dotnet"
-                        });
-                    }, token);
+                                Directory.CreateDirectory(pathToDirectory);
+                            }
+
+                            node.NodeThread = Process.Start(new ProcessStartInfo
+                            {
+                                ArgumentList =
+                                {
+                                    _pathToLibrary,
+                                    $"urls|-|{node.HttpAddress}",
+                                    $@"contentRoot|-|{pathToDirectory}",
+                                    $"Node:Id|-|{node.Id}",
+                                    $"Node:Type|-|{simulation.BlockchainConfiguration.Type}",
+                                    $"BlockchainConfiguration:Version|-|{simulation.BlockchainConfiguration.Version}",
+                                    $"BlockchainConfiguration:Target|-|{simulation.BlockchainConfiguration.Target}",
+                                    $"BlockchainConfiguration:BlockSize|-|{simulation.BlockchainConfiguration.BlockSize}"
+                                },
+                                FileName = "dotnet"
+                            });
+                        }, token);
 
                     Thread.Sleep(_hostingTime);
                 }, token);
@@ -200,7 +202,10 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                         }
                     });
 
-                    wait = HasSimulationTimeElapsed(simulation, settings, wait);
+                    wait = !HasSimulationTimeElapsed(simulation, settings, wait);
+
+                    // The interval
+                    Thread.Sleep(TimeSpan.FromSeconds(5));
                 } while (wait);
             }, token));
         }
@@ -233,7 +238,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             }, token));
         }
 
-        private static bool HasSimulationTimeElapsed(Simulation simulation, SimulationSettings settings, bool wait)
+        private static bool HasSimulationTimeElapsed(Simulation simulation, SimulationSettings settings,
+            bool wait = true)
         {
             if (wait && settings.ForceEndAfter.HasValue && simulation.LastRunTime.HasValue)
             {
@@ -244,7 +250,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 }
             }
 
-            return wait;
+            return !wait;
         }
     }
 }
