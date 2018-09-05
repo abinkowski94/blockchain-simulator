@@ -1,51 +1,118 @@
+using System;
 using BlockchainSimulator.Common.Models.Statistics;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using BlockchainSimulator.Common.Extensions;
+using BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing;
+using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Statistics;
+using Microsoft.AspNetCore.Hosting;
+using Newtonsoft.Json;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {
     public class StatisticService : IStatisticService
     {
-        public void ExtractAndSaveStatistics(List<Statistic> statistics)
+        private readonly string _directory;
+
+        public StatisticService(IHostingEnvironment environment)
         {
-            CreateBlockchainTree(statistics);
+            _directory = environment.ContentRootPath ?? Directory.GetCurrentDirectory();
         }
 
-        private static void CreateBlockchainTree(IEnumerable<Statistic> statistics)
+        public void ExtractAndSaveStatistics(List<Statistic> statistics, SimulationSettings settings, string scenarioId)
         {
-            //TODO Fix extraction algorithm
+            var directoryPath = $@"{_directory}\statistics\{scenarioId}\{DateTime.UtcNow:yyyy-MM-dd-hh-mm-ss}";
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+            
+            CreateBlockchainTree(statistics, directoryPath);
+        }
+
+        private static void CreateBlockchainTree(IEnumerable<Statistic> statistics, string directoryPath)
+        {
             var blockchainBranches = statistics.SelectMany(s => s.BlockchainStatistics.BlockchainBranches)
                 .OrderByDescending(b => b.Count).ToList();
 
-            BlockchainNode root = null;
-            if (blockchainBranches.Any())
+            var tempRes = new List<BlockInfo>();
+            blockchainBranches.SelectMany(b => b).ForEach(b =>
             {
-                root = new BlockchainNode {ChildNodes = new List<BlockchainNode>()};
-
-                foreach (var branch in blockchainBranches)
+                if (!tempRes.Any(t => AreBlockInfoEqual(t, b)))
                 {
-                    var node = root;
+                    tempRes.Add(b);
+                }
+            });
 
-                    foreach (var blockInfo in branch)
+
+            var root = new BlockchainNode {ChildNodes = new List<BlockchainNode>()};
+
+            foreach (var branch in blockchainBranches)
+            {
+                var node = root;
+                foreach (var blockInfo in branch)
+                {
+                    if (node == null)
                     {
-                        if (!node.ChildNodes.Any(i => AreBlockInfoEqual(i.BlockInfo, blockInfo)))
+                        continue;
+                    }
+
+                    if (!node.ChildNodes.Any(n => AreBlockInfoEqual(n.BlockInfo, blockInfo)))
+                    {
+                        var newNode = new BlockchainNode
                         {
-                            var childNode = new BlockchainNode
-                                {BlockInfo = blockInfo, ChildNodes = new List<BlockchainNode>()};
-                            node.ChildNodes.Add(childNode);
-                            node = childNode;
-                        }
+                            BlockInfo = blockInfo,
+                            ChildNodes = new List<BlockchainNode>()
+                        };
+                        node.ChildNodes.Add(newNode);
+                        node = newNode;
+                    }
+                    else
+                    {
+                        node = node.ChildNodes.FirstOrDefault(n => AreBlockInfoEqual(n.BlockInfo, blockInfo));
                     }
                 }
             }
 
-            SaveBlockchainTree(new BlockchainTree {Root = root});
+            SaveBlockchainTree(new BlockchainTree {Root = root}, directoryPath);
         }
 
-        private static void SaveBlockchainTree(BlockchainTree blockchainTree)
+        private static void SaveBlockchainTree(BlockchainTree blockchainTree, string directoryPath)
         {
-            // TODO
+            var jsonPath = $@"{directoryPath}\blockchain-tree.json";
+            File.WriteAllText(jsonPath, JsonConvert.SerializeObject(blockchainTree));
+
+            var imagePath = $@"{directoryPath}\blockchain-tree.bmp";
+            var drawer = new TreeDrawer(imagePath);
+
+            var data = GetDataForDrawer(blockchainTree.Root);
+            drawer.DrawGraph(data);
+        }
+
+        private static List<NodeModel> GetDataForDrawer(BlockchainNode node, Guid? parentId = null,
+            List<NodeModel> result = null)
+        {
+            if (result == null)
+            {
+                result = new List<NodeModel>();
+            }
+
+            if (node != null)
+            {
+                var nodeId = Guid.NewGuid();
+                result.Add(new NodeModel
+                {
+                    Id = nodeId.ToString() ?? "R",
+                    Name = node.BlockInfo?.Id ?? "R",
+                    ParentId = parentId?.ToString() ?? string.Empty
+                });
+
+                node.ChildNodes?.ForEach(n => GetDataForDrawer(n, nodeId, result));
+            }
+
+            return result;
         }
 
         private static bool AreBlockInfoEqual(BlockInfo blockInfo1, BlockInfo blockInfo2)

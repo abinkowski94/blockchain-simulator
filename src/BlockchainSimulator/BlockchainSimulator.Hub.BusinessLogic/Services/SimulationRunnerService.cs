@@ -59,8 +59,30 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 ConnectNodes(simulation);
                 SendTransactions(simulation, settings);
                 WaitForNetwork(simulation, settings);
-                WaitForStatistics(simulation);
+                WaitForStatistics(simulation, settings);
+                ClearNodes(simulation);
             }
+        }
+
+        private void ClearNodes(Simulation simulation)
+        {
+            _queue.QueueBackgroundWorkItem(token => new Task(() =>
+            {
+                simulation.ServerNodes.ParallelForEach(node =>
+                {
+                    node.NodeThread?.Kill();
+                    node.NodeThread?.Dispose();
+                    node.NodeThread = null;
+                }, token);
+
+                var directoryPath = $@"{_directoryPath}\nodes";
+                if (Directory.Exists(directoryPath))
+                {
+                    Directory.Delete(directoryPath, true);
+                }
+
+                simulation.Status = SimulationStatuses.ReadyToRun;
+            }, token));
         }
 
         private void ConnectNodes(Simulation simulation)
@@ -210,7 +232,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             }, token));
         }
 
-        private void WaitForStatistics(Simulation simulation)
+        private void WaitForStatistics(Simulation simulation, SimulationSettings settings)
         {
             _queue.QueueBackgroundWorkItem(token => new Task(() =>
             {
@@ -234,7 +256,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     }
                 }, token);
 
-                _statisticService.ExtractAndSaveStatistics(statistics.ToList());
+                _statisticService.ExtractAndSaveStatistics(statistics.ToList(), settings,
+                    simulation.ScenarioId.ToString());
             }, token));
         }
 

@@ -16,4 +16,8 @@
         <ProjectReference Include="..\BlockchainSimulator.Common\BlockchainSimulator.Common.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Helpers\Drawing" />
+    </ItemGroup>
+
 </Project>
