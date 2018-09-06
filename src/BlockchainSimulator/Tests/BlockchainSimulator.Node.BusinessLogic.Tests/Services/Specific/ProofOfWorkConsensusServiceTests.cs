@@ -35,8 +35,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
             var httpServiceMock = new Mock<IHttpService>();
 
             _consensusService = new ProofOfWorkConsensusService(_backgroundTaskQueueMock.Object,
-                _blockchainRepositoryMock.Object, _blockchainValidatorMock.Object, httpServiceMock.Object,
-                new Mock<IStatisticService>().Object);
+                _blockchainRepositoryMock.Object, _blockchainValidatorMock.Object, httpServiceMock.Object, new Mock<IStatisticService>().Object,
+                new Mock<IServiceProvider>().Object);
         }
 
         [Fact]
@@ -148,7 +148,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
             // Arrange
 
             // Act
-            var result = _consensusService.AcceptBlockchain((string)null) as ErrorResponse<bool>;
+            var result = _consensusService.AcceptBlockchain((string) null) as ErrorResponse<bool>;
 
             // Assert
             _blockchainRepositoryMock.Verify(p => p.GetBlockchain(), Times.Never());
@@ -166,8 +166,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
         public async Task ReachConsensus_Empty_Void()
         {
             // Arrange
-            _consensusService.ConnectNode(new ServerNode { Id = "1", HttpAddress = "https://test:4200" });
-            _consensusService.ConnectNode(new ServerNode { Id = "2", HttpAddress = "https://test:4200" });
+            _consensusService.ConnectNode(new ServerNode {Id = "1", HttpAddress = "https://test:4200"});
+            _consensusService.ConnectNode(new ServerNode {Id = "2", HttpAddress = "https://test:4200"});
 
             var token = new CancellationToken();
             Func<CancellationToken, Task> queueTask = null;

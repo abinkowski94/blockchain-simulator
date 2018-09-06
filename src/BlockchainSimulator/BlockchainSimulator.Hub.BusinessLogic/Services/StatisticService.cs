@@ -115,7 +115,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             drawer.DrawGraph(data);
         }
 
-        private void SaveSettings(string directoryPath, SimulationSettings settings)
+        private static void SaveSettings(string directoryPath, SimulationSettings settings)
         {
             var jsonPath = $@"{directoryPath}\simulation-settings.json";
             File.WriteAllText(jsonPath, JsonConvert.SerializeObject(settings));

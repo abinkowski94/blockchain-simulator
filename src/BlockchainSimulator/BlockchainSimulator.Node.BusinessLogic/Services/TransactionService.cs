@@ -8,63 +8,76 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class TransactionService : ITransactionService
     {
         private readonly IBlockchainService _blockchainService;
-        private readonly IBlockchainConfiguration _configuration;
+        private readonly IBlockchainConfiguration _blockchainConfiguration;
         private readonly IMiningService _miningService;
         private readonly ConcurrentDictionary<string, Transaction> _pendingTransactions;
         private readonly IMiningQueue _queue;
+        private readonly IConfiguration _configuration;
+        private readonly object _padlock = new object();
 
         public TransactionService(IBlockchainService blockchainService, IMiningService miningService,
-            IBlockchainConfiguration configuration, IMiningQueue queue)
+            IBlockchainConfiguration blockchainConfiguration, IMiningQueue queue, IConfiguration configuration)
         {
             _pendingTransactions = new ConcurrentDictionary<string, Transaction>();
-            _configuration = configuration;
+            _blockchainConfiguration = blockchainConfiguration;
             _blockchainService = blockchainService;
             _miningService = miningService;
             _queue = queue;
+            _configuration = configuration;
         }
 
         public BaseResponse<Transaction> AddTransaction(Transaction transaction)
         {
-            transaction.Id = Guid.NewGuid().ToString();
-            transaction.RegistrationTime = DateTime.UtcNow;
-            transaction.TransactionDetails = null;
-
-            if (!_pendingTransactions.TryAdd(transaction.Id, transaction))
+            lock (_padlock)
             {
-                return new ErrorResponse<Transaction>(
-                    $"Could not add the transaction: {transaction.Id} to the pending list", transaction);
-            }
+                if (transaction.Id != null && !transaction.Id.EndsWith(_configuration["Node:Id"]))
+                {
+                    return new ErrorResponse<Transaction>("Can not mine others node transaction", transaction);
+                }
+                
+                transaction.Id = transaction.Id ?? $"{Guid.NewGuid().ToString()}-{_configuration["Node:Id"]}";
+                transaction.RegistrationTime = transaction.Id != null ? DateTime.UtcNow : transaction.RegistrationTime;
+                transaction.TransactionDetails = null;
 
-            if (_pendingTransactions.Count % _configuration.BlockSize != 0)
-            {
-                return new SuccessResponse<Transaction>("The transaction has been added to pending list",
+                if (!_pendingTransactions.TryAdd(transaction.Id, transaction))
+                {
+                    return new ErrorResponse<Transaction>(
+                        $"Could not add the transaction: {transaction.Id} to the pending list", transaction);
+                }
+
+                if (_pendingTransactions.Count % _blockchainConfiguration.BlockSize != 0)
+                {
+                    return new SuccessResponse<Transaction>("The transaction has been added to pending list",
+                        transaction);
+                }
+
+                // Launches mining
+                var enqueueTime = DateTime.UtcNow;
+                _queue.QueueMiningTask(token => new Task(() =>
+                {
+                    var transactions = _pendingTransactions.Values.OrderByDescending(t => t.Fee)
+                        .Take(_blockchainConfiguration.BlockSize).ToList();
+                    transactions.ForEach(t => _pendingTransactions.TryRemove(t.Id, out _));
+                    _miningService.MineBlock(transactions, enqueueTime, token);
+                }, token));
+
+                return new SuccessResponse<Transaction>("The transaction has been added and processing has started",
                     transaction);
             }
-
-            // Launches mining
-            var enqueueTime = DateTime.UtcNow;
-            _queue.QueueMiningTask(token => new Task(() =>
-            {
-                var transactions = _pendingTransactions.Select(t => t.Value).OrderByDescending(t => t.Fee)
-                    .Take(_configuration.BlockSize).ToList();
-                transactions.ForEach(t => _pendingTransactions.TryRemove(t.Id, out _));
-                _miningService.MineBlock(transactions, enqueueTime, token);
-            }, token));
-
-            return new SuccessResponse<Transaction>("The transaction has been added and processing has started",
-                transaction);
         }
 
         public BaseResponse<List<Transaction>> GetPendingTransactions()
         {
-            var result = _pendingTransactions.Select(t => t.Value).ToList().OrderByDescending(t => t.Fee).ToList();
-            var message = $"Pending transactions count: {_pendingTransactions.Count}/{_configuration.BlockSize}";
+            var result = _pendingTransactions.Values.OrderByDescending(t => t.Fee).ToList();
+            var message =
+                $"Pending transactions count: {_pendingTransactions.Count}/{_blockchainConfiguration.BlockSize}";
 
             return new SuccessResponse<List<Transaction>>(message, result);
         }

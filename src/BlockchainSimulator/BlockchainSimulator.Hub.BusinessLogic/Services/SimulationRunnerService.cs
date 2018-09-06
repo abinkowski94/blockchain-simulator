@@ -146,29 +146,36 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 var randomGenerator = new Random();
                 simulation.LastRunTime = DateTime.UtcNow;
                 simulation.Status = SimulationStatuses.Running;
+                var transactionsSent = settings.TransactionsSent;
                 simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
                 {
                     if (settings.NodesAndTransactions.TryGetValue(node.Id, out var number))
                     {
-                        Enumerable.Range(0, (int)number).ForEach(i =>
-                       {
-                           if (HasSimulationTimeElapsed(simulation, settings))
-                           {
-                               return;
-                           }
+                        Enumerable.Range(0, (int) number).ForEach(i =>
+                        {
+                            if (HasSimulationTimeElapsed(simulation, settings))
+                            {
+                                return;
+                            }
 
-                           var body = JsonConvert.SerializeObject(new Transaction
-                           {
-                               Sender = Guid.NewGuid().ToString(),
-                               Recipient = Guid.NewGuid().ToString(),
-                               Amount = randomGenerator.Next(1, 1000),
-                               Fee = (decimal)randomGenerator.NextDouble()
-                           });
-                           var content = new StringContent(body, Encoding.UTF8, "application/json");
-                           _httpService.Post($"{node.HttpAddress}/api/transactions", content, _nodeTimeout, token);
-                       });
+                            var body = JsonConvert.SerializeObject(new Transaction
+                            {
+                                Sender = Guid.NewGuid().ToString(),
+                                Recipient = Guid.NewGuid().ToString(),
+                                Amount = randomGenerator.Next(1, 1000),
+                                Fee = (decimal) randomGenerator.NextDouble()
+                            });
+                            var content = new StringContent(body, Encoding.UTF8, "application/json");
+                            var responseMessage = _httpService.Post($"{node.HttpAddress}/api/transactions", content,
+                                _nodeTimeout, token);
+                            if (responseMessage.IsSuccessStatusCode)
+                            {
+                                Interlocked.Increment(ref transactionsSent);
+                            }
+                        });
                     }
                 }, token);
+                settings.TransactionsSent = transactionsSent;
             }, token));
         }
 
