@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using OfficeOpenXml;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {
@@ -30,6 +31,33 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
             SaveSettings(directoryPath, settings);
             CreateBlockchainTree(statistics, directoryPath);
+            CreateExcelFile(directoryPath, statistics, settings);
+        }
+
+        private void CreateExcelFile(string directoryPath, List<Statistic> statistics, SimulationSettings settings)
+        {
+            if (statistics.Any())
+            {
+                var longestBlockchainStatistics =
+                    statistics.OrderByDescending(s => s.BlockchainStatistics.TotalTransactionsCount).First();
+
+                using (var package = new ExcelPackage())
+                {
+                    package.Workbook.Properties.Title = "Simulation results";
+                    package.Workbook.Properties.Author = "Augustyn Binkowski";
+                    package.Workbook.Properties.Subject = "Blockchain simulation";
+                    package.Workbook.Properties.Keywords = "blockchain, simulation, results";
+
+                    var simulationResultsSheet = package.Workbook.Worksheets.Add("Simulation results collectively");
+                    
+                    simulationResultsSheet.Cells[1, 1].Value = "The simulation results";
+                    simulationResultsSheet.Cells[3, 1].Value = "Consensus type";
+                    simulationResultsSheet.Cells[3, 2].Value = longestBlockchainStatistics.NodeType;
+
+                    var path = $@"{directoryPath}\simulation-results.xlsx";
+                    package.SaveAs(new FileInfo(path));
+                }
+            }
         }
 
         private static bool AreBlockInfoEqual(BlockInfo blockInfo1, BlockInfo blockInfo2)
@@ -48,7 +76,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             var blockchainBranches = statistics.SelectMany(s => s.BlockchainStatistics.BlockchainBranches)
                 .OrderByDescending(b => b.Count).ToList();
 
-            var root = new BlockchainNode { ChildNodes = new List<BlockchainNode>() };
+            var root = new BlockchainNode {ChildNodes = new List<BlockchainNode>()};
             foreach (var branch in blockchainBranches)
             {
                 var node = root;
@@ -76,7 +104,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 }
             }
 
-            SaveBlockchainTree(new BlockchainTree { Root = root }, directoryPath);
+            SaveBlockchainTree(new BlockchainTree {Root = root}, directoryPath);
         }
 
         private static List<NodeModel> GetDataForDrawer(BlockchainNode node, Guid? parentId = null,
