@@ -7,7 +7,7 @@
         "simulation": {
             "blockchainConfiguration": {
                 "blockSize": "5",
-                "target": "0000",
+                "target": "000",
                 "type": "PoW",
                 "version": "PoW-v1"
             },
