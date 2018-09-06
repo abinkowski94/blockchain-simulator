@@ -1,14 +1,13 @@
-using System;
 using BlockchainSimulator.Common.Models.Statistics;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Statistics;
 using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {
@@ -28,8 +27,20 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 Directory.CreateDirectory(directoryPath);
             }
-            
+
+            SaveSettings(directoryPath, settings);
             CreateBlockchainTree(statistics, directoryPath);
+        }
+
+        private static bool AreBlockInfoEqual(BlockInfo blockInfo1, BlockInfo blockInfo2)
+        {
+            if (blockInfo1 == null || blockInfo2 == null)
+            {
+                return false;
+            }
+
+            return blockInfo1.Id == blockInfo2.Id && blockInfo1.Nonce == blockInfo2.Nonce &&
+                   blockInfo1.TimeStamp == blockInfo2.TimeStamp;
         }
 
         private static void CreateBlockchainTree(IEnumerable<Statistic> statistics, string directoryPath)
@@ -37,18 +48,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             var blockchainBranches = statistics.SelectMany(s => s.BlockchainStatistics.BlockchainBranches)
                 .OrderByDescending(b => b.Count).ToList();
 
-            var tempRes = new List<BlockInfo>();
-            blockchainBranches.SelectMany(b => b).ForEach(b =>
-            {
-                if (!tempRes.Any(t => AreBlockInfoEqual(t, b)))
-                {
-                    tempRes.Add(b);
-                }
-            });
-
-
-            var root = new BlockchainNode {ChildNodes = new List<BlockchainNode>()};
-
+            var root = new BlockchainNode { ChildNodes = new List<BlockchainNode>() };
             foreach (var branch in blockchainBranches)
             {
                 var node = root;
@@ -76,19 +76,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 }
             }
 
-            SaveBlockchainTree(new BlockchainTree {Root = root}, directoryPath);
-        }
-
-        private static void SaveBlockchainTree(BlockchainTree blockchainTree, string directoryPath)
-        {
-            var jsonPath = $@"{directoryPath}\blockchain-tree.json";
-            File.WriteAllText(jsonPath, JsonConvert.SerializeObject(blockchainTree));
-
-            var imagePath = $@"{directoryPath}\blockchain-tree.bmp";
-            var drawer = new TreeDrawer(imagePath);
-
-            var data = GetDataForDrawer(blockchainTree.Root);
-            drawer.DrawGraph(data);
+            SaveBlockchainTree(new BlockchainTree { Root = root }, directoryPath);
         }
 
         private static List<NodeModel> GetDataForDrawer(BlockchainNode node, Guid? parentId = null,
@@ -115,15 +103,22 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             return result;
         }
 
-        private static bool AreBlockInfoEqual(BlockInfo blockInfo1, BlockInfo blockInfo2)
+        private static void SaveBlockchainTree(BlockchainTree blockchainTree, string directoryPath)
         {
-            if (blockInfo1 == null || blockInfo2 == null)
-            {
-                return false;
-            }
+            var jsonPath = $@"{directoryPath}\blockchain-tree.json";
+            File.WriteAllText(jsonPath, JsonConvert.SerializeObject(blockchainTree));
 
-            return blockInfo1.Id == blockInfo2.Id && blockInfo1.Nonce == blockInfo2.Nonce &&
-                   blockInfo1.TimeStamp == blockInfo2.TimeStamp;
+            var imagePath = $@"{directoryPath}\blockchain-tree.bmp";
+            var drawer = new TreeDrawer(imagePath);
+
+            var data = GetDataForDrawer(blockchainTree.Root);
+            drawer.DrawGraph(data);
+        }
+
+        private void SaveSettings(string directoryPath, SimulationSettings settings)
+        {
+            var jsonPath = $@"{directoryPath}\simulation-settings.json";
+            File.WriteAllText(jsonPath, JsonConvert.SerializeObject(settings));
         }
     }
 }

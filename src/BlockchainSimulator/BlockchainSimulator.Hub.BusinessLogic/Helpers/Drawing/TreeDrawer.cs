@@ -39,33 +39,6 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             }
         }
 
-        private static List<TreeNodeModel<NodeModel>> GetChildNodes(List<NodeModel> data,
-            TreeNodeModel<NodeModel> parent)
-        {
-            var nodes = new List<TreeNodeModel<NodeModel>>();
-
-            foreach (var item in data.Where(p => p.ParentId == parent.Item.Id))
-            {
-                var treeNode = new TreeNodeModel<NodeModel>(item, parent);
-                treeNode.Children = GetChildNodes(data, treeNode);
-                nodes.Add(treeNode);
-            }
-
-            return nodes;
-        }
-
-        private static Size GetSize(TreeNodeModel<NodeModel> tree)
-        {
-            // tree sizes are 0-based, so add 1
-            var treeWidth = tree.Width + 1;
-            var treeHeight = tree.Height + 1;
-
-            var size = new Size(Convert.ToInt32(treeWidth * _nodeWidth + (treeWidth + 1) * _nodeMarginX),
-                treeHeight * _nodeHeight + (treeHeight + 1) * _nodeMarginY);
-
-            return size;
-        }
-
         private static void DrawNode(TreeNodeModel<NodeModel> node, Graphics graphic)
         {
             // rectangle where node will be positioned
@@ -121,6 +94,21 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             }
         }
 
+        private static List<TreeNodeModel<NodeModel>> GetChildNodes(List<NodeModel> data,
+                    TreeNodeModel<NodeModel> parent)
+        {
+            var nodes = new List<TreeNodeModel<NodeModel>>();
+
+            foreach (var item in data.Where(p => p.ParentId == parent.Item.Id))
+            {
+                var treeNode = new TreeNodeModel<NodeModel>(item, parent);
+                treeNode.Children = GetChildNodes(data, treeNode);
+                nodes.Add(treeNode);
+            }
+
+            return nodes;
+        }
+
         // converts list of sample items to hierarchical list of TreeNodeModels
         private static TreeNodeModel<NodeModel> GetSampleTree(List<NodeModel> data)
         {
@@ -131,6 +119,18 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             rootTreeNode.Children = GetChildNodes(data, rootTreeNode);
 
             return rootTreeNode;
+        }
+
+        private static Size GetSize(TreeNodeModel<NodeModel> tree)
+        {
+            // tree sizes are 0-based, so add 1
+            var treeWidth = tree.Width + 1;
+            var treeHeight = tree.Height + 1;
+
+            var size = new Size(Convert.ToInt32(treeWidth * _nodeWidth + (treeWidth + 1) * _nodeMarginX),
+                treeHeight * _nodeHeight + (treeHeight + 1) * _nodeMarginY);
+
+            return size;
         }
 
         private static void PaintTree(Graphics graphic, TreeNodeModel<NodeModel> tree)

@@ -54,7 +54,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 var transactions = _pendingTransactions.Select(t => t.Value).OrderByDescending(t => t.Fee)
                     .Take(_configuration.BlockSize).ToList();
                 transactions.ForEach(t => _pendingTransactions.TryRemove(t.Id, out _));
-                _miningService.MineBlocks(transactions, enqueueTime, token);
+                _miningService.MineBlock(transactions, enqueueTime, token);
             }, token));
 
             return new SuccessResponse<Transaction>("The transaction has been added and processing has started",

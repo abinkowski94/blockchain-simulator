@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
@@ -28,7 +27,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _statisticService = statisticService;
         }
 
-        public void MineBlocks(IEnumerable<Transaction> transactions, DateTime enqueueTime, CancellationToken token)
+        public void MineBlock(IEnumerable<Transaction> transactions, DateTime enqueueTime, CancellationToken token)
         {
             _statisticService.RegisterMiningAttempt();
 
@@ -40,7 +39,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             if (response is ErrorResponse<bool> errorResponse && !errorResponse.Result)
             {
                 _statisticService.RegisterAbandonedBlock();
-                _queue.QueueMiningTask(t => new Task(() => MineBlocks(transactionSet, enqueueTime, token)));
+                MineBlock(transactionSet, enqueueTime, token);
             }
         }
     }

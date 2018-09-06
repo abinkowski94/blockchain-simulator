@@ -1,4 +1,5 @@
 using BlockchainSimulator.Node.DataAccess.Repositories;
+using BlockchainSimulator.Node.WebApi.Models.Blockchain;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 
@@ -43,6 +44,17 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         public ActionResult<object> GetBlockchain()
         {
             return _blockchainRepository.GetBlockchain();
+        }
+
+        /// <summary>
+        /// Gets the locally stored blockchain meta-data
+        /// </summary>
+        /// <returns>The blockchain</returns>
+        [HttpGet("meta-data")]
+        public ActionResult<BlockchainMetadata> GetBlockchainMetadata()
+        {
+            var metadata = _blockchainRepository.GetBlockchainMetadata();
+            return LocalMapper.Map<BlockchainMetadata>(metadata);
         }
     }
 }

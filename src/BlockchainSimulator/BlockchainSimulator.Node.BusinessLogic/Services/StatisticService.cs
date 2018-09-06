@@ -13,10 +13,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class StatisticService : IStatisticService
     {
+        private readonly List<List<BlockInfo>> _blockchainBranches;
         private readonly IBlockchainConfiguration _blockchainConfiguration;
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly IConfiguration _configuration;
-        private readonly List<List<BlockInfo>> _blockchainBranches;
         private int _abandonedBlocksCount;
         private int _currentMiningQueueLength;
         private int _maxMiningQueueLength;
@@ -42,12 +42,16 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         public void AddBlockchainBranch(Blockchain incomingBlockchain)
         {
-            _blockchainBranches.Add(incomingBlockchain.Blocks.Select(b => new BlockInfo
+            if (incomingBlockchain?.Blocks != null
+                && _blockchainBranches.All(b => b.Count != incomingBlockchain.Blocks.Count))
             {
-                Id = b.Id,
-                TimeStamp = b.Header.TimeStamp,
-                Nonce = b.Header.Nonce
-            }).ToList());
+                _blockchainBranches.Add(incomingBlockchain.Blocks.Select(b => new BlockInfo
+                {
+                    Id = b.Id,
+                    TimeStamp = b.Header.TimeStamp,
+                    Nonce = b.Header.Nonce
+                }).ToList());
+            }
         }
 
         public BaseResponse<Statistic> GetStatistics()

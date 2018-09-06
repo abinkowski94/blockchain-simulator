@@ -28,8 +28,8 @@ namespace BlockchainSimulator.Hub.WebApi.AppStart
         /// <param name="services">The service provider</param>
         private static void OnShutdown(IServiceProvider services)
         {
-            services.GetService<QueuedHostedService>().Dispose();
-            services.GetService<IScenarioStorage>().Dispose();
+            services.GetService<QueuedHostedService>()?.Dispose();
+            services.GetService<IScenarioStorage>()?.Dispose();
 
             Console.WriteLine("Cleanup complete!");
         }

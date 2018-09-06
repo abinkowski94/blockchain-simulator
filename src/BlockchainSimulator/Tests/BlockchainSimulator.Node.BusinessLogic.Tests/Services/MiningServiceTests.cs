@@ -53,7 +53,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
                 .Returns(new SuccessResponse<bool>("The block has been accepted", true));
 
             // Act
-            _miningService.MineBlocks(transactions, enqueueTime, token);
+            _miningService.MineBlock(transactions, enqueueTime, token);
 
             // Assert
             _blockchainServiceMock.Verify(p => p.GetBlockchain());
@@ -82,7 +82,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
                 .Returns(new ErrorResponse<bool>("The block has not been accepted", false));
 
             // Act
-            _miningService.MineBlocks(transactions, enqueueTime, token);
+            _miningService.MineBlock(transactions, enqueueTime, token);
 
             // Assert
             _blockchainServiceMock.Verify(p => p.GetBlockchain());

@@ -25,6 +25,14 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
             }
         }
 
+        public BlockchainMetadata GetBlockchainMetadata()
+        {
+            return new BlockchainMetadata
+            {
+                Length = GetBlockchain().Blocks.Count
+            };
+        }
+
         public Blockchain SaveBlockchain(Blockchain blockchain)
         {
             lock (_padlock)

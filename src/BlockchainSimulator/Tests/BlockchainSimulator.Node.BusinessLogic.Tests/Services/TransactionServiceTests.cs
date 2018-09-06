@@ -93,7 +93,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             // Assert
             _blockchainConfigurationMock.Verify(p => p.BlockSize);
             _miningQueueMock.Verify(p => p.QueueMiningTask(It.IsAny<Func<CancellationToken, Task>>()));
-            _miningServiceMock.Verify(p => p.MineBlocks(It.IsAny<IEnumerable<Transaction>>(), It.IsAny<DateTime>(),
+            _miningServiceMock.Verify(p => p.MineBlock(It.IsAny<IEnumerable<Transaction>>(), It.IsAny<DateTime>(),
                 It.IsAny<CancellationToken>()));
 
             Assert.NotNull(result);
