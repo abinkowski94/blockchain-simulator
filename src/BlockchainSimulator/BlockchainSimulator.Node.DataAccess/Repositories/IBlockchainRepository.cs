@@ -8,6 +8,6 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
 
         BlockchainMetadata GetBlockchainMetadata();
 
-        Blockchain SaveBlockchain(Blockchain blockchain);
+        bool SaveBlockchain(Blockchain blockchain);
     }
 }

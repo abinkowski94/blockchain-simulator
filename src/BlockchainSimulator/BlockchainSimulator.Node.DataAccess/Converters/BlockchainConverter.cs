@@ -13,11 +13,16 @@ namespace BlockchainSimulator.Node.DataAccess.Converters
                 return null;
             }
 
-            var settings = new JsonSerializerSettings
+            return JsonConvert.DeserializeObject<Blockchain>(json, new JsonSerializerSettings
             {
-                Converters = new JsonConverter[] { new BlockConverter(), new NodeConverter() }
-            };
-            return JsonConvert.DeserializeObject<Blockchain>(json, settings);
+                Converters = {new BlockConverter(), new NodeConverter()}
+            });
+        }
+
+        public static Blockchain DeserializeBlockchain(JsonTextReader reader)
+        {
+            return new JsonSerializer {Converters = {new BlockConverter(), new NodeConverter()}}
+                .Deserialize<Blockchain>(reader);
         }
     }
 }

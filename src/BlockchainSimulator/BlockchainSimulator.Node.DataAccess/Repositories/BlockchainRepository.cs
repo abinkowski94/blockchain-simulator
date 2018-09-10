@@ -20,8 +20,11 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
         {
             lock (_padlock)
             {
-                var json = _fileRepository.GetFile(_blockchainFileName);
-                return BlockchainConverter.DeserializeBlockchain(json);
+                using (var streamReader = _fileRepository.GetFile(_blockchainFileName))
+                using (var reader = new JsonTextReader(streamReader))
+                {
+                    return BlockchainConverter.DeserializeBlockchain(reader);
+                }
             }
         }
 
@@ -33,14 +36,12 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
             };
         }
 
-        public Blockchain SaveBlockchain(Blockchain blockchain)
+        public bool SaveBlockchain(Blockchain blockchain)
         {
             lock (_padlock)
             {
                 var serializedObject = JsonConvert.SerializeObject(blockchain);
-                _fileRepository.SaveFile(serializedObject, _blockchainFileName);
-
-                return blockchain;
+                return _fileRepository.SaveFile(serializedObject, _blockchainFileName);
             }
         }
     }
