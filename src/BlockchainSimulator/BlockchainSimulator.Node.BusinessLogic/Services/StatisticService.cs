@@ -161,6 +161,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             result.Target = _blockchainConfiguration.Target;
             result.Version = _blockchainConfiguration.Version;
             result.NodeType = _configuration["Node:Type"];
+            result.NodeId = _configuration["Node:Id"];
         }
     }
 }

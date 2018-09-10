@@ -42,5 +42,11 @@ namespace BlockchainSimulator.Common.Models.Statistics
         /// </summary>
         [JsonProperty("version", Order = 3)]
         public string Version { get; set; }
+
+        /// <summary>
+        /// The node Id
+        /// </summary>
+        [JsonProperty("nodeId", Order = 7)]
+        public string NodeId { get; set; }
     }
 }
