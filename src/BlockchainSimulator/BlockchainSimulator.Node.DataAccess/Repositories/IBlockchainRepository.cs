@@ -1,4 +1,5 @@
 using BlockchainSimulator.Node.DataAccess.Model;
+using BlockchainSimulator.Node.DataAccess.Model.Block;
 
 namespace BlockchainSimulator.Node.DataAccess.Repositories
 {
@@ -6,8 +7,12 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
     {
         Blockchain GetBlockchain();
 
+        BlockBase GetLastBlock();
+
+        BlockBase GetBlock(string id);
+        
         BlockchainMetadata GetBlockchainMetadata();
 
-        bool SaveBlockchain(Blockchain blockchain);
+        void SaveBlockchain(Blockchain blockchain);
     }
 }

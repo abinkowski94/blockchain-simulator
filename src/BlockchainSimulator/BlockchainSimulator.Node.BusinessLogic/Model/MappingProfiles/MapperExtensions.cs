@@ -19,11 +19,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
             var blocks = mapper.Map<List<BlockBase>>(blockchain.Blocks);
 
             blocks.Where(b => !b.IsGenesis).Cast<Block.Block>().ToList()
-                .ForEach(b => b.Parent = blocks.FirstOrDefault(bl => b.ParentId == bl.Id));
+                .ForEach(b => b.Parent = blocks.FirstOrDefault(bl => b.ParentUniqueId == bl.UniqueId));
 
             blocks.ForEach(b => SetupTransactions(b.Body.MerkleTree, b.Body.Transactions));
 
-            return blocks.LastOrDefault();
+            return blocks.OrderByDescending(b => (b as Block.Block)?.Depth ?? 0).FirstOrDefault();
         }
 
         public static Blockchain ManualMap(this IMapper mapper, BlockBase blockBase)

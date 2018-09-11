@@ -20,16 +20,15 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
             }
         }
 
-        public StreamReader GetFile(string fileName)
+        public StreamReader GetFileReader(string fileName)
         {
             var path = $"{_directoryPath}\\{fileName}";
             return File.Exists(path) ? new StreamReader(path) : StreamReader.Null;
         }
 
-        public bool SaveFile(string data, string fileName)
+        public StreamWriter GetFileWriter(string fileName)
         {
-            File.WriteAllText($"{_directoryPath}\\{fileName}", data);
-            return true;
+            return new StreamWriter($"{_directoryPath}\\{fileName}");
         }
     }
 }

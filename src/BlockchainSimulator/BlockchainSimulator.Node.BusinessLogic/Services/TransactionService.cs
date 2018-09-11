@@ -37,11 +37,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         {
             lock (_padlock)
             {
-                if (transaction.Id != null && !transaction.Id.EndsWith(_configuration["Node:Id"]))
+                var validationResult = ValidateTransaction(transaction);
+                if (!validationResult.IsSuccess)
                 {
-                    return new ErrorResponse<Transaction>("Can not mine others node transaction", transaction);
+                    return validationResult;
                 }
-                
+
                 transaction.Id = transaction.Id ?? $"{Guid.NewGuid().ToString()}-{_configuration["Node:Id"]}";
                 transaction.RegistrationTime = transaction.Id != null ? DateTime.UtcNow : transaction.RegistrationTime;
                 transaction.TransactionDetails = null;
@@ -122,6 +123,25 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             }
 
             return null;
+        }
+
+        private BaseResponse<Transaction> ValidateTransaction(Transaction transaction)
+        {
+            if (transaction.Id == null)
+            {
+                return new SuccessResponse<Transaction>("The transaction is valid!", transaction);
+            }
+
+            if (!transaction.Id.EndsWith(_configuration["Node:Id"]))
+            {
+                return new ErrorResponse<Transaction>("Can not mine others node transaction", transaction);
+            }
+
+            var transactionResult = GetTransaction(transaction.Id);
+            return transactionResult.IsSuccess
+                ? (BaseResponse<Transaction>) new ErrorResponse<Transaction>("The transaction already exists",
+                    transaction)
+                : new SuccessResponse<Transaction>("The transaction is valid!", transaction);
         }
     }
 }

@@ -33,7 +33,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         [HttpGet("{id}")]
         public ActionResult<object> GetBlock(string id)
         {
-            return _blockchainRepository.GetBlockchain()?.Blocks?.FirstOrDefault(b => b.Id == id);
+            return _blockchainRepository.GetBlock(id);
         }
 
         /// <summary>

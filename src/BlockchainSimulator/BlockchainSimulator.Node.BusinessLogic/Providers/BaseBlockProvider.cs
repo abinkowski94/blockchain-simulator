@@ -53,6 +53,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
                 newBlock = new GenesisBlock
                 {
                     Id = Convert.ToString(0, 16),
+                    UniqueId = Guid.NewGuid().ToString(),
                     QueueTime = DateTime.UtcNow - enqueueTime
                 };
             }
@@ -61,8 +62,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
                 newBlock = new Block
                 {
                     Id = Convert.ToString(Convert.ToInt32(parentBlock.Id, 16) + 1, 16),
+                    UniqueId = Guid.NewGuid().ToString(),
+                    ParentUniqueId = parentBlock.UniqueId,
                     QueueTime = DateTime.UtcNow - enqueueTime,
-                    ParentId = parentBlock.Id,
                     Parent = parentBlock
                 };
             }

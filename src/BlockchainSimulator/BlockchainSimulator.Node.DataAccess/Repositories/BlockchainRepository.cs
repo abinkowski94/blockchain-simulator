@@ -1,6 +1,11 @@
+using System.IO;
+using System.Linq;
 using BlockchainSimulator.Node.DataAccess.Converters;
+using BlockchainSimulator.Node.DataAccess.Converters.Specific;
 using BlockchainSimulator.Node.DataAccess.Model;
+using BlockchainSimulator.Node.DataAccess.Model.Block;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace BlockchainSimulator.Node.DataAccess.Repositories
 {
@@ -20,28 +25,86 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
         {
             lock (_padlock)
             {
-                using (var streamReader = _fileRepository.GetFile(_blockchainFileName))
+                using (var streamReader = _fileRepository.GetFileReader(_blockchainFileName))
                 using (var reader = new JsonTextReader(streamReader))
                 {
-                    return BlockchainConverter.DeserializeBlockchain(reader);
+                    return streamReader == StreamReader.Null ? null : BlockchainConverter.DeserializeBlockchain(reader);
+                }
+            }
+        }
+
+        public BlockBase GetLastBlock()
+        {
+            lock (_padlock)
+            {
+                using (var streamReader = _fileRepository.GetFileReader(_blockchainFileName))
+                using (var reader = new JsonTextReader(streamReader))
+                {
+                    if (streamReader == StreamReader.Null)
+                    {
+                        return null;
+                    }
+
+                    var jObject = JObject.Load(reader);
+                    return jObject.First.Last.Last.ToObject<BlockBase>(new JsonSerializer
+                        {Converters = {new BlockConverter(), new NodeConverter()}});
+                }
+            }
+        }
+
+        public BlockBase GetBlock(string id)
+        {
+            lock (_padlock)
+            {
+                using (var streamReader = _fileRepository.GetFileReader(_blockchainFileName))
+                using (var reader = new JsonTextReader(streamReader))
+                {
+                    if (streamReader == StreamReader.Null)
+                    {
+                        return null;
+                    }
+
+                    var jObject = JObject.Load(reader);
+                    var jArray = (JArray) jObject.First.Last;
+                    var block = jArray.FirstOrDefault(b => b.Value<string>("id") == id);
+                    return block?.ToObject<BlockBase>(new JsonSerializer
+                        {Converters = {new BlockConverter(), new NodeConverter()}});
                 }
             }
         }
 
         public BlockchainMetadata GetBlockchainMetadata()
         {
-            return new BlockchainMetadata
+            lock (_padlock)
             {
-                Length = GetBlockchain().Blocks.Count
-            };
+                using (var streamReader = _fileRepository.GetFileReader(_blockchainFileName))
+                using (var reader = new JsonTextReader(streamReader))
+                {
+                    if (streamReader == StreamReader.Null)
+                    {
+                        return null;
+                    }
+
+                    var jObject = JObject.Load(reader);
+                    return new BlockchainMetadata
+                    {
+                        Length = ((JArray) jObject.First.Last).Count
+                    };
+                }
+            }
         }
 
-        public bool SaveBlockchain(Blockchain blockchain)
+        public void SaveBlockchain(Blockchain blockchain)
         {
             lock (_padlock)
             {
-                var serializedObject = JsonConvert.SerializeObject(blockchain);
-                return _fileRepository.SaveFile(serializedObject, _blockchainFileName);
+                using (var streamWriter = _fileRepository.GetFileWriter(_blockchainFileName))
+                using (var jsonWriter = new JsonTextWriter(streamWriter))
+                {
+                    var jsonSerializer = new JsonSerializer();
+                    jsonSerializer.Serialize(jsonWriter, blockchain);
+                    jsonWriter.Flush();
+                }
             }
         }
     }

@@ -4,10 +4,10 @@ namespace BlockchainSimulator.Node.DataAccess.Model.Block
 {
     public class Block : BlockBase
     {
-        [JsonProperty("isGenesis", Order = 2)]
+        [JsonProperty("isGenesis", Order = 4)] 
         public override bool IsGenesis => false;
 
-        [JsonProperty("parentId", Order = 3)]
-        public string ParentId { get; set; }
+        [JsonProperty("parentUniqueId", Order = 2)]
+        public string ParentUniqueId { get; set; }
     }
 }

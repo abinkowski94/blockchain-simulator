@@ -68,7 +68,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
             Assert.NotNull(result.Parent);
             Assert.False(result.IsGenesis);
             Assert.Equal("1", result.Id);
-            Assert.Equal("0", result.ParentId);
+            Assert.Equal("0", result.ParentUniqueId);
             Assert.Equal(_configuration.Version, result.Header.Version);
             Assert.NotNull(result.Header.ParentHash);
             Assert.Equal("3dda268f68fd57368c4c8a72ab5fa98fd85822789b422a53e47ef9a806adf0af",

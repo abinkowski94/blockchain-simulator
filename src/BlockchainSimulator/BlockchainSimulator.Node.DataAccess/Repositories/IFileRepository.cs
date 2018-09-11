@@ -4,8 +4,8 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
 {
     public interface IFileRepository
     {
-        StreamReader GetFile(string fileName);
+        StreamReader GetFileReader(string fileName);
 
-        bool SaveFile(string data, string fileName);
+        StreamWriter GetFileWriter(string fileName);
     }
 }
