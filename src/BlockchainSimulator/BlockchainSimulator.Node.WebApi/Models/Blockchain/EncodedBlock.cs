@@ -5,12 +5,12 @@ namespace BlockchainSimulator.Node.WebApi.Models.Blockchain
     /// <summary>
     /// The encoded blockchain
     /// </summary>
-    public class EncodedBlockchain
+    public class EncodedBlock
     {
         /// <summary>
-        /// The blockchain encoded in base 64 string
+        /// The block encoded in base 64 string
         /// </summary>
-        [JsonProperty("base64Blockchain")]
-        public string Base64Blockchain { get; set; }
+        [JsonProperty("base64Block")]
+        public string Base64Block { get; set; }
     }
 }

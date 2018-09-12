@@ -5,7 +5,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Statistics
 {
     public class BlockchainStatistics
     {
-        public List<List<BlockInfo>> BlockchainBranches { get; set; }
+        public List<BlockInfo> BlockInfos { get; set; }
+        
         public int BlocksCount { get; set; }
 
         public TimeSpan TotalQueueTimeForBlocks { get; set; }

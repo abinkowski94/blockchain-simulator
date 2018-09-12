@@ -21,9 +21,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _queue = queue;
         }
 
-        public abstract BaseResponse<bool> AcceptBlockchain(string base64Blockchain);
 
-        public abstract BaseResponse<bool> AcceptBlockchain(BlockBase blockBase);
+        public abstract BaseResponse<bool> AcceptBlock(string base64Block);
+
+        public abstract BaseResponse<bool> AcceptBlock(BlockBase blockBase);
+
+        public abstract void ReachConsensus(DataAccess.Model.Block.BlockBase block);
+
 
         public BaseResponse<ServerNode> ConnectNode(ServerNode serverNode)
         {
@@ -34,7 +38,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             }
 
             serverNode.IsConnected = null;
-
             CheckNodeConnection(serverNode);
 
             if (!_serverNodes.TryAdd(serverNode.Id, serverNode))
@@ -72,7 +75,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 _serverNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList());
         }
 
-        public abstract void ReachConsensus();
 
         private void CheckNodeConnection(ServerNode serverNode)
         {

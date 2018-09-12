@@ -12,8 +12,8 @@ namespace BlockchainSimulator.Common.Models.Statistics
         /// <summary>
         /// The blockchain branches
         /// </summary>
-        [JsonProperty("blockchainBranches", Order = 4)]
-        public List<List<BlockInfo>> BlockchainBranches { get; set; }
+        [JsonProperty("blockInfos", Order = 4)]
+        public List<BlockInfo> BlockInfos { get; set; }
 
         /// <summary>
         /// The number of blocks in blockchain

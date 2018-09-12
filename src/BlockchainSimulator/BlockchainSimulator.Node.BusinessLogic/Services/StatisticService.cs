@@ -8,20 +8,20 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BlockchainSimulator.Node.DataAccess.Model.Block;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class StatisticService : IStatisticService
     {
-        private readonly List<List<BlockInfo>> _blockchainBranches;
         private readonly IBlockchainConfiguration _blockchainConfiguration;
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly IConfiguration _configuration;
-        private int _abandonedBlocksCount;
+
         private int _currentMiningQueueLength;
         private int _maxMiningQueueLength;
         private int _miningAttemptsCount;
-        private int _rejectedIncomingBlockchainCount;
+        private int _rejectedIncomingBlockCount;
         private TimeSpan _totalMiningQueueTime;
 
         public StatisticService(IBlockchainRepository blockchainRepository,
@@ -30,55 +30,21 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _blockchainRepository = blockchainRepository;
             _blockchainConfiguration = blockchainConfiguration;
             _configuration = configuration;
-
-            _blockchainBranches = new List<List<BlockInfo>>();
-            _abandonedBlocksCount = 0;
-            _currentMiningQueueLength = 0;
-            _maxMiningQueueLength = 0;
-            _miningAttemptsCount = 0;
-            _rejectedIncomingBlockchainCount = 0;
-            _totalMiningQueueTime = TimeSpan.FromSeconds(0);
-        }
-
-        public void AddBlockchainBranch(BlockchainTree incomingBlockchainTree)
-        {
-            if (incomingBlockchainTree?.Blocks != null
-                && _blockchainBranches.All(b => b.Count != incomingBlockchainTree.Blocks.Count))
-            {
-                _blockchainBranches.Add(incomingBlockchainTree.Blocks.Select(b => new BlockInfo
-                {
-                    Id = b.Id,
-                    TimeStamp = b.Header.TimeStamp,
-                    Nonce = b.Header.Nonce
-                }).ToList());
-            }
-        }
-
-        public BaseResponse<Statistic> GetStatistics()
-        {
-            var blockChain = _blockchainRepository.GetBlockchainTree();
-            if (blockChain?.Blocks == null || !blockChain.Blocks.Any())
-            {
-                return new ErrorResponse<Statistic>("Could not retrieve statistics because blockchainTree is empty", null);
-            }
-
-            var result = new Statistic();
-
-            AddSessionConfiguration(result);
-            AddMiningQueueStatistics(result);
-            AddBlockchainStatistics(result, blockChain);
-
-            return new SuccessResponse<Statistic>($"The statistics has been generated on: {DateTime.UtcNow}", result);
-        }
-
-        public void RegisterAbandonedBlock()
-        {
-            _abandonedBlocksCount++;
         }
 
         public void RegisterMiningAttempt()
         {
             _miningAttemptsCount++;
+        }
+
+        public void RegisterQueueTime(TimeSpan timespan)
+        {
+            _totalMiningQueueTime += timespan;
+        }
+
+        public void RegisterRejectedBlock()
+        {
+            _rejectedIncomingBlockCount++;
         }
 
         public void RegisterQueueLengthChange(int length)
@@ -91,17 +57,26 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             }
         }
 
-        public void RegisterQueueTime(TimeSpan timespan)
+        public BaseResponse<Statistic> GetStatistics()
         {
-            _totalMiningQueueTime += timespan;
+            var blockchainTree = _blockchainRepository.GetBlockchainTree();
+            if (blockchainTree?.Blocks == null || !blockchainTree.Blocks.Any())
+            {
+                return new ErrorResponse<Statistic>("Could not retrieve statistics because blockchainTree is empty",
+                    null);
+            }
+
+            var result = new Statistic();
+
+            AddSessionConfiguration(result);
+            AddMiningQueueStatistics(result);
+            AddBlockchainStatistics(result, blockchainTree);
+
+            return new SuccessResponse<Statistic>($"The statistics has been generated on: {DateTime.UtcNow}", result);
         }
 
-        public void RegisterRejectedBlockchain()
-        {
-            _rejectedIncomingBlockchainCount++;
-        }
-
-        private static void AddTransactionsStatistics(BlockchainStatistics blockchainStatistics, BlockchainTree blockChain)
+        private static void AddTransactionsStatistics(BlockchainStatistics blockchainStatistics,
+            BlockchainTree blockChain)
         {
             blockchainStatistics.TransactionsStatistics = new List<TransactionStatistics>();
 
@@ -122,22 +97,30 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             });
         }
 
-        private void AddBlockchainStatistics(Statistic result, BlockchainTree blockChain)
+        private static void AddBlockchainStatistics(Statistic result, BlockchainTree blockchainTree)
         {
             result.BlockchainStatistics = new BlockchainStatistics
             {
-                BlocksCount = blockChain.Blocks.Count,
-                TotalQueueTimeForBlocks = blockChain.Blocks.Sum(b => b.QueueTime),
-                TotalTransactionsCount = blockChain.Blocks.Sum(b => b.Body.TransactionCounter)
+                BlocksCount = blockchainTree.Blocks.Count,
+                TotalQueueTimeForBlocks = blockchainTree.Blocks.Sum(b => b.QueueTime),
+                TotalTransactionsCount = blockchainTree.Blocks.Sum(b => b.Body.TransactionCounter)
             };
 
-            AddBlockchainTrees(result.BlockchainStatistics);
-            AddTransactionsStatistics(result.BlockchainStatistics, blockChain);
+            AddBlockchainTrees(result.BlockchainStatistics, blockchainTree);
+            AddTransactionsStatistics(result.BlockchainStatistics, blockchainTree);
         }
 
-        private void AddBlockchainTrees(BlockchainStatistics blockchainStatistics)
+        private static void AddBlockchainTrees(BlockchainStatistics blockchainStatistics, BlockchainTree blockchainTree)
         {
-            blockchainStatistics.BlockchainBranches = _blockchainBranches;
+            var mappedBlocksInfo = blockchainTree.Blocks.Select(b => new BlockInfo
+            {
+                UniqueId = b.UniqueId,
+                ParentUniqueId = (b as Block)?.ParentUniqueId,
+                Id = b.Id,
+                Nonce = b.Header.Nonce,
+                TimeStamp = b.Header.TimeStamp
+            }).ToList();
+            blockchainStatistics.BlockInfos = mappedBlocksInfo;
         }
 
         private void AddMiningQueueStatistics(Statistic result)
@@ -149,9 +132,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 TotalQueueTime = _totalMiningQueueTime,
                 AverageQueueTime = _totalMiningQueueTime /
                                    (_maxMiningQueueLength != 0 ? _maxMiningQueueLength : 1),
-                AbandonedBlocksCount = _abandonedBlocksCount,
                 TotalMiningAttemptsCount = _miningAttemptsCount,
-                RejectedIncomingBlockchainCount = _rejectedIncomingBlockchainCount
+                RejectedIncomingBlockchainCount = _rejectedIncomingBlockCount
             };
         }
 

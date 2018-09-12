@@ -15,7 +15,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
 
         void AddBlock(BlockBase blockBase);
 
-        bool BlockExists(string id);
+        bool BlockExists(string uniqueId);
 
         void SaveBlockchain(BlockchainTree blockchainTree);
     }

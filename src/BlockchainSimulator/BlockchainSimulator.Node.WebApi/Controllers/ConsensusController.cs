@@ -34,9 +34,9 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         /// <param name="encodedBlockchain">The encoded blockchain</param>
         /// <returns>The response if the blockchain has been accepted or not</returns>
         [HttpPost]
-        public ActionResult<BaseResponse> AcceptBlockchain([FromBody] EncodedBlockchain encodedBlockchain)
+        public ActionResult<BaseResponse> AcceptBlockchain([FromBody] EncodedBlock encodedBlockchain)
         {
-            return _consensusService.AcceptBlockchain(encodedBlockchain.Base64Blockchain)
+            return _consensusService.AcceptBlock(encodedBlockchain.Base64Block)
                 .GetActionResult<bool, bool>(this);
         }
 

@@ -9,7 +9,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Block
         public string BlockJson => JsonConvert.SerializeObject(this);
 
         [JsonIgnore] 
-        public abstract int Depth { get; }
+        public abstract int Depth { get; set; }
 
         [JsonProperty("body")] 
         public Body Body { get; set; }

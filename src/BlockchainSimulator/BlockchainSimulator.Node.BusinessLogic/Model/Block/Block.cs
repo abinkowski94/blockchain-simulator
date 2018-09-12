@@ -4,16 +4,19 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Block
 {
     public class Block : BlockBase
     {
-        [JsonIgnore] 
-        public override int Depth => 1 + (Parent as Block)?.Depth ?? 1;
+        private int? _depth;
 
-        [JsonProperty("isGenesis")] 
-        public override bool IsGenesis => false;
+        [JsonIgnore]
+        public override int Depth
+        {
+            get => _depth ?? 1 + (Parent as Block)?.Depth ?? 1;
+            set => _depth = value;
+        }
 
-        [JsonIgnore] 
-        public BlockBase Parent { get; set; }
+        [JsonProperty("isGenesis")] public override bool IsGenesis => false;
 
-        [JsonProperty("parentId")] 
-        public string ParentUniqueId { get; set; }
+        [JsonIgnore] public BlockBase Parent { get; set; }
+
+        [JsonProperty("parentId")] public string ParentUniqueId { get; set; }
     }
 }

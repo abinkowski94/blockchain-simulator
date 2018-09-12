@@ -65,6 +65,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
                     UniqueId = Guid.NewGuid().ToString(),
                     ParentUniqueId = parentBlock.UniqueId,
                     QueueTime = DateTime.UtcNow - enqueueTime,
+                    Depth = parentBlock.Depth + 1,
                     Parent = parentBlock
                 };
             }

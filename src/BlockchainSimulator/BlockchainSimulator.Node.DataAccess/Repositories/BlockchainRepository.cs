@@ -70,7 +70,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
 
                     var jObject = JObject.Load(reader);
                     var jArray = (JArray) jObject.First.Last;
-                    var block = jArray.FirstOrDefault(b => b.Value<string>("id") == id);
+                    var block = jArray.FirstOrDefault(b => b.Value<string>("uniqueId") == id);
                     return block?.ToObject<BlockBase>(new JsonSerializer
                         {Converters = {new BlockConverter(), new NodeConverter()}});
                 }
@@ -107,7 +107,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                 {
                     if (!blockBase.IsGenesis)
                     {
-                        throw new DataException("The blockchainTree is empty and the provided block is not genesis!");
+                        throw new DataException("The blockchain tree is empty and the provided block is not genesis!");
                     }
 
                     SaveBlockchain(new BlockchainTree {Blocks = new List<BlockBase> {blockBase}});
@@ -121,7 +121,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
             }
         }
 
-        public bool BlockExists(string id)
+        public bool BlockExists(string uniqueId)
         {
             lock (_padlock)
             {
@@ -135,7 +135,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
 
                     var jObject = JObject.Load(reader);
                     var jArray = (JArray) jObject.First.Last;
-                    return jArray.Any(b => b.Value<string>("id") == id);
+                    return jArray.Any(b => b.Value<string>("uniqueId") == uniqueId);
                 }
             }
         }
