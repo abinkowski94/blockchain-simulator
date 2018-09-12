@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using BlockchainSimulator.Node.DataAccess.Converters;
@@ -18,10 +20,10 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
         public BlockchainRepository(IFileRepository fileRepository)
         {
             _fileRepository = fileRepository;
-            _blockchainFileName = "blockchain.json";
+            _blockchainFileName = "blockchainTree.json";
         }
 
-        public Blockchain GetBlockchain()
+        public BlockchainTree GetBlockchainTree()
         {
             lock (_padlock)
             {
@@ -46,7 +48,9 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                     }
 
                     var jObject = JObject.Load(reader);
-                    return jObject.First.Last.Last.ToObject<BlockBase>(new JsonSerializer
+                    var jArray = (JArray) jObject.First.Last;
+                    var block = jArray.OrderByDescending(b => b.Value<int>("depth")).FirstOrDefault();
+                    return block?.ToObject<BlockBase>(new JsonSerializer
                         {Converters = {new BlockConverter(), new NodeConverter()}});
                 }
             }
@@ -73,7 +77,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
             }
         }
 
-        public BlockchainMetadata GetBlockchainMetadata()
+        public BlockchainTreeMetadata GetBlockchainMetadata()
         {
             lock (_padlock)
             {
@@ -86,15 +90,57 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                     }
 
                     var jObject = JObject.Load(reader);
-                    return new BlockchainMetadata
+                    return new BlockchainTreeMetadata
                     {
-                        Length = ((JArray) jObject.First.Last).Count
+                        Nodes = ((JArray) jObject.First.Last).Count
                     };
                 }
             }
         }
 
-        public void SaveBlockchain(Blockchain blockchain)
+        public void AddBlock(BlockBase blockBase)
+        {
+            lock (_padlock)
+            {
+                var metaData = GetBlockchainMetadata();
+                if (metaData == null || metaData.Nodes < 1)
+                {
+                    if (!blockBase.IsGenesis)
+                    {
+                        throw new DataException("The blockchainTree is empty and the provided block is not genesis!");
+                    }
+
+                    SaveBlockchain(new BlockchainTree {Blocks = new List<BlockBase> {blockBase}});
+                }
+                else
+                {
+                    var blockchain = GetBlockchainTree();
+                    blockchain.Blocks.Add(blockBase);
+                    SaveBlockchain(blockchain);
+                }
+            }
+        }
+
+        public bool BlockExists(string id)
+        {
+            lock (_padlock)
+            {
+                using (var streamReader = _fileRepository.GetFileReader(_blockchainFileName))
+                using (var reader = new JsonTextReader(streamReader))
+                {
+                    if (streamReader == StreamReader.Null)
+                    {
+                        return false;
+                    }
+
+                    var jObject = JObject.Load(reader);
+                    var jArray = (JArray) jObject.First.Last;
+                    return jArray.Any(b => b.Value<string>("id") == id);
+                }
+            }
+        }
+
+        public void SaveBlockchain(BlockchainTree blockchainTree)
         {
             lock (_padlock)
             {
@@ -102,7 +148,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                 using (var jsonWriter = new JsonTextWriter(streamWriter))
                 {
                     var jsonSerializer = new JsonSerializer();
-                    jsonSerializer.Serialize(jsonWriter, blockchain);
+                    jsonSerializer.Serialize(jsonWriter, blockchainTree);
                     jsonWriter.Flush();
                 }
             }

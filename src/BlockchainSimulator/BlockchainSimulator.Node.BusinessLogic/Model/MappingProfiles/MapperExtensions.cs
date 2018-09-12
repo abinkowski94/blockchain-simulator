@@ -9,14 +9,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
 {
     public static class MapperExtensions
     {
-        public static BlockBase ManualMap(this IMapper mapper, Blockchain blockchain)
+        public static BlockBase ManualMap(this IMapper mapper, BlockchainTree blockchainTree)
         {
-            if (blockchain == null)
+            if (blockchainTree == null)
             {
                 return null;
             }
 
-            var blocks = mapper.Map<List<BlockBase>>(blockchain.Blocks);
+            var blocks = mapper.Map<List<BlockBase>>(blockchainTree.Blocks);
 
             blocks.Where(b => !b.IsGenesis).Cast<Block.Block>().ToList()
                 .ForEach(b => b.Parent = blocks.FirstOrDefault(bl => b.ParentUniqueId == bl.UniqueId));
@@ -26,12 +26,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
             return blocks.OrderByDescending(b => (b as Block.Block)?.Depth ?? 0).FirstOrDefault();
         }
 
-        public static Blockchain ManualMap(this IMapper mapper, BlockBase blockBase)
+        public static BlockchainTree ManualMap(this IMapper mapper, BlockBase blockBase)
         {
             return GetBlockchain(mapper, blockBase);
         }
 
-        private static Blockchain GetBlockchain(IMapper mapper, BlockBase blockBase, List<BlockBase> blocks = null)
+        private static BlockchainTree GetBlockchain(IMapper mapper, BlockBase blockBase, List<BlockBase> blocks = null)
         {
             if (blockBase == null)
             {
@@ -56,7 +56,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
             }
 
             var mappedBlocks = mapper.Map<List<DataAccess.Model.Block.BlockBase>>(blocks);
-            return new Blockchain { Blocks = mappedBlocks };
+            return new BlockchainTree { Blocks = mappedBlocks };
         }
 
         private static void SetupTransactions(MerkleNode merkleNode, HashSet<Transaction.Transaction> transactions)

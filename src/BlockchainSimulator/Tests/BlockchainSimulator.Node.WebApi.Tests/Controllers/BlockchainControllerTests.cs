@@ -25,9 +25,9 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
         {
             // Arrange
             const string id = "1";
-            var blockchain = new Blockchain { Blocks = new List<BlockBase> { new Block { Id = id } } };
+            var blockchain = new BlockchainTree { Blocks = new List<BlockBase> { new Block { Id = id } } };
 
-            _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
+            _blockchainRepositoryMock.Setup(p => p.GetBlockchainTree())
                 .Returns(blockchain);
 
             // Act
@@ -35,7 +35,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
             var block = result.Value as Block;
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
 
             Assert.NotNull(result);
             Assert.NotNull(block);
@@ -49,15 +49,15 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
             // Arrange
             const string id = "1";
 
-            _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
-                .Returns((Blockchain)null);
+            _blockchainRepositoryMock.Setup(p => p.GetBlockchainTree())
+                .Returns((BlockchainTree)null);
 
             // Act
             var result = _blockchainController.GetBlock(id);
             var block = result.Value as Block;
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
 
             Assert.NotNull(result);
             Assert.Null(block);
@@ -67,14 +67,14 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
         public void GetBlockchain_Empty_Blockchain()
         {
             // Arrange
-            _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
-                .Returns(new Blockchain());
+            _blockchainRepositoryMock.Setup(p => p.GetBlockchainTree())
+                .Returns(new BlockchainTree());
 
             // Act
             var result = _blockchainController.GetBlockchain();
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
 
             Assert.NotNull(result);
         }

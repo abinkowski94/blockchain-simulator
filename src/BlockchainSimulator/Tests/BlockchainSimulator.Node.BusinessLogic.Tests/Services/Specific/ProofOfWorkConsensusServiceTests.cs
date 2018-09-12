@@ -49,7 +49,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
             var blockchain = BlockchainConverter.DeserializeBlockchain(blockchainJson);
             blockchain.Blocks.RemoveAt(1);
 
-            _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
+            _blockchainRepositoryMock.Setup(p => p.GetBlockchainTree())
                 .Returns(blockchain);
 
             var inputBlockchain = BlockchainConverter.DeserializeBlockchain(blockchainJson);
@@ -63,9 +63,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
             var result = _consensusService.AcceptBlockchain(encodedBlockchain) as ErrorResponse<bool>;
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
             _blockchainValidatorMock.Verify(p => p.Validate(It.IsAny<BlockBase>()));
-            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<Blockchain>()), Times.Never());
+            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<BlockchainTree>()), Times.Never());
             _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
                 Times.Never);
 
@@ -84,7 +84,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
 
             var blockchain = BlockchainConverter.DeserializeBlockchain(blockchainJson);
 
-            _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
+            _blockchainRepositoryMock.Setup(p => p.GetBlockchainTree())
                 .Returns(blockchain);
 
             var inputBlockchain = BlockchainConverter.DeserializeBlockchain(blockchainJson);
@@ -96,9 +96,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
             var result = _consensusService.AcceptBlockchain(encodedBlockchain) as ErrorResponse<bool>;
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
             _blockchainValidatorMock.Verify(p => p.Validate(It.IsAny<BlockBase>()), Times.Never);
-            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<Blockchain>()), Times.Never());
+            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<BlockchainTree>()), Times.Never());
             _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
                 Times.Never);
 
@@ -117,7 +117,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
             var blockchain = BlockchainConverter.DeserializeBlockchain(blockchainJson);
             blockchain.Blocks.RemoveAt(1);
 
-            _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
+            _blockchainRepositoryMock.Setup(p => p.GetBlockchainTree())
                 .Returns(blockchain);
 
             var inputBlockchain = BlockchainConverter.DeserializeBlockchain(blockchainJson);
@@ -131,9 +131,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
             var result = _consensusService.AcceptBlockchain(encodedBlockchain) as SuccessResponse<bool>;
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
             _blockchainValidatorMock.Verify(p => p.Validate(It.IsAny<BlockBase>()));
-            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<Blockchain>()));
+            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<BlockchainTree>()));
             _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
                 Times.Never);
 
@@ -151,9 +151,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
             var result = _consensusService.AcceptBlockchain((string) null) as ErrorResponse<bool>;
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchain(), Times.Never());
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree(), Times.Never());
             _blockchainValidatorMock.Verify(p => p.Validate(It.IsAny<BlockBase>()), Times.Never);
-            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<Blockchain>()), Times.Never());
+            _blockchainRepositoryMock.Verify(p => p.SaveBlockchain(It.IsAny<BlockchainTree>()), Times.Never());
             _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
                 Times.Never);
 
@@ -179,7 +179,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
 
             var blockchain = BlockchainConverter.DeserializeBlockchain(blockchainJson);
 
-            _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
+            _blockchainRepositoryMock.Setup(p => p.GetBlockchainTree())
                 .Returns(blockchain);
 
             // Act
@@ -187,7 +187,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
             await queueTask(token);
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
         }
     }
 }

@@ -16,7 +16,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         public BaseResponse<BlockBase> GetBlockchain()
         {
-            var blockchain = _blockchainRepository.GetBlockchain();
+            var blockchain = _blockchainRepository.GetBlockchainTree();
             if (blockchain?.Blocks == null)
             {
                 return new ErrorResponse<BlockBase>("The blockchain does not contain blocks", null);

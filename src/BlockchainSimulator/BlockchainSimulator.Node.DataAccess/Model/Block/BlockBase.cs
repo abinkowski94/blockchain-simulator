@@ -5,12 +5,15 @@ namespace BlockchainSimulator.Node.DataAccess.Model.Block
 {
     public abstract class BlockBase
     {
-        [JsonProperty("body", Order = 7)]
+        [JsonProperty("body", Order = 8)]
         public Body Body { get; set; }
 
-        [JsonProperty("header", Order = 6)]
+        [JsonProperty("header", Order = 7)]
         public Header Header { get; set; }
 
+        [JsonProperty("depth", Order = 6)]
+        public int Depth { get; set; }
+        
         [JsonProperty("id", Order = 3)]
         public string Id { get; set; }
         

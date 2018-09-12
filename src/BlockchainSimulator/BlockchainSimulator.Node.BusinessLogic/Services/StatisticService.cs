@@ -40,12 +40,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _totalMiningQueueTime = TimeSpan.FromSeconds(0);
         }
 
-        public void AddBlockchainBranch(Blockchain incomingBlockchain)
+        public void AddBlockchainBranch(BlockchainTree incomingBlockchainTree)
         {
-            if (incomingBlockchain?.Blocks != null
-                && _blockchainBranches.All(b => b.Count != incomingBlockchain.Blocks.Count))
+            if (incomingBlockchainTree?.Blocks != null
+                && _blockchainBranches.All(b => b.Count != incomingBlockchainTree.Blocks.Count))
             {
-                _blockchainBranches.Add(incomingBlockchain.Blocks.Select(b => new BlockInfo
+                _blockchainBranches.Add(incomingBlockchainTree.Blocks.Select(b => new BlockInfo
                 {
                     Id = b.Id,
                     TimeStamp = b.Header.TimeStamp,
@@ -56,10 +56,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         public BaseResponse<Statistic> GetStatistics()
         {
-            var blockChain = _blockchainRepository.GetBlockchain();
+            var blockChain = _blockchainRepository.GetBlockchainTree();
             if (blockChain?.Blocks == null || !blockChain.Blocks.Any())
             {
-                return new ErrorResponse<Statistic>("Could not retrieve statistics because blockchain is empty", null);
+                return new ErrorResponse<Statistic>("Could not retrieve statistics because blockchainTree is empty", null);
             }
 
             var result = new Statistic();
@@ -101,7 +101,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _rejectedIncomingBlockchainCount++;
         }
 
-        private static void AddTransactionsStatistics(BlockchainStatistics blockchainStatistics, Blockchain blockChain)
+        private static void AddTransactionsStatistics(BlockchainStatistics blockchainStatistics, BlockchainTree blockChain)
         {
             blockchainStatistics.TransactionsStatistics = new List<TransactionStatistics>();
 
@@ -122,7 +122,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             });
         }
 
-        private void AddBlockchainStatistics(Statistic result, Blockchain blockChain)
+        private void AddBlockchainStatistics(Statistic result, BlockchainTree blockChain)
         {
             result.BlockchainStatistics = new BlockchainStatistics
             {

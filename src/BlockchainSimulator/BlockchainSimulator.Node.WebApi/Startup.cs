@@ -36,7 +36,7 @@ namespace BlockchainSimulator.Node.WebApi
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             app.UseDefaultConfiguration(env);
-            app.UseSwagger("Blockchain simulator (Node API)");
+            app.UseSwagger("BlockchainTree simulator (Node API)");
         }
 
         /// <summary>

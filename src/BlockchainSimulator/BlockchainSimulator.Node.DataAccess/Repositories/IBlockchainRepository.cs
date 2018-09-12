@@ -5,14 +5,18 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
 {
     public interface IBlockchainRepository
     {
-        Blockchain GetBlockchain();
-
         BlockBase GetLastBlock();
 
         BlockBase GetBlock(string id);
-        
-        BlockchainMetadata GetBlockchainMetadata();
 
-        void SaveBlockchain(Blockchain blockchain);
+        BlockchainTree GetBlockchainTree();
+
+        BlockchainTreeMetadata GetBlockchainMetadata();
+
+        void AddBlock(BlockBase blockBase);
+
+        bool BlockExists(string id);
+
+        void SaveBlockchain(BlockchainTree blockchainTree);
     }
 }

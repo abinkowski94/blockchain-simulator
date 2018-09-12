@@ -28,17 +28,17 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
 
         [Theory]
         [MemberData(nameof(BlockchainDataSet.BlockchainData), MemberType = typeof(BlockchainDataSet))]
-        public void GetBlockchain_NoParams_Blockchain(Blockchain blockchain)
+        public void GetBlockchain_NoParams_Blockchain(BlockchainTree blockchainTree)
         {
             // Arrange
-            _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
-                .Returns(blockchain);
+            _blockchainRepositoryMock.Setup(p => p.GetBlockchainTree())
+                .Returns(blockchainTree);
 
             // Act
             var result = _blockchainService.GetBlockchain();
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
 
             Assert.NotNull(result);
         }
@@ -47,19 +47,19 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public void GetBlockchain_NoParams_ErrorResponseNoBlocks()
         {
             // Arrange
-            _blockchainRepositoryMock.Setup(p => p.GetBlockchain())
-                .Returns(new Blockchain());
+            _blockchainRepositoryMock.Setup(p => p.GetBlockchainTree())
+                .Returns(new BlockchainTree());
 
             // Act
             var result = _blockchainService.GetBlockchain() as ErrorResponse<BlockBase>;
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchain());
+            _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
 
             Assert.NotNull(result);
             Assert.NotNull(result.Message);
             Assert.Null(result.Result);
-            Assert.Equal("The blockchain does not contain blocks", result.Message);
+            Assert.Equal("The blockchainTree does not contain blocks", result.Message);
         }
     }
 }

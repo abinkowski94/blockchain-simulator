@@ -6,23 +6,23 @@ namespace BlockchainSimulator.Node.DataAccess.Converters
 {
     public static class BlockchainConverter
     {
-        public static Blockchain DeserializeBlockchain(string json)
+        public static BlockchainTree DeserializeBlockchain(string json)
         {
             if (json == null)
             {
                 return null;
             }
 
-            return JsonConvert.DeserializeObject<Blockchain>(json, new JsonSerializerSettings
+            return JsonConvert.DeserializeObject<BlockchainTree>(json, new JsonSerializerSettings
             {
                 Converters = {new BlockConverter(), new NodeConverter()}
             });
         }
 
-        public static Blockchain DeserializeBlockchain(JsonTextReader reader)
+        public static BlockchainTree DeserializeBlockchain(JsonTextReader reader)
         {
             return new JsonSerializer {Converters = {new BlockConverter(), new NodeConverter()}}
-                .Deserialize<Blockchain>(reader);
+                .Deserialize<BlockchainTree>(reader);
         }
     }
 }

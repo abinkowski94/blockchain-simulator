@@ -7,7 +7,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public interface IStatisticService
     {
-        void AddBlockchainBranch(Blockchain incomingBlockchain);
+        void AddBlockchainBranch(BlockchainTree incomingBlockchainTree);
 
         BaseResponse<Statistic> GetStatistics();
 

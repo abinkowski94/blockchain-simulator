@@ -44,7 +44,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             if (base64Blockchain == null)
             {
                 _statisticService.RegisterRejectedBlockchain();
-                return new ErrorResponse<bool>("The blockchain can not be null!", false);
+                return new ErrorResponse<bool>("The blockchainTree can not be null!", false);
             }
 
             var blockchainJson = Encoding.UTF8.GetString(Convert.FromBase64String(base64Blockchain));
@@ -63,7 +63,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
         {
             if (blockBase == null)
             {
-                return new ErrorResponse<bool>("The blockchain can not be null!", false);
+                return new ErrorResponse<bool>("The blockchainTree can not be null!", false);
             }
 
             var incomingBlockchain = LocalMapper.ManualMap(blockBase);
@@ -79,7 +79,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                     // The delay
                     Thread.Sleep((int) node.Delay);
 
-                    var blockchain = _blockchainRepository.GetBlockchain();
+                    var blockchain = _blockchainRepository.GetBlockchainTree();
                     var blockchainJson = JsonConvert.SerializeObject(blockchain);
                     var encodedBlockchain = Convert.ToBase64String(Encoding.UTF8.GetBytes(blockchainJson));
                     var content = new JsonContent(new {base64Blockchain = encodedBlockchain});
@@ -89,46 +89,46 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             });
         }
 
-        private BaseResponse<bool> AcceptBlockchain(Blockchain incomingBlockchain)
+        private BaseResponse<bool> AcceptBlockchain(BlockchainTree incomingBlockchainTree)
         {
             lock (_padlock)
             {
-                var currentBlockchain = _blockchainRepository.GetBlockchain();
-                if (currentBlockchain != null && incomingBlockchain.Blocks.Count <= currentBlockchain.Blocks.Count)
+                var currentBlockchain = _blockchainRepository.GetBlockchainTree();
+                if (currentBlockchain != null && incomingBlockchainTree.Blocks.Count <= currentBlockchain.Blocks.Count)
                 {
-                    return new ErrorResponse<bool>("The incoming blockchain is shorter than the current!", false);
+                    return new ErrorResponse<bool>("The incoming blockchainTree is shorter than the current!", false);
                 }
 
-                var blockchainForValidation = LocalMapper.ManualMap(incomingBlockchain);
+                var blockchainForValidation = LocalMapper.ManualMap(incomingBlockchainTree);
                 var validationResult = _blockchainValidator.Validate(blockchainForValidation);
                 if (!validationResult.IsSuccess)
                 {
-                    return new ErrorResponse<bool>("The incoming blockchain is invalid!", false,
+                    return new ErrorResponse<bool>("The incoming blockchainTree is invalid!", false,
                         validationResult.Errors);
                 }
 
                 _statisticService.AddBlockchainBranch(currentBlockchain);
-                _statisticService.AddBlockchainBranch(incomingBlockchain);
+                _statisticService.AddBlockchainBranch(incomingBlockchainTree);
 
-                _blockchainRepository.SaveBlockchain(incomingBlockchain);
+                _blockchainRepository.SaveBlockchain(incomingBlockchainTree);
 
                 ReachConsensus();
-                CompareAndReMineBlocks(currentBlockchain, incomingBlockchain);
+                CompareAndReMineBlocks(currentBlockchain, incomingBlockchainTree);
 
-                return new SuccessResponse<bool>("The blockchain has been accepted and swapped!", true);
+                return new SuccessResponse<bool>("The blockchainTree has been accepted and swapped!", true);
             }
         }
 
-        private void CompareAndReMineBlocks(Blockchain currentBlockchain, Blockchain incomingBlockchain)
+        private void CompareAndReMineBlocks(BlockchainTree currentBlockchainTree, BlockchainTree incomingBlockchainTree)
         {
-            if (currentBlockchain?.Blocks?.Any() == true && incomingBlockchain?.Blocks?.Any() == true)
+            if (currentBlockchainTree?.Blocks?.Any() == true && incomingBlockchainTree?.Blocks?.Any() == true)
             {
                 var transactionService =
                     (ITransactionService) _serviceProvider.GetService(typeof(ITransactionService));
-                var incomingTransactionIds = incomingBlockchain.Blocks.SelectMany(b => b.Body.Transactions)
+                var incomingTransactionIds = incomingBlockchainTree.Blocks.SelectMany(b => b.Body.Transactions)
                     .Select(t => t.Id).ToArray();
 
-                currentBlockchain.Blocks.SelectMany(b => b.Body.Transactions)
+                currentBlockchainTree.Blocks.SelectMany(b => b.Body.Transactions)
                     .Where(t => !incomingTransactionIds.Contains(t.Id)).ForEach(t =>
                     {
                         var mappedTransaction = LocalMapper.Map<Transaction>(t);

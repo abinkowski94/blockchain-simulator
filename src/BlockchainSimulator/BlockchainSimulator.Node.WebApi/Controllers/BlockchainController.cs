@@ -43,7 +43,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         [HttpGet]
         public ActionResult<object> GetBlockchain()
         {
-            return _blockchainRepository.GetBlockchain();
+            return _blockchainRepository.GetBlockchainTree();
         }
 
         /// <summary>

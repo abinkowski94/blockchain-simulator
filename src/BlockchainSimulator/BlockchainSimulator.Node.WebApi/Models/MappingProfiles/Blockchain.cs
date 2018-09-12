@@ -13,7 +13,7 @@ namespace BlockchainSimulator.Node.WebApi.Models.MappingProfiles
         /// </summary>
         public BlockchainProfile()
         {
-            CreateMap<BlockchainMetadata, DataAccess.Model.BlockchainMetadata>().ReverseMap();
+            CreateMap<BlockchainMetadata, DataAccess.Model.BlockchainTreeMetadata>().ReverseMap();
         }
     }
 }
