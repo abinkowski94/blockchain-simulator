@@ -11,6 +11,8 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
 
         BlockchainTree GetBlockchainTree();
 
+        BlockchainTree GetLongestBlockchain();
+
         BlockchainTreeMetadata GetBlockchainMetadata();
 
         void AddBlock(BlockBase blockBase);

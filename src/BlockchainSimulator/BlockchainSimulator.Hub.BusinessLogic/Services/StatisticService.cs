@@ -31,12 +31,12 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             }
 
             SaveSettings(directoryPath, settings);
-            var treeStats = CreateBlockchainTree(statistics, directoryPath);
-            CreateExcelFile(directoryPath, statistics, settings, treeStats);
+            CreateBlockchainTree(statistics, directoryPath);
+            CreateExcelFile(directoryPath, statistics, settings);
         }
 
         private static void CreateExcelFile(string directoryPath, IReadOnlyCollection<Statistic> statistics,
-            SimulationSettings settings, Tuple<int, int> treeStats)
+            SimulationSettings settings)
         {
             if (statistics.Any())
             {
@@ -50,7 +50,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     package.Workbook.Properties.Subject = "Blockchain simulation";
                     package.Workbook.Properties.Keywords = "blockchain, simulation, results";
 
-                    CreateCollectiveResultsSheet(settings, treeStats, package, longestBlockchainStatistics);
+                    CreateCollectiveResultsSheet(settings, package, longestBlockchainStatistics);
                     CreateNodesStatisticsSheet(statistics, package);
 
                     var path = $@"{directoryPath}\simulation-results.xlsx";
@@ -91,8 +91,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             nodesSheet.Cells[1, 1, row, 7].AutoFitColumns();
         }
 
-        private static void CreateCollectiveResultsSheet(SimulationSettings settings, Tuple<int, int> treeStats,
-            ExcelPackage package, Statistic longestBlockchainStatistics)
+        private static void CreateCollectiveResultsSheet(SimulationSettings settings, ExcelPackage package,
+            Statistic longestBlockchainStatistics)
         {
             var simulationResultsSheet = package.Workbook.Worksheets.Add("Simulation results collectively");
             var row = 0;
@@ -130,9 +130,12 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             simulationResultsSheet.Cells[row, 2].Value =
                 longestBlockchainStatistics.BlockchainStatistics.TotalQueueTimeForBlocks.TotalSeconds;
             simulationResultsSheet.Cells[++row, 1].Value = "Blockchain tree height";
-            simulationResultsSheet.Cells[row, 2].Value = treeStats.Item1;
+            simulationResultsSheet.Cells[row, 2].Value =
+                longestBlockchainStatistics.BlockchainStatistics.BlockInfos.Select(i => Convert.ToInt32(i.Id, 16))
+                    .Max() + 1;
             simulationResultsSheet.Cells[++row, 1].Value = "Blockchain tree nodes count";
-            simulationResultsSheet.Cells[row, 2].Value = treeStats.Item2;
+            simulationResultsSheet.Cells[row, 2].Value =
+                longestBlockchainStatistics.BlockchainStatistics.BlockInfos.Count;
             row += 2;
 
             simulationResultsSheet.Cells[++row, 1].Value = "Transactions statistics";
@@ -159,7 +162,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             simulationResultsSheet.Cells[1, 1, row, 6].AutoFitColumns();
         }
 
-        private static Tuple<int, int> CreateBlockchainTree(IEnumerable<Statistic> statistics, string directoryPath)
+        private static void CreateBlockchainTree(IEnumerable<Statistic> statistics, string directoryPath)
         {
             var statistic = statistics.OrderByDescending(s => s.BlockchainStatistics.TotalTransactionsCount).First();
             var models = statistic.BlockchainStatistics.BlockInfos.Select(i => new NodeModel
@@ -170,9 +173,6 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             }).ToList();
             models.Add(new NodeModel {Id = "R", Name = "R", ParentId = string.Empty});
             DrawAndSaveBlockchainTree(models, directoryPath);
-
-            //TODO
-            return new Tuple<int, int>(0, models.Count - 1);
         }
 
         private static void DrawAndSaveBlockchainTree(List<NodeModel> models, string directoryPath)

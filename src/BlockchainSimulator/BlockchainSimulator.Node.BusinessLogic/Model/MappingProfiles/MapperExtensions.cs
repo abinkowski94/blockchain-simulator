@@ -26,11 +26,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
             return blocks.OrderByDescending(b => (b as Block.Block)?.Depth ?? 0).FirstOrDefault();
         }
 
-        public static BlockchainTree ManualMap(this IMapper mapper, BlockBase blockBase)
-        {
-            return GetBlockchain(mapper, blockBase);
-        }
-
         private static BlockchainTree GetBlockchain(IMapper mapper, BlockBase blockBase, List<BlockBase> blocks = null)
         {
             if (blockBase == null)

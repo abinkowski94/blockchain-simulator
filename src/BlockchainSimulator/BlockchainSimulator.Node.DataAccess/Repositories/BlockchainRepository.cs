@@ -35,6 +35,35 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
             }
         }
 
+        public BlockchainTree GetLongestBlockchain()
+        {
+            lock (_padlock)
+            {
+                var blockchainTree = GetBlockchainTree();
+                if (blockchainTree == null)
+                {
+                    return null;
+                }
+
+                var blockchain = new BlockchainTree {Blocks = new List<BlockBase>()};
+                BlockBase block = null;
+                do
+                {
+                    block = block == null
+                        ? blockchainTree.Blocks.OrderByDescending(b => b.Depth).FirstOrDefault()
+                        : blockchainTree.Blocks.FirstOrDefault(b =>
+                            block is Block current && b.UniqueId == current.ParentUniqueId);
+
+                    if (block != null)
+                    {
+                        blockchain.Blocks.Add(block);
+                    }
+                } while (block != null);
+
+                return blockchain;
+            }
+        }
+
         public BlockBase GetLastBlock()
         {
             lock (_padlock)

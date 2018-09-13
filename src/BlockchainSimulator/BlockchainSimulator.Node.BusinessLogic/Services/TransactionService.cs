@@ -37,8 +37,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         {
             lock (_padlock)
             {
-                transaction.Id = $"{Guid.NewGuid().ToString()}-{_configuration["Node:Id"]}";
-                transaction.RegistrationTime = DateTime.UtcNow;
+                transaction.Id = transaction.Id ?? $"{Guid.NewGuid().ToString()}-{_configuration["Node:Id"]}";
+                transaction.RegistrationTime = transaction.Id == null ? transaction.RegistrationTime : DateTime.UtcNow;
                 transaction.TransactionDetails = null;
 
                 if (!_pendingTransactions.TryAdd(transaction.Id, transaction))

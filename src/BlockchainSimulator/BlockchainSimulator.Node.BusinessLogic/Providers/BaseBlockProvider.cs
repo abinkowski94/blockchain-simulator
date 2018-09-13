@@ -16,6 +16,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
             _merkleTreeProvider = merkleTreeProvider;
         }
 
+        protected abstract BlockBase FillBlock(BlockBase currentBlock);
+
         public BlockBase CreateBlock(HashSet<Transaction> transactions, DateTime enqueueTime,
             BlockBase parentBlock = null)
         {
@@ -75,7 +77,5 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
 
             return FillBlock(newBlock);
         }
-
-        protected abstract BlockBase FillBlock(BlockBase currentBlock);
     }
 }
