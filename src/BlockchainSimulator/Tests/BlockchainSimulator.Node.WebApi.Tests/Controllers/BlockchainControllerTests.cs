@@ -71,7 +71,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
                 .Returns(new BlockchainTree());
 
             // Act
-            var result = _blockchainController.GetBlockchain();
+            var result = _blockchainController.GetBlockchainTree();
 
             // Assert
             _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BlockchainSimulator.Node.DataAccess.Converters.Specific;
 using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Model.Block;
@@ -21,6 +22,19 @@ namespace BlockchainSimulator.Node.DataAccess.Converters
             }
 
             return JsonConvert.DeserializeObject<BlockBase>(json, new JsonSerializerSettings
+            {
+                Converters = {new BlockConverter(), new NodeConverter()}
+            });
+        }
+        
+        public static List<BlockBase> DeserializeBlocks(string json)
+        {
+            if (json == null)
+            {
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<List<BlockBase>>(json, new JsonSerializerSettings
             {
                 Converters = {new BlockConverter(), new NodeConverter()}
             });

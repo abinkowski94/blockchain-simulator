@@ -13,13 +13,15 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
 {
     public class BlockchainRepository : IBlockchainRepository
     {
-        private readonly string _blockchainFileName;
         private readonly IFileRepository _fileRepository;
+        private readonly JsonSerializer _serializer;
+        private readonly string _blockchainFileName;
         private readonly object _padlock = new object();
 
         public BlockchainRepository(IFileRepository fileRepository)
         {
             _fileRepository = fileRepository;
+            _serializer = new JsonSerializer {Converters = {new BlockConverter(), new NodeConverter()}};
             _blockchainFileName = "blockchainTree.json";
         }
 
@@ -64,6 +66,45 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
             }
         }
 
+        public List<string> GetBlocksIds()
+        {
+            lock (_padlock)
+            {
+                using (var streamReader = _fileRepository.GetFileReader(_blockchainFileName))
+                using (var reader = new JsonTextReader(streamReader))
+                {
+                    if (streamReader == StreamReader.Null)
+                    {
+                        return null;
+                    }
+
+                    var jObject = JObject.Load(reader);
+                    var jArray = (JArray) jObject.First.Last;
+                    return jArray.Select(b => b.Value<string>("uniqueId")).ToList();
+                }
+            }
+        }
+
+        public List<BlockBase> GetBlocks(List<string> ids)
+        {
+            lock (_padlock)
+            {
+                using (var streamReader = _fileRepository.GetFileReader(_blockchainFileName))
+                using (var reader = new JsonTextReader(streamReader))
+                {
+                    if (streamReader == StreamReader.Null)
+                    {
+                        return null;
+                    }
+
+                    var jObject = JObject.Load(reader);
+                    var jArray = (JArray) jObject.First.Last;
+                    var blocks = jArray.Where(b => ids.Contains(b.Value<string>("uniqueId")));
+                    return blocks.Select(b => b.ToObject<BlockBase>(_serializer)).ToList();
+                }
+            }
+        }
+
         public BlockBase GetLastBlock()
         {
             lock (_padlock)
@@ -79,8 +120,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                     var jObject = JObject.Load(reader);
                     var jArray = (JArray) jObject.First.Last;
                     var block = jArray.OrderByDescending(b => b.Value<int>("depth")).FirstOrDefault();
-                    return block?.ToObject<BlockBase>(new JsonSerializer
-                        {Converters = {new BlockConverter(), new NodeConverter()}});
+                    return block?.ToObject<BlockBase>(_serializer);
                 }
             }
         }
@@ -100,8 +140,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                     var jObject = JObject.Load(reader);
                     var jArray = (JArray) jObject.First.Last;
                     var block = jArray.FirstOrDefault(b => b.Value<string>("uniqueId") == id);
-                    return block?.ToObject<BlockBase>(new JsonSerializer
-                        {Converters = {new BlockConverter(), new NodeConverter()}});
+                    return block?.ToObject<BlockBase>(_serializer);
                 }
             }
         }
@@ -176,8 +215,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                 using (var streamWriter = _fileRepository.GetFileWriter(_blockchainFileName))
                 using (var jsonWriter = new JsonTextWriter(streamWriter))
                 {
-                    var jsonSerializer = new JsonSerializer();
-                    jsonSerializer.Serialize(jsonWriter, blockchainTree);
+                    _serializer.Serialize(jsonWriter, blockchainTree);
                     jsonWriter.Flush();
                 }
             }

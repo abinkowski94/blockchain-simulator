@@ -235,10 +235,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                         {
                             var response = _httpService.Get($"{node.HttpAddress}/api/statistic/mining-queue",
                                 _nodeTimeout, token);
-                            var contentTask = response.Content.ReadAsStringAsync();
-                            contentTask.Wait(token);
-                            var content = contentTask.Result;
-                            var miningQueueStatus = JsonConvert.DeserializeObject<MiningQueueStatus>(content);
+                            var miningQueueStatus = response.Content.ReadAs<MiningQueueStatus>();
 
                             return miningQueueStatus.IsEmpty;
                         }
@@ -268,10 +265,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     try
                     {
                         var response = _httpService.Get($"{node.HttpAddress}/api/statistic", _nodeTimeout, token);
-                        var contentTask = response.Content.ReadAsStringAsync();
-                        contentTask.Wait(token);
-                        var content = contentTask.Result;
-                        var statistic = JsonConvert.DeserializeObject<SuccessResponse<Statistic>>(content);
+                        var statistic = response.Content.ReadAs<SuccessResponse<Statistic>>();
 
                         statistics.Add(statistic.Result);
                     }

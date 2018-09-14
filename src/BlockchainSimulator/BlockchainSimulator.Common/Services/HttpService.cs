@@ -100,7 +100,7 @@ namespace BlockchainSimulator.Common.Services
                 // Turns off SSL
                 httpClientHandler.ServerCertificateCustomValidationCallback = (msg, cert, ch, err) => true;
                 using (var httpClient = new HttpClient(httpClientHandler)
-                    {Timeout = timeout ?? TimeSpan.FromSeconds(10)})
+                    {Timeout = timeout ?? TimeSpan.FromSeconds(30)})
                 {
                     try
                     {

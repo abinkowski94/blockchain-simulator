@@ -22,11 +22,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         }
 
 
-        public abstract BaseResponse<bool> AcceptBlock(string base64Block);
+        public abstract BaseResponse<bool> AcceptBlocks(string base64Blocks);
 
         public abstract BaseResponse<bool> AcceptBlock(BlockBase blockBase);
 
-        public abstract void ReachConsensus(DataAccess.Model.Block.BlockBase block);
+        public abstract void ReachConsensus();
 
 
         public BaseResponse<ServerNode> ConnectNode(ServerNode serverNode)

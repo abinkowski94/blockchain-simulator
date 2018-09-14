@@ -34,6 +34,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
 
                     await task;
                 }
+                catch (TaskCanceledException)
+                {
+                    Console.WriteLine("The task has been cancelled due to timeout!");
+                }
                 catch (Exception e)
                 {
                     // TODO: log errors
