@@ -1,19 +1,21 @@
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
-using BlockchainSimulator.Node.BusinessLogic.Model.Consensus;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using BlockchainSimulator.Common.Models.Consensus;
+using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
+using ServerNode = BlockchainSimulator.Node.BusinessLogic.Model.Consensus.ServerNode;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public abstract class BaseConsensusService : BaseService, IConsensusService
     {
-        protected readonly IBackgroundTaskQueue _queue;
         protected readonly ConcurrentDictionary<string, ServerNode> _serverNodes;
+        protected readonly IBackgroundTaskQueue _queue;
 
         protected BaseConsensusService(IBackgroundTaskQueue queue)
         {
@@ -21,13 +23,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _queue = queue;
         }
 
+        public abstract void AcceptBlocks(EncodedBlock encodedBlock);
 
-        public abstract BaseResponse<bool> AcceptBlocks(string base64Blocks);
-
-        public abstract BaseResponse<bool> AcceptBlock(BlockBase blockBase);
-
-        public abstract void ReachConsensus();
-
+        public abstract void AcceptBlock(BlockBase blockBase);
 
         public BaseResponse<ServerNode> ConnectNode(ServerNode serverNode)
         {

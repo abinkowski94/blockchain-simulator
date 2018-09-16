@@ -1,15 +1,16 @@
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
-using BlockchainSimulator.Node.BusinessLogic.Model.Consensus;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using System.Collections.Generic;
+using BlockchainSimulator.Common.Models.Consensus;
+using ServerNode = BlockchainSimulator.Node.BusinessLogic.Model.Consensus.ServerNode;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public interface IConsensusService
     {
-        BaseResponse<bool> AcceptBlocks(string base64Blocks);
+        void AcceptBlocks(EncodedBlock encodedBlock);
 
-        BaseResponse<bool> AcceptBlock(BlockBase blockBase);
+        void AcceptBlock(BlockBase blockBase);
 
         BaseResponse<ServerNode> ConnectNode(ServerNode serverNode);
 
@@ -18,7 +19,5 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         BaseResponse<ServerNode> DisconnectNode(string nodeId);
 
         BaseResponse<List<ServerNode>> GetNodes();
-
-        void ReachConsensus();
     }
 }

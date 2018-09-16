@@ -8,29 +8,40 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlockchainSimulator.Common.Extensions;
+using BlockchainSimulator.Common.Queues;
+using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.Configuration;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class TransactionService : ITransactionService
     {
-        private readonly IBlockchainService _blockchainService;
-        private readonly IBlockchainConfiguration _blockchainConfiguration;
-        private readonly IMiningService _miningService;
+        private Task _reMiningTask;
+        private readonly ConcurrentDictionary<string, Transaction> _registeredTransactions;
         private readonly ConcurrentDictionary<string, Transaction> _pendingTransactions;
-        private readonly IMiningQueue _queue;
+        private readonly IBlockchainConfiguration _blockchainConfiguration;
+        private readonly IBlockchainRepository _blockchainRepository;
+        private readonly IBackgroundTaskQueue _backgroundTaskQueue;
+        private readonly IBlockchainService _blockchainService;
+        private readonly IMiningService _miningService;
         private readonly IConfiguration _configuration;
+        private readonly IMiningQueue _miningQueue;
         private readonly object _padlock = new object();
 
         public TransactionService(IBlockchainService blockchainService, IMiningService miningService,
-            IBlockchainConfiguration blockchainConfiguration, IMiningQueue queue, IConfiguration configuration)
+            IBlockchainConfiguration blockchainConfiguration, IMiningQueue queue, IConfiguration configuration,
+            IBlockchainRepository blockchainRepository, IBackgroundTaskQueue backgroundTaskQueue)
         {
+            _registeredTransactions = new ConcurrentDictionary<string, Transaction>();
             _pendingTransactions = new ConcurrentDictionary<string, Transaction>();
             _blockchainConfiguration = blockchainConfiguration;
             _blockchainService = blockchainService;
             _miningService = miningService;
-            _queue = queue;
+            _miningQueue = queue;
             _configuration = configuration;
+            _blockchainRepository = blockchainRepository;
+            _backgroundTaskQueue = backgroundTaskQueue;
         }
 
         public BaseResponse<Transaction> AddTransaction(Transaction transaction)
@@ -38,8 +49,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             lock (_padlock)
             {
                 transaction.Id = transaction.Id ?? $"{Guid.NewGuid().ToString()}-{_configuration["Node:Id"]}";
-                transaction.RegistrationTime = transaction.Id == null ? transaction.RegistrationTime : DateTime.UtcNow;
+                transaction.RegistrationTime = transaction.RegistrationTime ?? DateTime.UtcNow;
                 transaction.TransactionDetails = null;
+
+                _registeredTransactions.TryAdd(transaction.Id, transaction);
 
                 if (!_pendingTransactions.TryAdd(transaction.Id, transaction))
                 {
@@ -55,12 +68,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
                 // Launches mining
                 var enqueueTime = DateTime.UtcNow;
-                _queue.QueueMiningTask(token => new Task(() =>
+                _miningQueue.QueueMiningTask(token => new Task(() =>
                 {
                     var transactions = _pendingTransactions.Values.OrderByDescending(t => t.Fee)
                         .Take(_blockchainConfiguration.BlockSize).ToList();
                     transactions.ForEach(t => _pendingTransactions.TryRemove(t.Id, out _));
+
                     _miningService.MineBlock(transactions, enqueueTime, token);
+                    ReMineTransactions();
                 }, token));
 
                 return new SuccessResponse<Transaction>("The transaction has been added and processing has started",
@@ -117,6 +132,35 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             }
 
             return null;
+        }
+
+        public void ReMineTransactions()
+        {
+            _reMiningTask = _reMiningTask ?? Task.Run(() =>
+            {
+                while (_miningQueue.Length > 0 || _backgroundTaskQueue.Length > 0 ||
+                       _pendingTransactions.Count > _blockchainConfiguration.BlockSize)
+                {
+                    // Waiting loop
+                }
+
+                if (_pendingTransactions.Count < _blockchainConfiguration.BlockSize)
+                {
+                    var longestBlockchainBranch = _blockchainRepository.GetLongestBlockchain();
+                    if (longestBlockchainBranch == null)
+                    {
+                        return;
+                    }
+
+                    var longestBlockchainBranchIds = longestBlockchainBranch.Blocks.SelectMany(b => b.Body.Transactions)
+                        .Select(t => t.Id).ToList();
+
+                    _registeredTransactions.Values.Where(t => !longestBlockchainBranchIds.Contains(t.Id))
+                        .ForEach(t => AddTransaction(t));
+                }
+
+                _reMiningTask = null;
+            });
         }
     }
 }

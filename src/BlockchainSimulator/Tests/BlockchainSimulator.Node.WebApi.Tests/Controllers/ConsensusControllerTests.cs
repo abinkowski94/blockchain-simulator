@@ -23,27 +23,27 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
             _consensusController = new ConsensusController(_consensusServiceMock.Object);
         }
 
-        [Fact]
-        public void AcceptBlockchain_EncodedBlockchain_True()
-        {
-            // Arrange
-            var encodedBlockchain = new EncodedBlocks { Base64Blocks = "base64Mock" };
-
-            _consensusServiceMock.Setup(p => p.AcceptBlocks(encodedBlockchain.Base64Blocks))
-                .Returns(new SuccessResponse<bool>("BlockchainTree has been accepted", true));
-
-            // Act
-            var result = _consensusController.AcceptBlockchain(encodedBlockchain);
-            var response = (result?.Result as ObjectResult)?.Value as BaseResponse;
-
-            // Assert
-            _consensusServiceMock.Verify(p => p.AcceptBlocks(encodedBlockchain.Base64Blocks));
-
-            Assert.NotNull(result);
-            Assert.NotNull(response);
-            Assert.Equal("BlockchainTree has been accepted", response.Message);
-            Assert.True(response.Result is bool b && b);
-        }
+//        [Fact]
+//        public void AcceptBlockchain_EncodedBlockchain_True()
+//        {
+//            // Arrange
+//            var encodedBlockchain = new EncodedBlocks { Base64Blocks = "base64Mock" };
+//
+//            _consensusServiceMock.Setup(p => p.AcceptBlocks(encodedBlockchain.Base64Blocks))
+//                .Returns(new SuccessResponse<bool>("BlockchainTree has been accepted", true));
+//
+//            // Act
+//            var result = _consensusController.AcceptBlockchain(encodedBlockchain);
+//            var response = (result?.Result as ObjectResult)?.Value as BaseResponse;
+//
+//            // Assert
+//            _consensusServiceMock.Verify(p => p.AcceptBlocks(encodedBlockchain.Base64Blocks));
+//
+//            Assert.NotNull(result);
+//            Assert.NotNull(response);
+//            Assert.Equal("BlockchainTree has been accepted", response.Message);
+//            Assert.True(response.Result is bool b && b);
+//        }
 
         [Fact]
         public void ConnectNode_Node_Node()

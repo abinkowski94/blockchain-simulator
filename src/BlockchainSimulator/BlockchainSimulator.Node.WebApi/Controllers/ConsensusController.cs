@@ -29,15 +29,14 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         }
 
         /// <summary>
-        /// Checks and accepts the incoming blocks and adds if they are valid
+        /// Checks and accepts the incoming block and adds if it is valid
         /// </summary>
-        /// <param name="encodedBlocks">The encoded blocks</param>
-        /// <returns>The response if the blocks has been accepted or not</returns>
+        /// <param name="encodedBlock">The encoded block</param>
+        /// <returns>The response if the block has been accepted or not</returns>
         [HttpPost]
-        public ActionResult<BaseResponse> AcceptBlockchain([FromBody] EncodedBlocks encodedBlocks)
+        public void AcceptBlockchain([FromBody] EncodedBlock encodedBlock)
         {
-            return _consensusService.AcceptBlocks(encodedBlocks.Base64Blocks)
-                .GetActionResult<bool, bool>(this);
+            _consensusService.AcceptBlocks(encodedBlock);
         }
 
         /// <summary>

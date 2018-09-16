@@ -164,8 +164,9 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
         private static void CreateBlockchainTree(IEnumerable<Statistic> statistics, string directoryPath)
         {
-            var statistic = statistics.OrderByDescending(s => s.BlockchainStatistics.TotalTransactionsCount).First();
-            var models = statistic.BlockchainStatistics.BlockInfos.Select(i => new NodeModel
+            var infos = statistics.SelectMany(s => s.BlockchainStatistics.BlockInfos).GroupBy(i => i.UniqueId)
+                .Select(g => g.First());
+            var models = infos.Select(i => new NodeModel
             {
                 Id = i.UniqueId,
                 Name = i.Id,

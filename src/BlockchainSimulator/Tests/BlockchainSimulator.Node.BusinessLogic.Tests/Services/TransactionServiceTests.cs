@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BlockchainSimulator.Common.Queues;
+using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
@@ -34,7 +36,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             _miningServiceMock = new Mock<IMiningService>();
 
             _transactionService = new TransactionService(_blockchainServiceMock.Object, _miningServiceMock.Object,
-                _blockchainConfigurationMock.Object, _miningQueueMock.Object, new Mock<IConfiguration>().Object);
+                _blockchainConfigurationMock.Object, _miningQueueMock.Object, new Mock<IConfiguration>().Object,
+                new Mock<IBlockchainRepository>().Object, new Mock<IBackgroundTaskQueue>().Object);
         }
 
         [Fact]
@@ -199,7 +202,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             _blockchainConfigurationMock.Setup(p => p.Version).Returns("PoW-v1");
 
             var blockchainProvider =
-                new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _blockchainConfigurationMock.Object);
+                new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _blockchainConfigurationMock.Object,
+                    new Mock<IConfiguration>().Object);
 
             var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>) ts.First())
                 .ToList();

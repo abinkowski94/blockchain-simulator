@@ -19,7 +19,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators.Specific
             }
 
             return new ValidationResult(false,
-                $"The hash h: {hash} of block id: {blockchain.Id} does not match the target t: {blockchain.Header.Target}");
+                $"The hash h: {hash} of block unique id: {blockchain.UniqueId} does not match the target t: {blockchain.Header.Target}");
         }
     }
 }

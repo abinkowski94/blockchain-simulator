@@ -13,10 +13,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Block
             set => _depth = value;
         }
 
-        [JsonProperty("isGenesis")] public override bool IsGenesis => false;
+        [JsonIgnore] 
+        public BlockBase Parent { get; set; }
+        
+        [JsonProperty("isGenesis")] 
+        public override bool IsGenesis => false;
 
-        [JsonIgnore] public BlockBase Parent { get; set; }
-
-        [JsonProperty("parentId")] public string ParentUniqueId { get; set; }
+        [JsonProperty("parentId")] 
+        public string ParentUniqueId { get; set; }
     }
 }

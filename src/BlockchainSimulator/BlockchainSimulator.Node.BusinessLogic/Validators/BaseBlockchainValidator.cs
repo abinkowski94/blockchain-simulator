@@ -26,11 +26,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators
             }
 
             var validationResult = new ValidationResult(true);
-            while (blockchain != null && !blockchain.IsGenesis)
+            while (blockchain != null && blockchain is Block block)
             {
-                SetupTransactions(blockchain.Body.MerkleTree, blockchain.Body.Transactions);
-
-                if (blockchain is Block block && block.Parent != null)
+                SetupTransactions(block.Body.MerkleTree, block.Body.Transactions);
+                if (block.Parent != null)
                 {
                     validationResult = ValidateParentHash(block);
                     if (!validationResult.IsSuccess)
@@ -39,19 +38,19 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators
                     }
                 }
 
-                validationResult = _merkleTreeValidator.Validate(blockchain.Body.MerkleTree);
+                validationResult = _merkleTreeValidator.Validate(block.Body.MerkleTree);
                 if (!validationResult.IsSuccess)
                 {
                     return validationResult;
                 }
 
-                validationResult = SpecificValidation(blockchain as Block);
+                validationResult = SpecificValidation(block);
                 if (!validationResult.IsSuccess)
                 {
                     return validationResult;
                 }
 
-                blockchain = ((Block) blockchain).Parent;
+                blockchain = block.Parent;
             }
 
             if (blockchain == null)

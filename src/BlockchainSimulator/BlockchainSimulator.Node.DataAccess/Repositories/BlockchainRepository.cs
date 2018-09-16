@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -119,7 +120,8 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
 
                     var jObject = JObject.Load(reader);
                     var jArray = (JArray) jObject.First.Last;
-                    var block = jArray.OrderByDescending(b => b.Value<int>("depth")).FirstOrDefault();
+                    var block = jArray.OrderByDescending(b => b.Value<int>("depth"))
+                        .ThenBy(b => b["header"].Value<DateTime>("timeStamp")).FirstOrDefault();
                     return block?.ToObject<BlockBase>(_serializer);
                 }
             }

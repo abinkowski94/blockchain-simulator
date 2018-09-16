@@ -18,6 +18,12 @@ namespace BlockchainSimulator.Common.Queues
 
         /// <inheritdoc />
         /// <summary>
+        /// The length of the queue
+        /// </summary>
+        public int Length => _workItems.Count;
+
+        /// <inheritdoc />
+        /// <summary>
         /// Dequeue the work item
         /// </summary>
         /// <param name="cancellationToken">The cancellation token</param>

@@ -21,5 +21,10 @@ namespace BlockchainSimulator.Common.Queues
         /// </summary>
         /// <param name="workItem">The work item</param>
         void QueueBackgroundWorkItem(Func<CancellationToken, Task> workItem);
+
+        /// <summary>
+        /// The length of the queue
+        /// </summary>
+        int Length { get; }
     }
 }

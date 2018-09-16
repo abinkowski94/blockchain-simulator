@@ -36,7 +36,7 @@ namespace BlockchainSimulator.Node.WebApi.Models.Transactions
         /// The time when the transaction has been registered
         /// </summary>
         [JsonProperty("registrationTime", Order = 6)]
-        public DateTime RegistrationTime { get; set; }
+        public DateTime? RegistrationTime { get; set; }
 
         /// <summary>
         /// The sender address

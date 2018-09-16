@@ -1,11 +1,9 @@
-using System;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Common.Services;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.BusinessLogic.Services.Specific;
 using BlockchainSimulator.Node.BusinessLogic.Validators;
 using BlockchainSimulator.Node.DataAccess.Repositories;
-using Microsoft.Extensions.Configuration;
 using Moq;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
@@ -24,10 +22,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services.Specific
             _blockchainValidatorMock = new Mock<IBlockchainValidator>();
             var httpServiceMock = new Mock<IHttpService>();
 
-            _consensusService = new ProofOfWorkConsensusService(_backgroundTaskQueueMock.Object,
-                _blockchainRepositoryMock.Object, _blockchainValidatorMock.Object, httpServiceMock.Object,
-                new Mock<IStatisticService>().Object, new Mock<IServiceProvider>().Object,
-                new Mock<IConfiguration>().Object);
+//            _consensusService = new ProofOfWorkConsensusService(_backgroundTaskQueueMock.Object,
+//                _blockchainRepositoryMock.Object, _blockchainValidatorMock.Object, httpServiceMock.Object,
+//                new Mock<IStatisticService>().Object);
         }
     }
 }

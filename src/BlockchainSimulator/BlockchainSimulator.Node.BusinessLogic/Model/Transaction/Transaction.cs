@@ -18,7 +18,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Transaction
         public string Recipient { get; set; }
 
         [JsonProperty("registrationTime")]
-        public DateTime RegistrationTime { get; set; }
+        public DateTime? RegistrationTime { get; set; }
 
         [JsonProperty("sender")]
         public string Sender { get; set; }

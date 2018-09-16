@@ -11,5 +11,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         BaseResponse<List<Transaction>> GetPendingTransactions();
 
         BaseResponse<Transaction> GetTransaction(string id);
+
+        void ReMineTransactions();
     }
 }
