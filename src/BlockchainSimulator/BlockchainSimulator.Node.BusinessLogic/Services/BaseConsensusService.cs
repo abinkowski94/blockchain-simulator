@@ -5,9 +5,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
+using System.Threading.Tasks;
 using BlockchainSimulator.Common.Models.Consensus;
-using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
+using BlockchainSimulator.Common.Services;
 using ServerNode = BlockchainSimulator.Node.BusinessLogic.Model.Consensus.ServerNode;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
@@ -16,16 +16,18 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
     {
         protected readonly ConcurrentDictionary<string, ServerNode> _serverNodes;
         protected readonly IBackgroundTaskQueue _queue;
+        protected readonly IHttpService _httpService;
 
-        protected BaseConsensusService(IBackgroundTaskQueue queue)
+        protected BaseConsensusService(IBackgroundTaskQueue queue, IHttpService httpService)
         {
             _serverNodes = new ConcurrentDictionary<string, ServerNode>();
+            _httpService = httpService;
             _queue = queue;
         }
 
         public abstract void AcceptBlocks(EncodedBlock encodedBlock);
 
-        public abstract void AcceptBlock(BlockBase blockBase);
+        public abstract BaseResponse<bool> AcceptBlock(BlockBase blockBase);
 
         public BaseResponse<ServerNode> ConnectNode(ServerNode serverNode)
         {
@@ -73,30 +75,22 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 _serverNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList());
         }
 
-
         private void CheckNodeConnection(ServerNode serverNode)
         {
-            _queue.QueueBackgroundWorkItem(async token =>
+            _queue.QueueBackgroundWorkItem(token => Task.Run(() =>
             {
                 try
                 {
-                    using (var httpClientHandler = new HttpClientHandler())
-                    {
-                        // Turns off SSL
-                        httpClientHandler.ServerCertificateCustomValidationCallback = (msg, cert, chain, err) => true;
-                        using (var httpClient = new HttpClient(httpClientHandler))
-                        {
-                            var response = await httpClient.GetAsync($"{serverNode.HttpAddress}/api/info", token);
-                            serverNode.IsConnected = response.IsSuccessStatusCode;
-                        }
-                    }
+                    var timeout = TimeSpan.FromSeconds(30);
+                    var response = _httpService.Get($"{serverNode.HttpAddress}/api/info", timeout, token);
+                    serverNode.IsConnected = response.IsSuccessStatusCode;
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                     serverNode.IsConnected = false;
                 }
-            });
+            }, token));
         }
 
         private List<string> ValidateNode(ServerNode serverNode)

@@ -10,7 +10,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
     {
         void AcceptBlocks(EncodedBlock encodedBlock);
 
-        void AcceptBlock(BlockBase blockBase);
+        BaseResponse<bool> AcceptBlock(BlockBase blockBase);
 
         BaseResponse<ServerNode> ConnectNode(ServerNode serverNode);
 

@@ -11,34 +11,29 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class MiningService : BaseService, IMiningService
     {
-        private readonly IBlockchainRepository _repository;
-        private readonly IBlockProvider _blockProvider;
+        private readonly IBlockchainRepository _blockchainRepository;
         private readonly IConsensusService _consensusService;
         private readonly IStatisticService _statisticService;
-        private readonly object _padlock = new object();
+        private readonly IBlockProvider _blockProvider;
 
-        public MiningService(IBlockProvider blockProvider, IConsensusService consensusService,
-            IStatisticService statisticService, IBlockchainRepository repository)
+        public MiningService(IBlockchainRepository blockchainRepository, IConsensusService consensusService,
+            IStatisticService statisticService, IBlockProvider blockProvider)
         {
-            _blockProvider = blockProvider;
+            _blockchainRepository = blockchainRepository;
             _consensusService = consensusService;
             _statisticService = statisticService;
-            _repository = repository;
+            _blockProvider = blockProvider;
         }
 
         public void MineBlock(IEnumerable<Transaction> transactions, DateTime enqueueTime, CancellationToken token)
         {
-            lock (_padlock)
-            {
-                _statisticService.RegisterMiningAttempt();
+            _statisticService.RegisterMiningAttempt();
 
-                var transactionSet = transactions.ToHashSet();
-                var lastBlock = _repository.GetLastBlock();
-                var newBlock =
-                    _blockProvider.CreateBlock(transactionSet, enqueueTime, LocalMapper.Map<BlockBase>(lastBlock));
+            var transactionSet = transactions.ToHashSet();
+            var lastBlock = LocalMapper.Map<BlockBase>(_blockchainRepository.GetLastBlock());
+            var newBlock = _blockProvider.CreateBlock(transactionSet, enqueueTime, lastBlock);
 
-                _consensusService.AcceptBlock(newBlock);
-            }
+            _consensusService.AcceptBlock(newBlock);
         }
     }
 }

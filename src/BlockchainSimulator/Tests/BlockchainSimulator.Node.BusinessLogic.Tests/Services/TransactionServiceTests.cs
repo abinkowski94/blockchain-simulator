@@ -13,8 +13,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Common.Queues;
-using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
@@ -36,8 +34,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             _miningServiceMock = new Mock<IMiningService>();
 
             _transactionService = new TransactionService(_blockchainServiceMock.Object, _miningServiceMock.Object,
-                _blockchainConfigurationMock.Object, _miningQueueMock.Object, new Mock<IConfiguration>().Object,
-                new Mock<IBlockchainRepository>().Object, new Mock<IBackgroundTaskQueue>().Object);
+                _blockchainConfigurationMock.Object, _miningQueueMock.Object, new Mock<IConfiguration>().Object);
         }
 
         [Fact]

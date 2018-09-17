@@ -16,7 +16,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Queues
         public MiningHostedServiceTests()
         {
             _queue = new MiningQueue(new Mock<IStatisticService>().Object);
-            _hostedService = new MiningHostedService(_queue);
+            _hostedService =
+                new MiningHostedService(_queue, new Mock<IMiningHostedServiceSynchronizationContext>().Object);
         }
 
         [Fact]

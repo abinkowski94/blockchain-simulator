@@ -8,10 +8,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
     public class MiningHostedService : BackgroundService
     {
         private readonly IMiningQueue _taskQueue;
-
-        public MiningHostedService(IMiningQueue taskQueue)
+        private readonly IMiningHostedServiceSynchronizationContext _synchronizationContext;
+        
+        public MiningHostedService(IMiningQueue taskQueue,
+            IMiningHostedServiceSynchronizationContext synchronizationContext)
         {
             _taskQueue = taskQueue;
+            _synchronizationContext = synchronizationContext;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -23,13 +26,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
                 try
                 {
                     var task = workItem(cancellationToken);
-                    try
+                    if (task.Status == TaskStatus.Created)
                     {
                         task.Start();
-                    }
-                    catch
-                    {
-                        // ignored
                     }
 
                     await task;
@@ -42,6 +41,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
                 {
                     // TODO: log errors
                     Console.WriteLine(e);
+                }
+
+                if (_taskQueue.Length == 0)
+                {
+                    _synchronizationContext.Release();
                 }
             }
         }

@@ -33,9 +33,7 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
             services.AddSingleton<IBlockchainRepository, BlockchainRepository>();
 
             // Queues
-            services.AddHostedService<QueuedHostedService>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
-            services.AddHostedService<MiningHostedService>();
             services.AddSingleton<IMiningQueue, MiningQueue>();
 
             // Services
@@ -44,6 +42,15 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
             services.AddSingleton<IMiningService, MiningService>();
             services.AddSingleton<IStatisticService, StatisticService>();
             services.AddTransient<IHttpService, HttpService>();
+
+            // Hosted services
+            services.AddHostedService<ReMiningHostedService>();
+            services.AddHostedService<QueuedHostedService>();
+            services.AddHostedService<MiningHostedService>();
+            services.AddSingleton<IMiningHostedServiceSynchronizationContext,
+                MiningHostedServiceSynchronizationContext>();
+            services.AddSingleton<IQueuedHostedServiceSynchronizationContext,
+                QueuedHostedServiceSynchronizationContext>();
 
             // Specific
             switch (configuration["Node:Type"])

@@ -11,15 +11,19 @@ namespace BlockchainSimulator.Common.Queues
     /// </summary>
     public class QueuedHostedService : BackgroundService
     {
+        private readonly IQueuedHostedServiceSynchronizationContext _synchronizationContext;
         private readonly IBackgroundTaskQueue _taskQueue;
 
         /// <summary>
         /// The constructor
         /// </summary>
         /// <param name="taskQueue">The queue</param>
-        public QueuedHostedService(IBackgroundTaskQueue taskQueue)
+        /// <param name="synchronizationContext">The synchronization context</param>
+        public QueuedHostedService(IBackgroundTaskQueue taskQueue,
+            IQueuedHostedServiceSynchronizationContext synchronizationContext)
         {
             _taskQueue = taskQueue;
+            _synchronizationContext = synchronizationContext;
         }
 
         /// <inheritdoc />
@@ -44,10 +48,19 @@ namespace BlockchainSimulator.Common.Queues
 
                     await task;
                 }
+                catch (TaskCanceledException)
+                {
+                    Console.WriteLine("The task has been cancelled due to timeout!");
+                }
                 catch (Exception e)
                 {
                     // TODO: log errors
                     Console.WriteLine(e);
+                }
+
+                if (_taskQueue.Length <= 0)
+                {
+                    _synchronizationContext.Release();
                 }
             }
         }

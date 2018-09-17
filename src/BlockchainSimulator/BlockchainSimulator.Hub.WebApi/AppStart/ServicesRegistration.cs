@@ -18,16 +18,23 @@ namespace BlockchainSimulator.Hub.WebApi.AppStart
         /// <param name="services">The services container</param>
         public static void AddHubServices(this IServiceCollection services)
         {
-            services.AddTransient<IHttpService, HttpService>();
+            // Repositories and storage
             services.AddTransient<IFileRepository, FileRepository>();
             services.AddSingleton<IScenarioStorage, ScenarioStorage>();
             services.AddSingleton<ISimulationStorage, SimulationStorage>();
-            services.AddSingleton<ISimulationRunnerService, SimulationRunnerService>();
+
+            // Background queue
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+            services.AddSingleton<IQueuedHostedServiceSynchronizationContext,
+                QueuedHostedServiceSynchronizationContext>();
             services.AddHostedService<QueuedHostedService>();
+
+            // Services
+            services.AddTransient<IHttpService, HttpService>();
             services.AddTransient<IScenarioService, ScenarioService>();
-            services.AddTransient<ISimulationService, SimulationService>();
             services.AddTransient<IStatisticService, StatisticService>();
+            services.AddTransient<ISimulationService, SimulationService>();
+            services.AddSingleton<ISimulationRunnerService, SimulationRunnerService>();
         }
     }
 }

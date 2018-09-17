@@ -16,11 +16,21 @@ namespace BlockchainSimulator.Common.Extensions
         /// <returns>The sting</returns>>
         public static T ReadAs<T>(this HttpContent content) where T : class
         {
+            var result = ReadAsString(content);
+            return result == null ? null : JsonConvert.DeserializeObject<T>(result);
+        }
+
+        /// <summary>
+        /// Reads content as string
+        /// </summary>
+        /// <param name="content">The http content</param>
+        /// <returns>String value</returns>
+        public static string ReadAsString(this HttpContent content)
+        {
             var readTask = content.ReadAsStringAsync();
             readTask.Wait();
-            var result = readTask.Result;
 
-            return result == null ? null : JsonConvert.DeserializeObject<T>(result);
+            return readTask.Result;
         }
     }
 }
