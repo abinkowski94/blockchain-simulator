@@ -22,24 +22,20 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {
     public class SimulationRunnerService : ISimulationRunnerService
     {
+        private readonly TimeSpan _hostingTime;
+        private readonly TimeSpan _nodeTimeout;
+        private readonly string _pathToLibrary;
         private readonly string _directoryPath;
         private readonly int _hostingRetryCount;
-        private readonly TimeSpan _hostingTime;
-        private readonly IHttpService _httpService;
-        private readonly TimeSpan _nodeTimeout;
         private readonly object _padlock = new object();
-        private readonly string _pathToLibrary;
-        private readonly IBackgroundTaskQueue _queue;
+
         private readonly IStatisticService _statisticService;
+        private readonly IBackgroundTaskQueue _queue;
+        private readonly IHttpService _httpService;
 
-        public SimulationRunnerService(IBackgroundTaskQueue queue, IHttpService httpService,
-            IHostingEnvironment environment, IStatisticService statisticService)
+        public SimulationRunnerService(IStatisticService statisticService, IBackgroundTaskQueue queue,
+            IHttpService httpService, IHostingEnvironment environment)
         {
-            _queue = queue;
-            _httpService = httpService;
-            _statisticService = statisticService;
-            _directoryPath = environment.ContentRootPath ?? Directory.GetCurrentDirectory();
-
             //TODO: Add timeout configuration
             _nodeTimeout = TimeSpan.FromSeconds(10);
             _hostingTime = TimeSpan.FromSeconds(5);
@@ -47,6 +43,11 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
             var pathToFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             _pathToLibrary = $@"{pathToFolder}\Node\BlockchainSimulator.Node.WebApi.dll";
+            _directoryPath = environment.ContentRootPath ?? Directory.GetCurrentDirectory();
+
+            _statisticService = statisticService;
+            _httpService = httpService;
+            _queue = queue;
         }
 
         public void RunSimulation(Simulation simulation, SimulationSettings settings)
@@ -54,6 +55,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             lock (_padlock)
             {
                 simulation.Status = SimulationStatuses.Pending;
+
                 SpawnServers(simulation, settings);
                 PingServers(simulation, settings);
                 ConnectNodes(simulation);
@@ -62,121 +64,6 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 WaitForStatistics(simulation, settings);
                 ClearNodes(simulation);
             }
-        }
-
-        private static bool HasSimulationTimeElapsed(Simulation simulation, SimulationSettings settings,
-            bool wait = true)
-        {
-            if (wait && settings.ForceEndAfter.HasValue && simulation.LastRunTime.HasValue)
-            {
-                var timeDifference = DateTime.UtcNow - simulation.LastRunTime.Value;
-                if (timeDifference > settings.ForceEndAfter)
-                {
-                    wait = false;
-                }
-            }
-
-            return !wait;
-        }
-
-        private void ClearNodes(Simulation simulation)
-        {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
-            {
-                simulation.ServerNodes.ParallelForEach(node =>
-                {
-                    node.NodeThread?.Kill();
-                    node.NodeThread?.Dispose();
-                    node.NodeThread = null;
-                }, token);
-
-                var directoryPath = $@"{_directoryPath}\nodes";
-                if (Directory.Exists(directoryPath))
-                {
-                    Directory.Delete(directoryPath, true);
-                }
-
-                simulation.Status = SimulationStatuses.ReadyToRun;
-            }, token));
-        }
-
-        private void ConnectNodes(Simulation simulation)
-        {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
-            {
-                simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
-                {
-                    simulation.ServerNodes.Where(n => n.IsConnected == true && node.ConnectedTo.Contains(n.Id))
-                        .ForEach(otherNode =>
-                        {
-                            var body = JsonConvert.SerializeObject(otherNode);
-                            var content = new StringContent(body, Encoding.UTF8, "application/json");
-                            _httpService.Put($"{node.HttpAddress}/api/consensus", content, _nodeTimeout, token);
-                        });
-                }, token);
-            }, token));
-        }
-
-        private void PingServers(Simulation simulation, SimulationSettings settings)
-        {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
-            {
-                simulation.ServerNodes.Where(n => settings.NodesAndTransactions.Keys.Contains(n.Id))
-                    .ParallelForEach(node =>
-                    {
-                        try
-                        {
-                            var responseMessage = _httpService.Get($"{node.HttpAddress}/api/info", _nodeTimeout,
-                                _hostingRetryCount, token);
-                            node.IsConnected = responseMessage.IsSuccessStatusCode;
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                            node.IsConnected = false;
-                        }
-                    }, token);
-            }, token));
-        }
-
-        private void SendTransactions(Simulation simulation, SimulationSettings settings)
-        {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
-            {
-                var randomGenerator = new Random();
-                simulation.LastRunTime = DateTime.UtcNow;
-                simulation.Status = SimulationStatuses.Running;
-                var transactionsSent = settings.TransactionsSent;
-                simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
-                {
-                    if (settings.NodesAndTransactions.TryGetValue(node.Id, out var number))
-                    {
-                        Enumerable.Range(0, (int) number).ForEach(i =>
-                        {
-                            if (HasSimulationTimeElapsed(simulation, settings))
-                            {
-                                return;
-                            }
-
-                            var body = JsonConvert.SerializeObject(new Transaction
-                            {
-                                Sender = Guid.NewGuid().ToString(),
-                                Recipient = Guid.NewGuid().ToString(),
-                                Amount = randomGenerator.Next(1, 1000),
-                                Fee = (decimal) randomGenerator.NextDouble()
-                            });
-                            var content = new StringContent(body, Encoding.UTF8, "application/json");
-                            var responseMessage = _httpService.Post($"{node.HttpAddress}/api/transactions", content,
-                                _nodeTimeout, token);
-                            if (responseMessage.IsSuccessStatusCode)
-                            {
-                                Interlocked.Increment(ref transactionsSent);
-                            }
-                        });
-                    }
-                }, token);
-                settings.TransactionsSent = transactionsSent;
-            }, token));
         }
 
         private void SpawnServers(Simulation simulation, SimulationSettings settings)
@@ -218,6 +105,85 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     Thread.Sleep(_hostingTime);
                 }, token);
             });
+        }
+
+        private void PingServers(Simulation simulation, SimulationSettings settings)
+        {
+            _queue.QueueBackgroundWorkItem(token => new Task(() =>
+            {
+                simulation.ServerNodes.Where(n => settings.NodesAndTransactions.Keys.Contains(n.Id))
+                    .ParallelForEach(node =>
+                    {
+                        try
+                        {
+                            var responseMessage = _httpService.Get($"{node.HttpAddress}/api/info", _nodeTimeout,
+                                _hostingRetryCount, token);
+                            node.IsConnected = responseMessage.IsSuccessStatusCode;
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            node.IsConnected = false;
+                        }
+                    }, token);
+            }, token));
+        }
+
+        private void ConnectNodes(Simulation simulation)
+        {
+            _queue.QueueBackgroundWorkItem(token => new Task(() =>
+            {
+                simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
+                {
+                    simulation.ServerNodes.Where(n => n.IsConnected == true && node.ConnectedTo.Contains(n.Id))
+                        .ForEach(otherNode =>
+                        {
+                            var body = JsonConvert.SerializeObject(otherNode);
+                            var content = new StringContent(body, Encoding.UTF8, "application/json");
+                            _httpService.Put($"{node.HttpAddress}/api/consensus", content, _nodeTimeout, token);
+                        });
+                }, token);
+            }, token));
+        }
+
+        private void SendTransactions(Simulation simulation, SimulationSettings settings)
+        {
+            _queue.QueueBackgroundWorkItem(token => new Task(() =>
+            {
+                var randomGenerator = new Random();
+                simulation.LastRunTime = DateTime.UtcNow;
+                simulation.Status = SimulationStatuses.Running;
+                var transactionsSent = settings.TransactionsSent;
+                simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
+                {
+                    if (settings.NodesAndTransactions.TryGetValue(node.Id, out var number))
+                    {
+                        Enumerable.Range(0, (int) number).ForEach(i =>
+                        {
+                            if (HasSimulationTimeElapsed(simulation, settings))
+                            {
+                                return;
+                            }
+
+                            var body = JsonConvert.SerializeObject(new Transaction
+                            {
+                                Sender = Guid.NewGuid().ToString(),
+                                Recipient = Guid.NewGuid().ToString(),
+                                Amount = randomGenerator.Next(1, 1000),
+                                Fee = (decimal) randomGenerator.NextDouble()
+                            });
+                            var content = new StringContent(body, Encoding.UTF8, "application/json");
+                            var responseMessage = _httpService.Post($"{node.HttpAddress}/api/transactions", content,
+                                _nodeTimeout, token);
+                            if (responseMessage.IsSuccessStatusCode)
+                            {
+                                Interlocked.Increment(ref transactionsSent);
+                            }
+                        });
+                    }
+                }, token);
+                settings.TransactionsSent = transactionsSent;
+            }, token));
         }
 
         private void WaitForNetwork(Simulation simulation, SimulationSettings settings)
@@ -278,6 +244,42 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 _statisticService.ExtractAndSaveStatistics(statistics.ToList(), settings,
                     simulation.ScenarioId.ToString());
             }, token));
+        }
+
+        private void ClearNodes(Simulation simulation)
+        {
+            _queue.QueueBackgroundWorkItem(token => new Task(() =>
+            {
+                simulation.ServerNodes.ParallelForEach(node =>
+                {
+                    node.NodeThread?.Kill();
+                    node.NodeThread?.Dispose();
+                    node.NodeThread = null;
+                }, token);
+
+                var directoryPath = $@"{_directoryPath}\nodes";
+                if (Directory.Exists(directoryPath))
+                {
+                    Directory.Delete(directoryPath, true);
+                }
+
+                simulation.Status = SimulationStatuses.ReadyToRun;
+            }, token));
+        }
+
+        private static bool HasSimulationTimeElapsed(Simulation simulation, SimulationSettings settings,
+            bool wait = true)
+        {
+            if (wait && settings.ForceEndAfter.HasValue && simulation.LastRunTime.HasValue)
+            {
+                var timeDifference = DateTime.UtcNow - simulation.LastRunTime.Value;
+                if (timeDifference > settings.ForceEndAfter)
+                {
+                    wait = false;
+                }
+            }
+
+            return !wait;
         }
     }
 }

@@ -48,7 +48,7 @@ namespace BlockchainSimulator.Common.Services
                 try
                 {
                     return CallHttpRequest(httpClient => httpClient.GetAsync(uri, token ?? CancellationToken.None),
-                        timeout, token, false);
+                        timeout, token);
                 }
                 catch (Exception e)
                 {
@@ -94,7 +94,7 @@ namespace BlockchainSimulator.Common.Services
         }
 
         private static HttpResponseMessage CallHttpRequest(Func<HttpClient, Task<HttpResponseMessage>> func,
-            TimeSpan? timeout = null, CancellationToken? token = null, bool ignoreException = true)
+            TimeSpan? timeout = null, CancellationToken? token = null)
         {
             using (var httpClientHandler = new HttpClientHandler())
             {
@@ -119,14 +119,12 @@ namespace BlockchainSimulator.Common.Services
                     {
                         return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
                     }
-                    catch (Exception e)
+                    catch (TaskCanceledException)
                     {
-                        Console.WriteLine(e);
-                        if (!ignoreException)
-                        {
-                            throw;
-                        }
-                        
+                        return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+                    }
+                    catch (Exception)
+                    {
                         return new HttpResponseMessage(HttpStatusCode.BadRequest);
                     }
                 }

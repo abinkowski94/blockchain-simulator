@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
+using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
@@ -31,7 +32,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         public void MineBlock(IEnumerable<Transaction> transactions, DateTime enqueueTime, CancellationToken token)
         {
-            var miningTask = new Task(() =>
+            var miningTask = new Task<BaseResponse<bool>>(() =>
             {
                 _statisticService.RegisterMiningAttempt();
 
@@ -39,11 +40,16 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 var lastBlock = LocalMapper.Map<BlockBase>(_blockchainRepository.GetLastBlock());
                 var newBlock = _blockProvider.CreateBlock(transactionSet, enqueueTime, lastBlock);
 
-                _consensusService.AcceptBlock(newBlock);
+                return _consensusService.AcceptBlock(newBlock);
             }, token);
 
             _queue.QueueBackgroundWorkItem(t => miningTask);
             miningTask.Wait(token);
+            
+            if (!miningTask.Result.IsSuccess)
+            {
+                _statisticService.RegisterAbandonedBlock();
+            }
         }
     }
 }

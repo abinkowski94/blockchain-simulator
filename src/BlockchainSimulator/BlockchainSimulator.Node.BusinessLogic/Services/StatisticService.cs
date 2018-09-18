@@ -18,17 +18,18 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly IConfiguration _configuration;
 
+        private int _rejectedIncomingBlockCount;
         private int _currentMiningQueueLength;
         private int _maxMiningQueueLength;
         private int _miningAttemptsCount;
-        private int _rejectedIncomingBlockCount;
+        private int _abandonedBlockCount;
         private TimeSpan _totalMiningQueueTime;
 
-        public StatisticService(IBlockchainRepository blockchainRepository,
-            IBlockchainConfiguration blockchainConfiguration, IConfiguration configuration)
+        public StatisticService(IBlockchainConfiguration blockchainConfiguration,
+            IBlockchainRepository blockchainRepository, IConfiguration configuration)
         {
-            _blockchainRepository = blockchainRepository;
             _blockchainConfiguration = blockchainConfiguration;
+            _blockchainRepository = blockchainRepository;
             _configuration = configuration;
         }
 
@@ -45,6 +46,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         public void RegisterRejectedBlock()
         {
             _rejectedIncomingBlockCount++;
+        }
+
+        public void RegisterAbandonedBlock()
+        {
+            _abandonedBlockCount++;
         }
 
         public void RegisterQueueLengthChange(int length)
@@ -134,7 +140,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 AverageQueueTime = _totalMiningQueueTime /
                                    (_maxMiningQueueLength != 0 ? _maxMiningQueueLength : 1),
                 TotalMiningAttemptsCount = _miningAttemptsCount,
-                RejectedIncomingBlockchainCount = _rejectedIncomingBlockCount
+                RejectedIncomingBlockchainCount = _rejectedIncomingBlockCount,
+                AbandonedBlocksCount = _abandonedBlockCount
             };
         }
 

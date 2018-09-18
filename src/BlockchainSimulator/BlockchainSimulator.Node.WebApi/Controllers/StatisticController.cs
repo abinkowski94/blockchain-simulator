@@ -16,19 +16,19 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
     [Route("api/[controller]")]
     public class StatisticController : BaseController
     {
-        private readonly IMiningQueue _miningQueue;
         private readonly IStatisticService _statisticService;
+        private readonly IMiningQueue _miningQueue;
 
         /// <inheritdoc />
         /// <summary>
         /// The constructor
         /// </summary>
-        /// <param name="miningQueue">The mining queue</param>
         /// <param name="statisticService">The statistic service</param>
-        public StatisticController(IMiningQueue miningQueue, IStatisticService statisticService)
+        /// <param name="miningQueue">The mining queue</param>
+        public StatisticController(IStatisticService statisticService, IMiningQueue miningQueue)
         {
-            _miningQueue = miningQueue;
             _statisticService = statisticService;
+            _miningQueue = miningQueue;
         }
 
         /// <summary>

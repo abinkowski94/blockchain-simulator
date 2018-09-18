@@ -15,5 +15,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         void RegisterQueueTime(TimeSpan timespan);
 
         void RegisterRejectedBlock();
+        
+        void RegisterAbandonedBlock();
     }
 }
