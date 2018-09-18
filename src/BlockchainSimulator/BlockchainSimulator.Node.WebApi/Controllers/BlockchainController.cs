@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using BlockchainSimulator.Node.WebApi.Models.Blockchain;
 using Microsoft.AspNetCore.Mvc;
@@ -43,7 +44,18 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         {
             return _blockchainRepository.GetBlockchainTree();
         }
-        
+
+        /// <summary>
+        /// Gets the blocks by ids
+        /// </summary>
+        /// <param name="ids">The blocks ids</param>
+        /// <returns>List of blocks</returns>
+        [HttpPost("ids")]
+        public ActionResult<object> GetBlocks([FromBody] List<string> ids)
+        {
+            return _blockchainRepository.GetBlocks(ids);
+        }
+
         /// <summary>
         /// Gets the blocks ids
         /// </summary>

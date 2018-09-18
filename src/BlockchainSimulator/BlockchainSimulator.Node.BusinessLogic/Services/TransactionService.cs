@@ -18,8 +18,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IBlockchainConfiguration _blockchainConfiguration;
         private readonly IBlockchainService _blockchainService;
         private readonly IMiningService _miningService;
-        private readonly IConfiguration _configuration;
         private readonly IMiningQueue _miningQueue;
+        private readonly string _nodeId;
         private readonly object _padlock = new object();
 
         public ConcurrentDictionary<string, Transaction> RegisteredTransactions { get; }
@@ -31,8 +31,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _blockchainConfiguration = blockchainConfiguration;
             _blockchainService = blockchainService;
             _miningService = miningService;
-            _configuration = configuration;
             _miningQueue = queue;
+            _nodeId = configuration["Node:Id"];
 
             RegisteredTransactions = new ConcurrentDictionary<string, Transaction>();
         }
@@ -41,17 +41,17 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         {
             lock (_padlock)
             {
-                transaction.Id = transaction.Id ?? $"{Guid.NewGuid().ToString()}-{_configuration["Node:Id"]}";
+                transaction.Id = transaction.Id ?? $"{Guid.NewGuid().ToString()}-{_nodeId}";
                 transaction.RegistrationTime = transaction.RegistrationTime ?? DateTime.UtcNow;
                 transaction.TransactionDetails = null;
 
+                RegisteredTransactions.TryAdd(transaction.Id, transaction);
                 if (!_pendingTransactions.TryAdd(transaction.Id, transaction))
                 {
                     return new ErrorResponse<Transaction>(
                         $"Could not add the transaction: {transaction.Id} to the pending list", transaction);
                 }
 
-                RegisteredTransactions.TryAdd(transaction.Id, transaction);
                 if (_pendingTransactions.Count % _blockchainConfiguration.BlockSize != 0)
                 {
                     return new SuccessResponse<Transaction>("The transaction has been added to pending list",

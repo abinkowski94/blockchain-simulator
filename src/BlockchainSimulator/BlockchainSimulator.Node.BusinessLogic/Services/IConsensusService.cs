@@ -8,7 +8,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public interface IConsensusService
     {
-        void AcceptBlocks(EncodedBlock encodedBlock);
+        void AcceptExternalBlock(EncodedBlock encodedBlock);
 
         BaseResponse<bool> AcceptBlock(BlockBase blockBase);
 
@@ -19,5 +19,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         BaseResponse<ServerNode> DisconnectNode(string nodeId);
 
         BaseResponse<List<ServerNode>> GetNodes();
+        
+        void SynchronizeWithOtherNodes();
     }
 }

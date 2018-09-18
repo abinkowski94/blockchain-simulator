@@ -47,8 +47,6 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
             services.AddHostedService<ReMiningHostedService>();
             services.AddHostedService<QueuedHostedService>();
             services.AddHostedService<MiningHostedService>();
-            services.AddSingleton<IMiningHostedServiceSynchronizationContext,
-                MiningHostedServiceSynchronizationContext>();
             services.AddSingleton<IQueuedHostedServiceSynchronizationContext,
                 QueuedHostedServiceSynchronizationContext>();
 

@@ -25,9 +25,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _queue = queue;
         }
 
-        public abstract void AcceptBlocks(EncodedBlock encodedBlock);
+        public abstract void AcceptExternalBlock(EncodedBlock encodedBlock);
 
         public abstract BaseResponse<bool> AcceptBlock(BlockBase blockBase);
+
+        public abstract void SynchronizeWithOtherNodes();
 
         public BaseResponse<ServerNode> ConnectNode(ServerNode serverNode)
         {

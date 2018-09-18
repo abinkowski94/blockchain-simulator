@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
-using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.Hosting;
 
@@ -12,30 +11,27 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
     public class ReMiningHostedService : BackgroundService
     {
         private readonly IQueuedHostedServiceSynchronizationContext _queuedHostedServiceSynchronizationContext;
-        private readonly IMiningHostedServiceSynchronizationContext _miningHostedServiceSynchronizationContext;
         private readonly IBlockchainConfiguration _blockchainConfiguration;
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly ITransactionService _transactionService;
+        private readonly IConsensusService _consensusService;
 
-        public ReMiningHostedService(
-            IMiningHostedServiceSynchronizationContext miningHostedServiceSynchronizationContext,
-            IQueuedHostedServiceSynchronizationContext queuedHostedServiceSynchronizationContext,
+        public ReMiningHostedService(IQueuedHostedServiceSynchronizationContext queuedHostedServiceSynchronizationContext,
             IBlockchainConfiguration blockchainConfiguration, IBlockchainRepository blockchainRepository,
-            ITransactionService transactionService)
+            ITransactionService transactionService, IConsensusService consensusService)
         {
             _queuedHostedServiceSynchronizationContext = queuedHostedServiceSynchronizationContext;
-            _miningHostedServiceSynchronizationContext = miningHostedServiceSynchronizationContext;
             _blockchainConfiguration = blockchainConfiguration;
             _blockchainRepository = blockchainRepository;
             _transactionService = transactionService;
+            _consensusService = consensusService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.WhenAll(_miningHostedServiceSynchronizationContext.WaitAsync(),
-                    _queuedHostedServiceSynchronizationContext.WaitAsync());
+                await _queuedHostedServiceSynchronizationContext.WaitAsync();
 
                 var pendingTransactions = _transactionService.GetPendingTransactions().Result;
                 if (pendingTransactions.Count < _blockchainConfiguration.BlockSize)
@@ -55,7 +51,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                         }
                         else
                         {
-                            // TODO: Sync with nodes
+                            _consensusService.SynchronizeWithOtherNodes();
                         }
                     }
                 }

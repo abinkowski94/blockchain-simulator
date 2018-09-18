@@ -1,7 +1,6 @@
 using BlockchainSimulator.Common.Models.Statistics;
 using BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
-using BlockchainSimulator.Hub.BusinessLogic.Model.Statistics;
 using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
 using System;
@@ -31,7 +30,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             }
 
             SaveSettings(directoryPath, settings);
-            CreateBlockchainTree(statistics, directoryPath);
+            CreateBlockchainTrees(statistics, directoryPath);
             CreateExcelFile(directoryPath, statistics, settings);
         }
 
@@ -162,23 +161,44 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             simulationResultsSheet.Cells[1, 1, row, 6].AutoFitColumns();
         }
 
-        private static void CreateBlockchainTree(IEnumerable<Statistic> statistics, string directoryPath)
+        private static void CreateBlockchainTrees(List<Statistic> statistics, string directoryPath)
         {
-            var infos = statistics.SelectMany(s => s.BlockchainStatistics.BlockInfos).GroupBy(i => i.UniqueId)
+            var treeInfos = statistics.SelectMany(s => s.BlockchainStatistics.BlockInfos).GroupBy(i => i.UniqueId)
                 .Select(g => g.First());
-            var models = infos.Select(i => new NodeModel
+
+            var treeNodes = GetTreeNodes(treeInfos);
+            DrawAndSaveBlockchainTree(treeNodes, directoryPath, "blockchain-tree.bmp");
+
+            var treesPaths = $"{directoryPath}/trees";
+            if (!Directory.Exists(treesPaths))
+            {
+                Directory.CreateDirectory(treesPaths);
+            }
+            
+            statistics.ForEach(s =>
+            {
+                treeInfos = s.BlockchainStatistics.BlockInfos.GroupBy(i => i.UniqueId).Select(g => g.First());
+                treeNodes = GetTreeNodes(treeInfos);
+                DrawAndSaveBlockchainTree(treeNodes, treesPaths, $"{s.NodeId}-blockchain-tree.bmp");
+            });
+        }
+
+        private static List<NodeModel> GetTreeNodes(IEnumerable<BlockInfo> mainTreeInfos)
+        {
+            var treeNodes = mainTreeInfos.Select(i => new NodeModel
             {
                 Id = i.UniqueId,
                 Name = i.Id,
                 ParentId = i.ParentUniqueId ?? "R"
             }).ToList();
-            models.Add(new NodeModel {Id = "R", Name = "R", ParentId = string.Empty});
-            DrawAndSaveBlockchainTree(models, directoryPath);
+            treeNodes.Add(new NodeModel {Id = "R", Name = "R", ParentId = string.Empty});
+
+            return treeNodes;
         }
 
-        private static void DrawAndSaveBlockchainTree(List<NodeModel> models, string directoryPath)
+        private static void DrawAndSaveBlockchainTree(List<NodeModel> models, string directoryPath, string fileName)
         {
-            var imagePath = $@"{directoryPath}\blockchain-tree.bmp";
+            var imagePath = $@"{directoryPath}\{fileName}";
             var drawer = new TreeDrawer(imagePath);
             drawer.DrawGraph(models);
         }

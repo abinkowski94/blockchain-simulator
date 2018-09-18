@@ -11,7 +11,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using BlockchainSimulator.Common.Models.Consensus;
 using BlockchainSimulator.Common.Models.WebClient;
@@ -35,13 +34,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             IStatisticService statisticService, IConfiguration configuration) : base(queue, httpService)
         {
             _encodedBlocksIds = new ConcurrentBag<string>();
+            _nodeId = configuration["Node:Id"];
+
             _blockchainRepository = blockchainRepository;
             _blockchainValidator = blockchainValidator;
             _statisticService = statisticService;
-            _nodeId = configuration["Node:Id"];
         }
 
-        public override void AcceptBlocks(EncodedBlock encodedBlock)
+        public override void AcceptExternalBlock(EncodedBlock encodedBlock)
         {
             _queue.QueueBackgroundWorkItem(token => new Task<BaseResponse<bool>>(() =>
             {
@@ -72,12 +72,19 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
         public override BaseResponse<bool> AcceptBlock(BlockBase blockBase)
         {
+            // Warning call this only withing queue
             if (blockBase == null)
             {
                 return new ErrorResponse<bool>("The block can not be null!", false);
             }
 
-            var validationResult = ValidateDuplicates(blockBase);
+            var lastBlock = _blockchainRepository.GetLastBlock();
+            if (blockBase is Model.Block.Block block && block.ParentUniqueId != lastBlock.UniqueId)
+            {
+                return new ErrorResponse<bool>("The blockchain head has changed!", false);
+            }
+
+            var validationResult = ValidateTransactionsDuplicates(blockBase);
             if (!validationResult.IsSuccess)
             {
                 return validationResult;
@@ -90,6 +97,39 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             return new SuccessResponse<bool>("The block has been accepted and appended!", true);
         }
 
+        public override void SynchronizeWithOtherNodes()
+        {
+            _queue.QueueBackgroundWorkItem(token => new Task(() =>
+            {
+                var currentBlocksIds = _blockchainRepository.GetBlocksIds();
+                var externalBlocks =
+                    new ConcurrentDictionary<string, Tuple<DataAccess.Model.Block.BlockBase, string>>();
+                _serverNodes.Values.ParallelForEach(node =>
+                {
+                    var httpResponse = _httpService.Get($"{node.HttpAddress}/api/blockchain/ids");
+                    if (httpResponse.IsSuccessStatusCode)
+                    {
+                        var externalIds = httpResponse.Content.ReadAs<List<string>>();
+                        if (externalIds != null)
+                        {
+                            var blockIdsToSync = externalIds.Where(eid => !currentBlocksIds.Contains(eid)).ToList();
+                            var httpContent = new JsonContent(blockIdsToSync);
+                            httpResponse = _httpService.Post($"{node.HttpAddress}/api/blockchain/ids", httpContent);
+                            if (httpResponse.IsSuccessStatusCode)
+                            {
+                                var externalBlocksJson = httpResponse.Content.ReadAsString();
+                                var externalBlocksList = BlockchainConverter.DeserializeBlocks(externalBlocksJson);
+                                externalBlocksList?.ForEach(b => externalBlocks.TryAdd(b.UniqueId,
+                                    new Tuple<DataAccess.Model.Block.BlockBase, string>(b, node.Id)));
+                            }
+                        }
+                    }
+                });
+
+                externalBlocks.Values.OrderBy(t => t.Item1.Depth).ForEach(b => AcceptBlock(b.Item1, b.Item2));
+            }, token));
+        }
+
         private BaseResponse<bool> AcceptBlock(DataAccess.Model.Block.BlockBase incomingBlock, string senderNodeId)
         {
             if (_blockchainRepository.BlockExists(incomingBlock.UniqueId))
@@ -100,7 +140,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
             var mappedBlock = LocalMapper.Map<BlockBase>(incomingBlock);
 
-            var duplicatesValidationResult = ValidateDuplicates(mappedBlock);
+            var duplicatesValidationResult = ValidateTransactionsDuplicates(mappedBlock);
             if (!duplicatesValidationResult.IsSuccess)
             {
                 return duplicatesValidationResult;
@@ -151,7 +191,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
         private void DistributeBlock(EncodedBlock encodedBlock)
         {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
+            _queue.QueueBackgroundWorkItem(token => Task.Run(() =>
             {
                 encodedBlock.NodeSenderId = _nodeId;
                 encodedBlock.NodesAcceptedIds.Add(_nodeId);
@@ -159,14 +199,17 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 _serverNodes.Values.Where(node => !encodedBlock.NodesAcceptedIds.Contains(node.Id))
                     .ParallelForEach(node =>
                     {
-                        // The delay
-                        Thread.Sleep((int) node.Delay);
-                        _httpService.Post($"{node.HttpAddress}/api/consensus", new JsonContent(encodedBlock));
+                        Task.Run(async () =>
+                        {
+                            // The delay
+                            await Task.Delay((int) node.Delay, token);
+                            _httpService.Post($"{node.HttpAddress}/api/consensus", new JsonContent(encodedBlock));
+                        }, token);
                     });
             }, token));
         }
 
-        private BaseResponse<bool> ValidateDuplicates(BlockBase blockBase)
+        private BaseResponse<bool> ValidateTransactionsDuplicates(BlockBase blockBase)
         {
             var longestBlockchain = _blockchainRepository.GetLongestBlockchain();
             if (longestBlockchain != null)
@@ -188,8 +231,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             {
                 return new SuccessResponse<bool>("The parent block exists!", true);
             }
-
-            Console.WriteLine("Block not found. Digging deeper!");
 
             var nodeAddress = _serverNodes.Values.FirstOrDefault(n => n.Id == senderNodeId)?.HttpAddress;
             if (nodeAddress == null)

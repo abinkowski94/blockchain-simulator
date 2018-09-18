@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -99,17 +100,24 @@ namespace BlockchainSimulator.Common.Services
             {
                 // Turns off SSL
                 httpClientHandler.ServerCertificateCustomValidationCallback = (msg, cert, ch, err) => true;
-                using (var httpClient = new HttpClient(httpClientHandler)
-                    {Timeout = timeout ?? TimeSpan.FromSeconds(30)})
+                var defaultTimeout = TimeSpan.FromSeconds(30);
+
+                using (var httpClient = new HttpClient(httpClientHandler) {Timeout = timeout ?? defaultTimeout})
                 {
                     try
                     {
                         var responseTask = func(httpClient);
-                        if (!responseTask.IsCanceled)
+                        if (responseTask.IsCanceled)
                         {
-                            responseTask.Wait(token ?? CancellationToken.None);
-                            return responseTask.Result;
+                            return new HttpResponseMessage(HttpStatusCode.BadRequest);
                         }
+
+                        responseTask.Wait(token ?? CancellationToken.None);
+                        return responseTask.Result;
+                    }
+                    catch (HttpRequestException)
+                    {
+                        return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
                     }
                     catch (Exception e)
                     {
@@ -118,9 +126,9 @@ namespace BlockchainSimulator.Common.Services
                         {
                             throw;
                         }
+                        
+                        return new HttpResponseMessage(HttpStatusCode.BadRequest);
                     }
-
-                    return null;
                 }
             }
         }

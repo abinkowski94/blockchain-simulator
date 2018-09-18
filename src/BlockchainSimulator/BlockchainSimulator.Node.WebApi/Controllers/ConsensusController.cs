@@ -36,7 +36,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         [HttpPost]
         public void AcceptBlockchain([FromBody] EncodedBlock encodedBlock)
         {
-            _consensusService.AcceptBlocks(encodedBlock);
+            _consensusService.AcceptBlock(encodedBlock);
         }
 
         /// <summary>

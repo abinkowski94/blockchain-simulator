@@ -29,7 +29,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
 //            // Arrange
 //            var encodedBlockchain = new EncodedBlocks { Base64Blocks = "base64Mock" };
 //
-//            _consensusServiceMock.Setup(p => p.AcceptBlocks(encodedBlockchain.Base64Blocks))
+//            _consensusServiceMock.Setup(p => p.AcceptBlock(encodedBlockchain.Base64Blocks))
 //                .Returns(new SuccessResponse<bool>("BlockchainTree has been accepted", true));
 //
 //            // Act
@@ -37,7 +37,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
 //            var response = (result?.Result as ObjectResult)?.Value as BaseResponse;
 //
 //            // Assert
-//            _consensusServiceMock.Verify(p => p.AcceptBlocks(encodedBlockchain.Base64Blocks));
+//            _consensusServiceMock.Verify(p => p.AcceptBlock(encodedBlockchain.Base64Blocks));
 //
 //            Assert.NotNull(result);
 //            Assert.NotNull(response);
