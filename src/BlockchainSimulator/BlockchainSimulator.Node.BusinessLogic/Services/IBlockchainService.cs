@@ -5,6 +5,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public interface IBlockchainService
     {
-        BaseResponse<BlockBase> GetBlockchain();
+        BaseResponse<BlockBase> GetBlockchainTree();
     }
 }

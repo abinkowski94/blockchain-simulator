@@ -1,5 +1,3 @@
-using System;
-
 namespace BlockchainSimulator.Node.BusinessLogic.Model.Responses
 {
     public class ErrorResponse<T> : BaseResponse<T>

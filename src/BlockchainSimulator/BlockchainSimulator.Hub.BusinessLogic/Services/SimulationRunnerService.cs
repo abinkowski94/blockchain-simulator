@@ -255,18 +255,11 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     try
                     {
                         node.NodeThread?.Dispose();
-                        node.NodeThread?.Close();
+                        node.NodeThread?.Kill();
                     }
-                    catch
+                    catch (Exception e)
                     {
-                        try
-                        {
-                            node.NodeThread?.Kill();
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                        }
+                        Console.WriteLine(e);
                     }
                     finally
                     {

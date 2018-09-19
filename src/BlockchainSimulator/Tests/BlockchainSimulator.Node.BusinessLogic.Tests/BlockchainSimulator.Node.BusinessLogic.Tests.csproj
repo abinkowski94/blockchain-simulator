@@ -18,5 +18,9 @@
     <ItemGroup>
         <ProjectReference Include="..\..\BlockchainSimulator.Node.BusinessLogic\BlockchainSimulator.Node.BusinessLogic.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Services\Specific" />
+    </ItemGroup>
     
 </Project>

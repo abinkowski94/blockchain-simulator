@@ -14,22 +14,24 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public abstract class BaseConsensusService : BaseService, IConsensusService
     {
-        protected readonly ConcurrentDictionary<string, ServerNode> _serverNodes;
-        protected readonly IBackgroundTaskQueue _queue;
-        protected readonly IHttpService _httpService;
+        protected readonly ConcurrentDictionary<string, ServerNode> ServerNodes;
+
+        protected readonly IBackgroundTaskQueue Queue;
+        protected readonly IHttpService HttpService;
 
         protected BaseConsensusService(IBackgroundTaskQueue queue, IHttpService httpService)
         {
-            _serverNodes = new ConcurrentDictionary<string, ServerNode>();
-            _httpService = httpService;
-            _queue = queue;
+            ServerNodes = new ConcurrentDictionary<string, ServerNode>();
+
+            HttpService = httpService;
+            Queue = queue;
         }
 
         public abstract void AcceptExternalBlock(EncodedBlock encodedBlock);
 
         public abstract BaseResponse<bool> AcceptBlock(BlockBase blockBase);
 
-        public abstract void SynchronizeWithOtherNodes();
+        public abstract void SynchronizeWithOtherNodes(bool useQueue);
 
         public BaseResponse<ServerNode> ConnectNode(ServerNode serverNode)
         {
@@ -42,7 +44,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             serverNode.IsConnected = null;
             CheckNodeConnection(serverNode);
 
-            if (!_serverNodes.TryAdd(serverNode.Id, serverNode))
+            if (!ServerNodes.TryAdd(serverNode.Id, serverNode))
             {
                 return new ErrorResponse<ServerNode>($"Could not add a node with id: {serverNode.Id}", serverNode);
             }
@@ -52,16 +54,16 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         public BaseResponse<List<ServerNode>> DisconnectFromNetwork()
         {
-            var result = _serverNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList();
+            var result = ServerNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList();
             result.ForEach(n => n.IsConnected = false);
-            _serverNodes.Clear();
+            ServerNodes.Clear();
 
             return new SuccessResponse<List<ServerNode>>("All nodes has been disconnected!", result);
         }
 
         public BaseResponse<ServerNode> DisconnectNode(string nodeId)
         {
-            _serverNodes.TryRemove(nodeId, out var result);
+            ServerNodes.TryRemove(nodeId, out var result);
             if (result == null)
             {
                 return new ErrorResponse<ServerNode>($"Could not disconnect node with id: {nodeId}", null);
@@ -74,24 +76,16 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         public BaseResponse<List<ServerNode>> GetNodes()
         {
             return new SuccessResponse<List<ServerNode>>($"The server list for current time: {DateTime.UtcNow}",
-                _serverNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList());
+                ServerNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList());
         }
 
         private void CheckNodeConnection(ServerNode serverNode)
         {
-            _queue.EnqueueTask(token => Task.Run(() =>
+            Queue.EnqueueTask(token => Task.Run(() =>
             {
-                try
-                {
-                    var timeout = TimeSpan.FromSeconds(30);
-                    var response = _httpService.Get($"{serverNode.HttpAddress}/api/info", timeout, token);
-                    serverNode.IsConnected = response.IsSuccessStatusCode;
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    serverNode.IsConnected = false;
-                }
+                var timeout = TimeSpan.FromSeconds(30);
+                var response = HttpService.Get($"{serverNode.HttpAddress}/api/info", timeout, token);
+                serverNode.IsConnected = response.IsSuccessStatusCode;
             }, token));
         }
 
@@ -114,7 +108,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 validationErrors.Add("The node's http address cannot be null!");
             }
 
-            if (serverNode.Id != null && _serverNodes.ContainsKey(serverNode.Id))
+            if (serverNode.Id != null && ServerNodes.ContainsKey(serverNode.Id))
             {
                 validationErrors.Add($"The node's id already exists id: {serverNode.Id}!");
             }

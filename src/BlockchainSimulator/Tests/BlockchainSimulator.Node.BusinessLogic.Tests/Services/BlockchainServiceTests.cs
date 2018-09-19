@@ -35,7 +35,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
                 .Returns(blockchainTree);
 
             // Act
-            var result = _blockchainService.GetBlockchain();
+            var result = _blockchainService.GetBlockchainTree();
 
             // Assert
             _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
@@ -51,7 +51,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
                 .Returns(new BlockchainTree());
 
             // Act
-            var result = _blockchainService.GetBlockchain() as ErrorResponse<BlockBase>;
+            var result = _blockchainService.GetBlockchainTree() as ErrorResponse<BlockBase>;
 
             // Assert
             _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
@@ -59,7 +59,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             Assert.NotNull(result);
             Assert.NotNull(result.Message);
             Assert.Null(result.Result);
-            Assert.Equal("The blockchainTree does not contain blocks", result.Message);
+            Assert.Equal("The blockchain tree does not contain blocks!", result.Message);
         }
     }
 }

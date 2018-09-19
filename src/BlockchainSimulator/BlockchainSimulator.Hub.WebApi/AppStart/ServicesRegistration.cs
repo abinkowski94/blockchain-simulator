@@ -23,10 +23,8 @@ namespace BlockchainSimulator.Hub.WebApi.AppStart
             services.AddSingleton<IScenarioStorage, ScenarioStorage>();
             services.AddSingleton<ISimulationStorage, SimulationStorage>();
 
-            // Background queue
+            // Background queue and hosted service
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
-            services.AddSingleton<IQueuedHostedServiceSynchronizationContext,
-                QueuedHostedServiceSynchronizationContext>();
             services.AddHostedService<QueuedHostedService>();
 
             // Services

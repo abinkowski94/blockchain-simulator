@@ -1,10 +1,7 @@
-using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Model.Block;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using BlockchainSimulator.Node.WebApi.Controllers;
 using Moq;
-using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
@@ -25,22 +22,22 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
         {
             // Arrange
             const string id = "1";
-            var blockchain = new BlockchainTree { Blocks = new List<BlockBase> { new Block { Id = id } } };
+            var block = new Block {Id = id};
 
-            _blockchainRepositoryMock.Setup(p => p.GetBlockchainTree())
-                .Returns(blockchain);
+            _blockchainRepositoryMock.Setup(p => p.GetBlock(id))
+                .Returns(block);
 
             // Act
             var result = _blockchainController.GetBlock(id);
-            var block = result.Value as Block;
+            var blockResult = result.Value as Block;
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
+            _blockchainRepositoryMock.Verify(p => p.GetBlock(id));
 
             Assert.NotNull(result);
-            Assert.NotNull(block);
-            Assert.Equal(blockchain.Blocks.First(), block);
-            Assert.Equal(id, block.Id);
+            Assert.NotNull(blockResult);
+            Assert.Equal(block.Id, blockResult.Id);
+            Assert.Equal(block, blockResult);
         }
 
         [Fact]
@@ -49,34 +46,18 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
             // Arrange
             const string id = "1";
 
-            _blockchainRepositoryMock.Setup(p => p.GetBlockchainTree())
-                .Returns((BlockchainTree)null);
+            _blockchainRepositoryMock.Setup(p => p.GetBlock(id))
+                .Returns((BlockBase) null);
 
             // Act
             var result = _blockchainController.GetBlock(id);
-            var block = result.Value as Block;
+            var blockResult = result.Value as Block;
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
+            _blockchainRepositoryMock.Verify(p => p.GetBlock(id));
 
             Assert.NotNull(result);
-            Assert.Null(block);
-        }
-
-        [Fact]
-        public void GetBlockchain_Empty_Blockchain()
-        {
-            // Arrange
-            _blockchainRepositoryMock.Setup(p => p.GetBlockchainTree())
-                .Returns(new BlockchainTree());
-
-            // Act
-            var result = _blockchainController.GetBlockchainTree();
-
-            // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
-
-            Assert.NotNull(result);
+            Assert.Null(blockResult);
         }
     }
 }

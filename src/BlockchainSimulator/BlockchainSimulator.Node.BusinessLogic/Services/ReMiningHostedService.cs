@@ -14,24 +14,23 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IBlockchainConfiguration _blockchainConfiguration;
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly ITransactionService _transactionService;
-        private readonly IConsensusService _consensusService;
 
-        public ReMiningHostedService(IQueuedHostedServiceSynchronizationContext queuedHostedServiceSynchronizationContext,
+        public ReMiningHostedService(
+            IQueuedHostedServiceSynchronizationContext queuedHostedServiceSynchronizationContext,
             IBlockchainConfiguration blockchainConfiguration, IBlockchainRepository blockchainRepository,
-            ITransactionService transactionService, IConsensusService consensusService)
+            ITransactionService transactionService)
         {
             _queuedHostedServiceSynchronizationContext = queuedHostedServiceSynchronizationContext;
             _blockchainConfiguration = blockchainConfiguration;
             _blockchainRepository = blockchainRepository;
             _transactionService = transactionService;
-            _consensusService = consensusService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                await _queuedHostedServiceSynchronizationContext.WaitAsync();
+                await _queuedHostedServiceSynchronizationContext.WaitAsync(5000, cancellationToken);
 
                 var pendingTransactions = _transactionService.GetPendingTransactions().Result;
                 if (pendingTransactions.Count < _blockchainConfiguration.BlockSize)
@@ -48,10 +47,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                         if (transactionsToReMine.Any())
                         {
                             transactionsToReMine.ForEach(t => _transactionService.AddTransaction(t));
-                        }
-                        else
-                        {
-                            //_consensusService.SynchronizeWithOtherNodes();
                         }
                     }
                 }

@@ -2,11 +2,8 @@ using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
-using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
@@ -40,7 +37,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 if (!result.IsSuccess)
                 {
                     _statisticService.RegisterAbandonedBlock();
-                    MineBlock(transactions, enqueueTime, token);
                 }
             }
         }

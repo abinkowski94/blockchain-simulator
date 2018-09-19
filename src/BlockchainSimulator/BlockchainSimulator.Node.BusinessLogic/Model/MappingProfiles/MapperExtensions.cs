@@ -26,44 +26,17 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
             return blocks.OrderByDescending(b => (b as Block.Block)?.Depth ?? 0).FirstOrDefault();
         }
 
-        private static BlockchainTree GetBlockchain(IMapper mapper, BlockBase blockBase, List<BlockBase> blocks = null)
-        {
-            if (blockBase == null)
-            {
-                return null;
-            }
-
-            if (blocks == null)
-            {
-                blocks = new List<BlockBase>();
-            }
-
-            switch (blockBase)
-            {
-                case Block.Block block:
-                    blocks.Insert(0, block);
-                    GetBlockchain(mapper, block.Parent, blocks);
-                    break;
-
-                case GenesisBlock genesisBlock:
-                    blocks.Insert(0, genesisBlock);
-                    break;
-            }
-
-            var mappedBlocks = mapper.Map<List<DataAccess.Model.Block.BlockBase>>(blocks);
-            return new BlockchainTree { Blocks = mappedBlocks };
-        }
-
         private static void SetupTransactions(MerkleNode merkleNode, HashSet<Transaction.Transaction> transactions)
         {
-            if (merkleNode is Leaf leaf)
+            switch (merkleNode)
             {
-                leaf.Transaction = transactions.FirstOrDefault(t => t.Id == leaf.TransactionId);
-            }
-            else if (merkleNode is Transaction.Node node)
-            {
-                SetupTransactions(node.LeftNode, transactions);
-                SetupTransactions(node.RightNode, transactions);
+                case Leaf leaf:
+                    leaf.Transaction = transactions.FirstOrDefault(t => t.Id == leaf.TransactionId);
+                    break;
+                case Transaction.Node node:
+                    SetupTransactions(node.LeftNode, transactions);
+                    SetupTransactions(node.RightNode, transactions);
+                    break;
             }
         }
     }

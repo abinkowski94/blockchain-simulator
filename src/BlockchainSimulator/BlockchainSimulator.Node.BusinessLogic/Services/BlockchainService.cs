@@ -14,12 +14,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _blockchainRepository = blockchainRepository;
         }
 
-        public BaseResponse<BlockBase> GetBlockchain()
+        public BaseResponse<BlockBase> GetBlockchainTree()
         {
             var blockchain = _blockchainRepository.GetBlockchainTree();
             if (blockchain?.Blocks == null)
             {
-                return new ErrorResponse<BlockBase>("The blockchain does not contain blocks", null);
+                return new ErrorResponse<BlockBase>("The blockchain tree does not contain blocks!", null);
             }
 
             var result = LocalMapper.ManualMap(blockchain);

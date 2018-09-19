@@ -1,6 +1,5 @@
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
-using BlockchainSimulator.Node.BusinessLogic.Tests.Data;
 using System.Collections.Generic;
 using Xunit;
 
@@ -38,21 +37,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers
 
             // Assert
             Assert.Null(result);
-        }
-
-        [Theory]
-        [MemberData(nameof(TransactionDataSet.TransactionDataAndMerkleTreeHashResults), MemberType = typeof(TransactionDataSet))]
-        public void GetMerkleTree_SetOfTransactions_CorrectMerkleTree(HashSet<Transaction> transactions,
-            string resultHash)
-        {
-            // Arrange
-
-            // Act
-            var result = _merkleTreeProvider.GetMerkleTree(transactions);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(resultHash, result.Hash);
         }
     }
 }

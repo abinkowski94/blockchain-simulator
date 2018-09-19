@@ -3,7 +3,6 @@ using BlockchainSimulator.Common.Models.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.WebApi.Controllers;
-using BlockchainSimulator.Node.WebApi.Models.Blockchain;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Collections.Generic;
@@ -22,28 +21,6 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
             _consensusServiceMock = new Mock<IConsensusService>();
             _consensusController = new ConsensusController(_consensusServiceMock.Object);
         }
-
-//        [Fact]
-//        public void AcceptBlockchain_EncodedBlockchain_True()
-//        {
-//            // Arrange
-//            var encodedBlockchain = new EncodedBlocks { Base64Blocks = "base64Mock" };
-//
-//            _consensusServiceMock.Setup(p => p.AcceptBlock(encodedBlockchain.Base64Blocks))
-//                .Returns(new SuccessResponse<bool>("BlockchainTree has been accepted", true));
-//
-//            // Act
-//            var result = _consensusController.AcceptBlockchain(encodedBlockchain);
-//            var response = (result?.Result as ObjectResult)?.Value as BaseResponse;
-//
-//            // Assert
-//            _consensusServiceMock.Verify(p => p.AcceptBlock(encodedBlockchain.Base64Blocks));
-//
-//            Assert.NotNull(result);
-//            Assert.NotNull(response);
-//            Assert.Equal("BlockchainTree has been accepted", response.Message);
-//            Assert.True(response.Result is bool b && b);
-//        }
 
         [Fact]
         public void ConnectNode_Node_Node()

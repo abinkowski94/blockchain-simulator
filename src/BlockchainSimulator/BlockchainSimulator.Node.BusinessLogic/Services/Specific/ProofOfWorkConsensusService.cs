@@ -43,7 +43,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
         public override void AcceptExternalBlock(EncodedBlock encodedBlock)
         {
-            _queue.EnqueueTask(token => new Task<BaseResponse<bool>>(() =>
+            Queue.EnqueueTask(token => new Task<BaseResponse<bool>>(() =>
             {
                 if (encodedBlock?.Base64Block == null)
                 {
@@ -70,7 +70,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             }, token));
         }
 
-        // Warning call this only withing queue
         public override BaseResponse<bool> AcceptBlock(BlockBase blockBase)
         {
             if (blockBase == null)
@@ -97,16 +96,48 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             return new SuccessResponse<bool>("The block has been accepted and appended!", true);
         }
 
-        public override void SynchronizeWithOtherNodes()
+        public override void SynchronizeWithOtherNodes(bool useQueue)
         {
-            _queue.EnqueueTask(token => new Task(() =>
+            if (useQueue)
+            {
+                Queue.EnqueueTask(token => new Task(() =>
+                {
+                    var currentBlocksIds = _blockchainRepository.GetLongestBlockchainIds();
+                    var externalBlocks = new ConcurrentDictionary<string, Tuple<DAM.Block.BlockBase, string>>();
+
+                    ServerNodes.Values.ParallelForEach(node =>
+                    {
+                        var httpResponse = HttpService.Get($"{node.HttpAddress}/api/blockchain/longest-ids");
+                        if (httpResponse.IsSuccessStatusCode)
+                        {
+                            var externalIds = httpResponse.Content.ReadAs<List<string>>();
+                            if (externalIds != null)
+                            {
+                                var blockIdsToSync = externalIds.Where(eid => !currentBlocksIds.Contains(eid)).ToList();
+                                var httpContent = new JsonContent(blockIdsToSync);
+                                httpResponse = HttpService.Post($"{node.HttpAddress}/api/blockchain/ids", httpContent);
+                                if (httpResponse.IsSuccessStatusCode)
+                                {
+                                    var externalBlocksJson = httpResponse.Content.ReadAsString();
+                                    var externalBlocksList = BlockchainConverter.DeserializeBlocks(externalBlocksJson);
+                                    externalBlocksList?.ForEach(b => externalBlocks.TryAdd(b.UniqueId,
+                                        new Tuple<DAM.Block.BlockBase, string>(b, node.Id)));
+                                }
+                            }
+                        }
+                    });
+
+                    externalBlocks.Values.OrderBy(t => t.Item1.Depth).ForEach(b => AcceptBlock(b.Item1, b.Item2));
+                }, token));
+            }
+            else
             {
                 var currentBlocksIds = _blockchainRepository.GetLongestBlockchainIds();
                 var externalBlocks = new ConcurrentDictionary<string, Tuple<DAM.Block.BlockBase, string>>();
 
-                _serverNodes.Values.ParallelForEach(node =>
+                ServerNodes.Values.ParallelForEach(node =>
                 {
-                    var httpResponse = _httpService.Get($"{node.HttpAddress}/api/blockchain/longest-ids");
+                    var httpResponse = HttpService.Get($"{node.HttpAddress}/api/blockchain/longest-ids");
                     if (httpResponse.IsSuccessStatusCode)
                     {
                         var externalIds = httpResponse.Content.ReadAs<List<string>>();
@@ -114,7 +145,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                         {
                             var blockIdsToSync = externalIds.Where(eid => !currentBlocksIds.Contains(eid)).ToList();
                             var httpContent = new JsonContent(blockIdsToSync);
-                            httpResponse = _httpService.Post($"{node.HttpAddress}/api/blockchain/ids", httpContent);
+                            httpResponse = HttpService.Post($"{node.HttpAddress}/api/blockchain/ids", httpContent);
                             if (httpResponse.IsSuccessStatusCode)
                             {
                                 var externalBlocksJson = httpResponse.Content.ReadAsString();
@@ -127,7 +158,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 });
 
                 externalBlocks.Values.OrderBy(t => t.Item1.Depth).ForEach(b => AcceptBlock(b.Item1, b.Item2));
-            }, token));
+            }
         }
 
         private BaseResponse<bool> AcceptBlock(DAM.Block.BlockBase incomingBlock, string senderNodeId)
@@ -151,6 +182,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 var parentBlockValidationResult = ValidateParentBlock(block, senderNodeId);
                 if (!parentBlockValidationResult.IsSuccess)
                 {
+                    Console.WriteLine(parentBlockValidationResult.Message);
+                    Console.WriteLine(_nodeId);
                     return parentBlockValidationResult;
                 }
 
@@ -191,19 +224,19 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
         private void DistributeBlock(EncodedBlock encodedBlock)
         {
-            _queue.EnqueueTask(token => Task.Run(() =>
+            Queue.EnqueueTask(token => Task.Run(() =>
             {
                 encodedBlock.NodeSenderId = _nodeId;
                 encodedBlock.NodesAcceptedIds.Add(_nodeId);
 
-                _serverNodes.Values.Where(node => !encodedBlock.NodesAcceptedIds.Contains(node.Id))
+                ServerNodes.Values.Where(node => !encodedBlock.NodesAcceptedIds.Contains(node.Id))
                     .ParallelForEach(node =>
                     {
                         Task.Run(() =>
                         {
                             // The delay
                             Task.Delay((int) node.Delay, token).Wait(token);
-                            _httpService.Post($"{node.HttpAddress}/api/consensus", new JsonContent(encodedBlock));
+                            HttpService.Post($"{node.HttpAddress}/api/consensus", new JsonContent(encodedBlock));
                         }, token);
                     });
             }, token));
@@ -232,14 +265,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 return new SuccessResponse<bool>("The parent block exists!", true);
             }
 
-            var nodeAddress = _serverNodes.Values.FirstOrDefault(n => n.Id == senderNodeId)?.HttpAddress;
+            var nodeAddress = ServerNodes.Values.FirstOrDefault(n => n.Id == senderNodeId)?.HttpAddress;
             if (nodeAddress == null)
             {
                 _statisticService.RegisterRejectedBlock();
                 return new ErrorResponse<bool>($"The parent block with id: {block.ParentUniqueId} don't exist!", false);
             }
 
-            var httpResponse = _httpService.Get($"{nodeAddress}/api/blockchain/{block.ParentUniqueId}");
+            var httpResponse = HttpService.Get($"{nodeAddress}/api/blockchain/{block.ParentUniqueId}");
             if (!httpResponse.IsSuccessStatusCode)
             {
                 _statisticService.RegisterRejectedBlock();

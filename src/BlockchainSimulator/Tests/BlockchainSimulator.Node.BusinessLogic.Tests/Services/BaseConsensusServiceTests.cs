@@ -1,4 +1,3 @@
-using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Model.Consensus;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Services;
@@ -6,8 +5,12 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using BlockchainSimulator.Common.Services;
+using BlockchainSimulator.Node.BusinessLogic.Queues;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
@@ -15,13 +18,15 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
     public class BaseConsensusServiceTests
     {
         private readonly Mock<IBackgroundTaskQueue> _backgroundTaskQueueMock;
+        private readonly Mock<IHttpService> _httpServiceMock;
         private readonly IConsensusService _consensusService;
 
         public BaseConsensusServiceTests()
         {
             _backgroundTaskQueueMock = new Mock<IBackgroundTaskQueue>();
-            _consensusService = new Mock<BaseConsensusService>(_backgroundTaskQueueMock.Object)
-            { CallBase = true }.Object;
+            _httpServiceMock = new Mock<IHttpService>();
+            _consensusService = new Mock<BaseConsensusService>(_backgroundTaskQueueMock.Object, _httpServiceMock.Object)
+                {CallBase = true}.Object;
         }
 
         [Fact]
@@ -33,7 +38,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             var response = _consensusService.ConnectNode(new ServerNode()) as ErrorResponse<ServerNode>;
 
             // Assert
-            _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
+            _backgroundTaskQueueMock.Verify(p => p.EnqueueTask(It.IsAny<Func<CancellationToken, Task>>()),
                 Times.Never);
 
             Assert.NotNull(response);
@@ -48,14 +53,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public void ConnectNode_Node_ErrorResponseAlreadyExists()
         {
             // Arrange
-            _consensusService.ConnectNode(new ServerNode { Id = "1", HttpAddress = "http://test:4200" });
+            _consensusService.ConnectNode(new ServerNode {Id = "1", HttpAddress = "http://test:4200"});
 
             // Act
-            var response = _consensusService.ConnectNode(new ServerNode { Id = "1", HttpAddress = "http://test:4200" })
+            var response = _consensusService.ConnectNode(new ServerNode {Id = "1", HttpAddress = "http://test:4200"})
                 as ErrorResponse<ServerNode>;
 
             // Assert
-            _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
+            _backgroundTaskQueueMock.Verify(p => p.EnqueueTask(It.IsAny<Func<CancellationToken, Task>>()),
                 Times.Once);
 
             Assert.NotNull(response);
@@ -69,20 +74,23 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public async Task ConnectNode_Node_SuccessResponse()
         {
             // Arrange
-            var node = new ServerNode { Id = "1", HttpAddress = "http://test:4200" };
+            var serverNode = new ServerNode {Id = "1", HttpAddress = "http://test:4200"};
 
             var token = new CancellationToken();
             Func<CancellationToken, Task> queueTask = null;
-            _backgroundTaskQueueMock.Setup(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()))
+            _backgroundTaskQueueMock.Setup(p => p.EnqueueTask(It.IsAny<Func<CancellationToken, Task>>()))
                 .Callback((Func<CancellationToken, Task> func) => queueTask = func);
 
+            _httpServiceMock.Setup(p => p.Get($"{serverNode.HttpAddress}/api/info", It.IsAny<TimeSpan>(), token))
+                .Returns(new HttpResponseMessage(HttpStatusCode.OK));
+
             // Act
-            var response = _consensusService.ConnectNode(node) as SuccessResponse<ServerNode>;
+            var response = _consensusService.ConnectNode(serverNode) as SuccessResponse<ServerNode>;
             await queueTask(token);
 
             // Assert
-            _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
-                Times.Once);
+            _backgroundTaskQueueMock.Verify(p => p.EnqueueTask(It.IsAny<Func<CancellationToken, Task>>()));
+            _httpServiceMock.Verify(p => p.Get($"{serverNode.HttpAddress}/api/info", It.IsAny<TimeSpan>(), token));
 
             Assert.NotNull(response);
             Assert.NotNull(response.Result);
@@ -98,7 +106,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             var response = _consensusService.ConnectNode(null) as ErrorResponse<ServerNode>;
 
             // Assert
-            _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
+            _backgroundTaskQueueMock.Verify(p => p.EnqueueTask(It.IsAny<Func<CancellationToken, Task>>()),
                 Times.Never);
 
             Assert.NotNull(response);
@@ -112,8 +120,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public void DisconnectFromNetwork_Empty_SuccessResponse()
         {
             // Arrange
-            _consensusService.ConnectNode(new ServerNode { Id = "1", HttpAddress = "http://test:4200" });
-            _consensusService.ConnectNode(new ServerNode { Id = "2", HttpAddress = "http://test:4200" });
+            _consensusService.ConnectNode(new ServerNode {Id = "1", HttpAddress = "http://test:4200"});
+            _consensusService.ConnectNode(new ServerNode {Id = "2", HttpAddress = "http://test:4200"});
 
             // Act
             var result = _consensusService.DisconnectFromNetwork() as SuccessResponse<List<ServerNode>>;
@@ -147,7 +155,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         {
             // Arrange
             const string id = "1";
-            _consensusService.ConnectNode(new ServerNode { Id = id, HttpAddress = "http://test:4200" });
+            _consensusService.ConnectNode(new ServerNode {Id = id, HttpAddress = "http://test:4200"});
 
             // Act
             var result = _consensusService.DisconnectNode(id) as SuccessResponse<ServerNode>;
@@ -164,8 +172,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public void GetNodes_Empty_SuccessResponseWithNodes()
         {
             // Arrange
-            _consensusService.ConnectNode(new ServerNode { Id = "1", HttpAddress = "https://test:4200", Delay = 100 });
-            _consensusService.ConnectNode(new ServerNode { Id = "2", HttpAddress = "https://test:4200", Delay = 1000 });
+            _consensusService.ConnectNode(new ServerNode {Id = "1", HttpAddress = "https://test:4200", Delay = 100});
+            _consensusService.ConnectNode(new ServerNode {Id = "2", HttpAddress = "https://test:4200", Delay = 1000});
 
             // Act
             var result = _consensusService.GetNodes() as SuccessResponse<List<ServerNode>>;

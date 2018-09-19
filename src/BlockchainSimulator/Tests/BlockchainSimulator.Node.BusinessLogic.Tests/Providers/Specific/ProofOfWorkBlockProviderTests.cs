@@ -26,8 +26,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
             configurationMock.Setup(p => p.BlockSize).Returns(10);
             _configuration = configurationMock.Object;
 
-            _blockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _configuration,
-                new Mock<IConfiguration>().Object);
+            var configMock = new Mock<IConfiguration>();
+            configMock.Setup(p => p["Node:Id"]).Returns("1");
+
+            _blockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _configuration, configMock.Object);
         }
 
         [Fact]
@@ -70,10 +72,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
             Assert.NotNull(result.Parent);
             Assert.False(result.IsGenesis);
             Assert.Equal("1", result.Id);
-            Assert.Equal("0", result.ParentUniqueId);
+            Assert.NotNull(result.UniqueId);
+            Assert.Equal(result.Parent.UniqueId, result.ParentUniqueId);
             Assert.Equal(_configuration.Version, result.Header.Version);
             Assert.NotNull(result.Header.ParentHash);
-            Assert.Equal("3dda268f68fd57368c4c8a72ab5fa98fd85822789b422a53e47ef9a806adf0af",
+            Assert.Equal("5e2da3deb36395f11e6a1115ecda4973ca94424881e104267808f0bc79c1c58f",
                 result.Header.MerkleTreeRootHash);
             Assert.Equal(_configuration.Target, result.Header.Target);
             Assert.NotNull(result.Header.Nonce);
@@ -96,7 +99,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
             Assert.Equal("0", result.Id);
             Assert.Equal(_configuration.Version, result.Header.Version);
             Assert.Null(result.Header.ParentHash);
-            Assert.Equal("3dda268f68fd57368c4c8a72ab5fa98fd85822789b422a53e47ef9a806adf0af",
+            Assert.Equal("5e2da3deb36395f11e6a1115ecda4973ca94424881e104267808f0bc79c1c58f",
                 result.Header.MerkleTreeRootHash);
             Assert.Equal(_configuration.Target, result.Header.Target);
             Assert.NotNull(result.Header.Nonce);

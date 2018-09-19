@@ -9,16 +9,17 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
 {
     public class TreeDrawer
     {
-        private const int _nodeHeight = 30;
-        private const int _nodeMarginX = 50;
-        private const int _nodeMarginY = 40;
-        private const int _nodeWidth = 30;
-        private static readonly Pen _nodePen = Pens.Gray;
+        private const int NodeHeight = 30;
+        private const int NodeMarginX = 50;
+        private const int NodeMarginY = 40;
+        private const int NodeWidth = 30;
         private readonly string _path;
+        private readonly Pen _nodePen;
 
         public TreeDrawer(string path)
         {
             _path = path;
+            _nodePen = Pens.Black;
         }
 
         public void DrawGraph(List<NodeModel> data)
@@ -39,11 +40,11 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             }
         }
 
-        private static void DrawNode(TreeNodeModel<NodeModel> node, Graphics graphic)
+        private void DrawNode(TreeNodeModel<NodeModel> node, Graphics graphic)
         {
             // rectangle where node will be positioned
-            var nodeRect = new Rectangle(Convert.ToInt32(_nodeMarginX + node.X * (_nodeWidth + _nodeMarginX)),
-                _nodeMarginY + node.Y * (_nodeHeight + _nodeMarginY), _nodeWidth, _nodeHeight);
+            var nodeRect = new Rectangle(Convert.ToInt32(NodeMarginX + node.X * (NodeWidth + NodeMarginX)),
+                NodeMarginY + node.Y * (NodeHeight + NodeMarginY), NodeWidth, NodeHeight);
 
             // draw box
             graphic.DrawRectangle(_nodePen, nodeRect);
@@ -58,7 +59,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             {
                 var nodeTopMiddle = new Point(nodeRect.X + nodeRect.Width / 2, nodeRect.Y);
                 graphic.DrawLine(_nodePen, nodeTopMiddle,
-                    new Point(nodeTopMiddle.X, nodeTopMiddle.Y - _nodeMarginY / 2));
+                    new Point(nodeTopMiddle.X, nodeTopMiddle.Y - NodeMarginY / 2));
             }
 
             // draw line to children
@@ -66,22 +67,22 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             {
                 var nodeBottomMiddle = new Point(nodeRect.X + (nodeRect.Width / 2), nodeRect.Y + nodeRect.Height);
                 graphic.DrawLine(_nodePen, nodeBottomMiddle,
-                    new Point(nodeBottomMiddle.X, nodeBottomMiddle.Y + (_nodeMarginY / 2)));
+                    new Point(nodeBottomMiddle.X, nodeBottomMiddle.Y + (NodeMarginY / 2)));
 
                 // draw line over children
                 if (node.Children.Count > 1)
                 {
-                    var childrenLineStartX = Convert.ToInt32(_nodeMarginX + node.GetRightMostChild().X *
+                    var childrenLineStartX = Convert.ToInt32(NodeMarginX + node.GetRightMostChild().X *
                                                              // ReSharper disable once PossibleLossOfFraction
-                                                             (_nodeWidth + _nodeMarginX) + _nodeWidth / 2);
-                    var childrenLineStartY = nodeBottomMiddle.Y + _nodeMarginY / 2;
+                                                             (NodeWidth + NodeMarginX) + NodeWidth / 2);
+                    var childrenLineStartY = nodeBottomMiddle.Y + NodeMarginY / 2;
                     var childrenLineStart = new Point(childrenLineStartX, childrenLineStartY);
 
-                    var childrenLineEndX = Convert.ToInt32(_nodeMarginX +
-                                                           node.GetLeftMostChild().X * (_nodeWidth + _nodeMarginX) +
+                    var childrenLineEndX = Convert.ToInt32(NodeMarginX +
+                                                           node.GetLeftMostChild().X * (NodeWidth + NodeMarginX) +
                                                            // ReSharper disable once PossibleLossOfFraction
-                                                           _nodeWidth / 2);
-                    var childrenLineEndY = nodeBottomMiddle.Y + _nodeMarginY / 2;
+                                                           NodeWidth / 2);
+                    var childrenLineEndY = nodeBottomMiddle.Y + NodeMarginY / 2;
                     var childrenLineEnd = new Point(childrenLineEndX, childrenLineEndY);
 
                     graphic.DrawLine(_nodePen, childrenLineStart, childrenLineEnd);
@@ -95,7 +96,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
         }
 
         private static List<TreeNodeModel<NodeModel>> GetChildNodes(List<NodeModel> data,
-                    TreeNodeModel<NodeModel> parent)
+            TreeNodeModel<NodeModel> parent)
         {
             var nodes = new List<TreeNodeModel<NodeModel>>();
 
@@ -127,13 +128,13 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             var treeWidth = tree.Width + 1;
             var treeHeight = tree.Height + 1;
 
-            var size = new Size(Convert.ToInt32(treeWidth * _nodeWidth + (treeWidth + 1) * _nodeMarginX),
-                treeHeight * _nodeHeight + (treeHeight + 1) * _nodeMarginY);
+            var size = new Size(Convert.ToInt32(treeWidth * NodeWidth + (treeWidth + 1) * NodeMarginX),
+                treeHeight * NodeHeight + (treeHeight + 1) * NodeMarginY);
 
             return size;
         }
 
-        private static void PaintTree(Graphics graphic, TreeNodeModel<NodeModel> tree)
+        private void PaintTree(Graphics graphic, TreeNodeModel<NodeModel> tree)
         {
             graphic.Clear(Color.White);
             DrawNode(tree, graphic);

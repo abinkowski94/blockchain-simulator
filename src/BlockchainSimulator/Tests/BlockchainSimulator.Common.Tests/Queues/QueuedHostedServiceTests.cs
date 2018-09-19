@@ -2,7 +2,6 @@ using BlockchainSimulator.Common.Queues;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Moq;
 using Xunit;
 
 namespace BlockchainSimulator.Common.Tests.Queues
@@ -15,8 +14,7 @@ namespace BlockchainSimulator.Common.Tests.Queues
         public QueuedHostedServiceTests()
         {
             _queue = new BackgroundTaskQueue();
-            _hostedService =
-                new QueuedHostedService(_queue, new Mock<IQueuedHostedServiceSynchronizationContext>().Object);
+            _hostedService = new QueuedHostedService(_queue);
         }
 
         [Fact]
