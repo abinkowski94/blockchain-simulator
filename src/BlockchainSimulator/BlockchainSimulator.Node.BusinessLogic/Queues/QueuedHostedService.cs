@@ -1,24 +1,27 @@
-using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Queues
 {
-    public class MiningHostedService : BackgroundService
+    public class QueuedHostedService : BackgroundService
     {
-        private readonly IMiningQueue _taskQueue;
+        private readonly IQueuedHostedServiceSynchronizationContext _synchronizationContext;
+        private readonly IBackgroundTaskQueue _queue;
 
-        public MiningHostedService(IMiningQueue taskQueue)
+        public QueuedHostedService(IBackgroundTaskQueue queue,
+            IQueuedHostedServiceSynchronizationContext synchronizationContext)
         {
-            _taskQueue = taskQueue;
+            _queue = queue;
+            _synchronizationContext = synchronizationContext;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var workItem = await _taskQueue.DequeueAsync(cancellationToken);
+                var workItem = await _queue.DequeueAsync(cancellationToken);
 
                 try
                 {
@@ -38,6 +41,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
                 {
                     // TODO: log errors
                     Console.WriteLine(e);
+                }
+
+                if (_queue.Length <= 0)
+                {
+                    _synchronizationContext.Release();
                 }
             }
         }

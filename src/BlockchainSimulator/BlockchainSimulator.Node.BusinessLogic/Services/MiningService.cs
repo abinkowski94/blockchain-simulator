@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.DataAccess.Repositories;
@@ -18,37 +17,31 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IConsensusService _consensusService;
         private readonly IStatisticService _statisticService;
         private readonly IBlockProvider _blockProvider;
-        private readonly IBackgroundTaskQueue _queue;
 
         public MiningService(IBlockchainRepository blockchainRepository, IConsensusService consensusService,
-            IStatisticService statisticService, IBlockProvider blockProvider, IBackgroundTaskQueue queue)
+            IStatisticService statisticService, IBlockProvider blockProvider)
         {
             _blockchainRepository = blockchainRepository;
             _consensusService = consensusService;
             _statisticService = statisticService;
             _blockProvider = blockProvider;
-            _queue = queue;
         }
 
-        public void MineBlock(IEnumerable<Transaction> transactions, DateTime enqueueTime, CancellationToken token)
+        public void MineBlock(HashSet<Transaction> transactions, DateTime enqueueTime, CancellationToken token)
         {
-            var miningTask = new Task<BaseResponse<bool>>(() =>
+            if (!token.IsCancellationRequested)
             {
                 _statisticService.RegisterMiningAttempt();
 
-                var transactionSet = transactions.ToHashSet();
                 var lastBlock = LocalMapper.Map<BlockBase>(_blockchainRepository.GetLastBlock());
-                var newBlock = _blockProvider.CreateBlock(transactionSet, enqueueTime, lastBlock);
+                var newBlock = _blockProvider.CreateBlock(transactions, enqueueTime, lastBlock);
 
-                return _consensusService.AcceptBlock(newBlock);
-            }, token);
-
-            _queue.QueueBackgroundWorkItem(t => miningTask);
-            miningTask.Wait(token);
-            
-            if (!miningTask.Result.IsSuccess)
-            {
-                _statisticService.RegisterAbandonedBlock();
+                var result = _consensusService.AcceptBlock(newBlock);
+                if (!result.IsSuccess)
+                {
+                    _statisticService.RegisterAbandonedBlock();
+                    MineBlock(transactions, enqueueTime, token);
+                }
             }
         }
     }

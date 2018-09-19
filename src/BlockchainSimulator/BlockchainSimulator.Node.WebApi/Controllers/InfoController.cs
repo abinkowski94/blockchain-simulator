@@ -32,5 +32,16 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         {
             return _configuration.AsEnumerable().Where(kv => kv.Value != null).ToList();
         }
+
+        /// <summary>
+        /// Stops all jobs in the service
+        /// </summary>
+        /// <returns>True if all services has been stopped</returns>
+        [HttpPost]
+        public bool StopAllJobs()
+        {
+            // TODO: Add service and add method to stop all jobs
+            return true;
+        }
     }
 }

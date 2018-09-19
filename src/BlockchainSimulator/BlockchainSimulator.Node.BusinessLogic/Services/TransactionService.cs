@@ -18,20 +18,20 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IBlockchainConfiguration _blockchainConfiguration;
         private readonly IBlockchainService _blockchainService;
         private readonly IMiningService _miningService;
-        private readonly IMiningQueue _miningQueue;
+        private readonly IBackgroundTaskQueue _queue;
         private readonly string _nodeId;
         private readonly object _padlock = new object();
 
         public ConcurrentDictionary<string, Transaction> RegisteredTransactions { get; }
 
         public TransactionService(IBlockchainService blockchainService, IMiningService miningService,
-            IBlockchainConfiguration blockchainConfiguration, IMiningQueue queue, IConfiguration configuration)
+            IBlockchainConfiguration blockchainConfiguration, IBackgroundTaskQueue queue, IConfiguration configuration)
         {
             _pendingTransactions = new ConcurrentDictionary<string, Transaction>();
             _blockchainConfiguration = blockchainConfiguration;
             _blockchainService = blockchainService;
             _miningService = miningService;
-            _miningQueue = queue;
+            _queue = queue;
             _nodeId = configuration["Node:Id"];
 
             RegisteredTransactions = new ConcurrentDictionary<string, Transaction>();
@@ -94,11 +94,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private void MineTransactions()
         {
             var enqueueTime = DateTime.UtcNow;
-            var transactions = _pendingTransactions.Values.OrderByDescending(t => t.Fee)
-                .Take(_blockchainConfiguration.BlockSize).ToList();
-            transactions.ForEach(t => _pendingTransactions.TryRemove(t.Id, out _));
-            _miningQueue.QueueMiningTask(token =>
-                new Task(() => _miningService.MineBlock(transactions, enqueueTime, token), token));
+            _queue.EnqueueTask(token => new Task(() =>
+            {
+                var transactions = _pendingTransactions.Values.OrderByDescending(t => t.Fee)
+                    .Take(_blockchainConfiguration.BlockSize).ToList();
+                transactions.ForEach(t => _pendingTransactions.TryRemove(t.Id, out _));
+                _miningService.MineBlock(transactions.ToHashSet(), enqueueTime, token);
+            }, token));
         }
 
         private static Transaction FindAndFillTransactionData(string transactionId, BlockBase block)

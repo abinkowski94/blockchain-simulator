@@ -55,6 +55,16 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         {
             return _blockchainRepository.GetBlocks(ids);
         }
+        
+        /// <summary>
+        /// Gets the longest blockchain ids
+        /// </summary>
+        /// <returns>The longest blockchain ids</returns>
+        [HttpGet("longest-ids")]
+        public ActionResult<object> GetLongestBlockchainBlocksIds()
+        {
+            return _blockchainRepository.GetLongestBlockchainIds();
+        }
 
         /// <summary>
         /// Gets the blocks ids

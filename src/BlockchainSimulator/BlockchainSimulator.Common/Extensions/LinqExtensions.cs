@@ -63,5 +63,18 @@ namespace BlockchainSimulator.Common.Extensions
 
             return result;
         }
+
+        /// <summary>
+        /// Repeats the action
+        /// </summary>
+        /// <param name="repeatCount">The repeat count</param>
+        /// <param name="action">The action</param>
+        public static void RepeatAction(int repeatCount, Action action)
+        {
+            for (var i = 0; i < repeatCount; i++)
+            {
+                action();
+            }
+        }
     }
 }

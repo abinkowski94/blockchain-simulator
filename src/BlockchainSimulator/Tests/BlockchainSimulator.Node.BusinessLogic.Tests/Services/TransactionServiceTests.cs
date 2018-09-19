@@ -22,7 +22,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
     {
         private readonly Mock<IBlockchainConfiguration> _blockchainConfigurationMock;
         private readonly Mock<IBlockchainService> _blockchainServiceMock;
-        private readonly Mock<IMiningQueue> _miningQueueMock;
+        private readonly Mock<IBackgroundTaskQueue> _miningQueueMock;
         private readonly Mock<IMiningService> _miningServiceMock;
         private readonly TransactionService _transactionService;
 
@@ -30,7 +30,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         {
             _blockchainServiceMock = new Mock<IBlockchainService>();
             _blockchainConfigurationMock = new Mock<IBlockchainConfiguration>();
-            _miningQueueMock = new Mock<IMiningQueue>();
+            _miningQueueMock = new Mock<IBackgroundTaskQueue>();
             _miningServiceMock = new Mock<IMiningService>();
 
             _transactionService = new TransactionService(_blockchainServiceMock.Object, _miningServiceMock.Object,
@@ -56,7 +56,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
 
             // Assert
             _blockchainConfigurationMock.Verify(p => p.BlockSize);
-            _miningQueueMock.Verify(p => p.QueueMiningTask(It.IsAny<Func<CancellationToken, Task>>()), Times.Never);
+            _miningQueueMock.Verify(p => p.EnqueueTask(It.IsAny<Func<CancellationToken, Task>>()), Times.Never);
 
             Assert.NotNull(result);
             Assert.NotNull(result.Message);
@@ -82,7 +82,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             Func<CancellationToken, Task> queueTask = t => Task.Run(() => { }, t);
 
             _blockchainConfigurationMock.Setup(p => p.BlockSize).Returns(1);
-            _miningQueueMock.Setup(p => p.QueueMiningTask(It.IsAny<Func<CancellationToken, Task>>()))
+            _miningQueueMock.Setup(p => p.EnqueueTask(It.IsAny<Func<CancellationToken, Task>>()))
                 .Callback((Func<CancellationToken, Task> func) => queueTask = func);
 
             // Act
@@ -93,8 +93,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
 
             // Assert
             _blockchainConfigurationMock.Verify(p => p.BlockSize);
-            _miningQueueMock.Verify(p => p.QueueMiningTask(It.IsAny<Func<CancellationToken, Task>>()));
-            _miningServiceMock.Verify(p => p.MineBlock(It.IsAny<IEnumerable<Transaction>>(), It.IsAny<DateTime>(),
+            _miningQueueMock.Verify(p => p.EnqueueTask(It.IsAny<Func<CancellationToken, Task>>()));
+            _miningServiceMock.Verify(p => p.MineBlock(It.IsAny<HashSet<Transaction>>(), It.IsAny<DateTime>(),
                 It.IsAny<CancellationToken>()));
 
             Assert.NotNull(result);

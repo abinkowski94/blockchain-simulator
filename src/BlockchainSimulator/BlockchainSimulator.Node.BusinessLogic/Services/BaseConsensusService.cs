@@ -1,4 +1,3 @@
-using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using System;
@@ -8,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BlockchainSimulator.Common.Models.Consensus;
 using BlockchainSimulator.Common.Services;
+using BlockchainSimulator.Node.BusinessLogic.Queues;
 using ServerNode = BlockchainSimulator.Node.BusinessLogic.Model.Consensus.ServerNode;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
@@ -79,7 +79,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         private void CheckNodeConnection(ServerNode serverNode)
         {
-            _queue.QueueBackgroundWorkItem(token => Task.Run(() =>
+            _queue.EnqueueTask(token => Task.Run(() =>
             {
                 try
                 {

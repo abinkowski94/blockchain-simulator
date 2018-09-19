@@ -1,8 +1,8 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
+using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.Hosting;
 
@@ -51,7 +51,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                         }
                         else
                         {
-                            _consensusService.SynchronizeWithOtherNodes();
+                            //_consensusService.SynchronizeWithOtherNodes();
                         }
                     }
                 }

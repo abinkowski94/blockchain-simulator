@@ -17,6 +17,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
         private readonly IFileRepository _fileRepository;
         private readonly JsonSerializer _serializer;
         private readonly string _blockchainFileName;
+
         private readonly object _padlock = new object();
 
         public BlockchainRepository(IFileRepository fileRepository)
@@ -36,6 +37,12 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                     return streamReader == StreamReader.Null ? null : BlockchainConverter.DeserializeBlockchain(reader);
                 }
             }
+        }
+
+        public List<string> GetLongestBlockchainIds()
+        {
+            var longestBlockchain = GetLongestBlockchain();
+            return longestBlockchain.Blocks.Select(b => b.UniqueId).ToList();
         }
 
         public BlockchainTree GetLongestBlockchain()

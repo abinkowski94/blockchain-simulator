@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Queues
 {
-    public class MiningQueue : IMiningQueue
+    public class BackgroundTaskQueue : IBackgroundTaskQueue
     {
         private readonly SemaphoreSlim _signal = new SemaphoreSlim(0);
         private readonly IStatisticService _statisticService;
@@ -16,7 +16,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
 
         public int Length => _workItems.Count;
 
-        public MiningQueue(IStatisticService statisticService)
+        public BackgroundTaskQueue(IStatisticService statisticService)
         {
             _statisticService = statisticService;
         }
@@ -32,7 +32,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
             return workItem.Item2;
         }
 
-        public void QueueMiningTask(Func<CancellationToken, Task> workItem)
+        public void EnqueueTask(Func<CancellationToken, Task> workItem)
         {
             if (workItem == null)
             {

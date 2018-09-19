@@ -8,8 +8,10 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
     {
         List<string> GetBlocksIds();
 
-        List<BlockBase> GetBlocks(List<string> ids);
+        List<string> GetLongestBlockchainIds();
         
+        List<BlockBase> GetBlocks(List<string> ids);
+
         BlockBase GetLastBlock();
 
         BlockBase GetBlock(string id);
@@ -23,7 +25,5 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
         void AddBlock(BlockBase blockBase);
 
         bool BlockExists(string uniqueId);
-
-        void SaveBlockchain(BlockchainTree blockchainTree);
     }
 }
