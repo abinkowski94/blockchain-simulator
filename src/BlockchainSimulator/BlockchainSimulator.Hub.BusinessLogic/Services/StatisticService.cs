@@ -30,8 +30,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             }
 
             SaveSettings(directoryPath, settings);
-            CreateBlockchainTrees(statistics, directoryPath);
             CreateExcelFile(directoryPath, statistics, settings);
+            CreateBlockchainTrees(statistics, directoryPath);
         }
 
         private static void CreateExcelFile(string directoryPath, IReadOnlyCollection<Statistic> statistics,

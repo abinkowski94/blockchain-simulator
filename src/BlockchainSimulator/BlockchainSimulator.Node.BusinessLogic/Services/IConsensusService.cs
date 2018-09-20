@@ -19,7 +19,5 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         BaseResponse<ServerNode> DisconnectNode(string nodeId);
 
         BaseResponse<List<ServerNode>> GetNodes();
-        
-        void SynchronizeWithOtherNodes(bool useQueue);
     }
 }

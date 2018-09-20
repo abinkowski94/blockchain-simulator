@@ -7,7 +7,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
     {
         private readonly SemaphoreSlim _signal = new SemaphoreSlim(0);
 
-        public Task WaitAsync(int millisecondsTimeout, CancellationToken cancellationToken)
+        public Task WaitAsync(CancellationToken cancellationToken, int millisecondsTimeout = -1)
         {
             return _signal.WaitAsync(millisecondsTimeout, cancellationToken);
         }

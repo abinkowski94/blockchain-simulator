@@ -40,7 +40,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
         {
             //TODO: Add times to global configuration
             _nodeTimeout = TimeSpan.FromSeconds(10);
-            _hostingTime = TimeSpan.FromSeconds(5);
+            _hostingTime = TimeSpan.FromSeconds(10);
             _networkWaitInterval = TimeSpan.FromSeconds(5);
             _hostingRetryCount = 5;
 
@@ -254,8 +254,10 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 {
                     try
                     {
-                        node.NodeThread?.Dispose();
-                        node.NodeThread?.Kill();
+                        if (node.NodeThread?.CloseMainWindow() != true)
+                        {
+                            node.NodeThread?.Kill();
+                        }
                     }
                     catch (Exception e)
                     {
@@ -263,9 +265,12 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     }
                     finally
                     {
+                        node.NodeThread?.Dispose();
                         node.NodeThread = null;
                     }
                 }, token);
+                
+                Thread.Sleep(_hostingTime);
 
                 var directoryPath = $@"{_directoryPath}\nodes";
                 if (Directory.Exists(directoryPath))

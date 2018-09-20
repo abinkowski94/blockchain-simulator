@@ -30,7 +30,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                await _queuedHostedServiceSynchronizationContext.WaitAsync(5000, cancellationToken);
+                await _queuedHostedServiceSynchronizationContext.WaitAsync(cancellationToken, 5000);
 
                 var pendingTransactions = _transactionService.GetPendingTransactions().Result;
                 if (pendingTransactions.Count < _blockchainConfiguration.BlockSize)

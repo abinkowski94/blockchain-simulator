@@ -5,7 +5,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
 {
     public interface IQueuedHostedServiceSynchronizationContext
     {
-        Task WaitAsync(int millisecondsTimeout, CancellationToken cancellationToken);
+        Task WaitAsync(CancellationToken cancellationToken, int millisecondsTimeout = -1);
 
         void Release();
     }

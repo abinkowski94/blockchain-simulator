@@ -31,8 +31,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         public abstract BaseResponse<bool> AcceptBlock(BlockBase blockBase);
 
-        public abstract void SynchronizeWithOtherNodes(bool useQueue);
-
         public BaseResponse<ServerNode> ConnectNode(ServerNode serverNode)
         {
             var validationErrors = ValidateNode(serverNode);

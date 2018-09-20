@@ -27,6 +27,12 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
             _blockchainFileName = "blockchainTree.json";
         }
 
+        public List<string> GetLongestBlockchainIds()
+        {
+            var longestBlockchain = GetLongestBlockchain();
+            return longestBlockchain.Blocks.Select(b => b.UniqueId).ToList();
+        }
+
         public BlockchainTree GetBlockchainTree()
         {
             lock (_padlock)
@@ -37,12 +43,6 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                     return streamReader == StreamReader.Null ? null : BlockchainConverter.DeserializeBlockchain(reader);
                 }
             }
-        }
-
-        public List<string> GetLongestBlockchainIds()
-        {
-            var longestBlockchain = GetLongestBlockchain();
-            return longestBlockchain.Blocks.Select(b => b.UniqueId).ToList();
         }
 
         public BlockchainTree GetLongestBlockchain()
@@ -61,6 +61,40 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                 {
                     block = block == null
                         ? blockchainTree.Blocks.OrderByDescending(b => b.Depth).FirstOrDefault()
+                        : blockchainTree.Blocks.FirstOrDefault(b =>
+                            block is Block current && b.UniqueId == current.ParentUniqueId);
+
+                    if (block != null)
+                    {
+                        blockchain.Blocks.Add(block);
+                    }
+                } while (block != null);
+
+                return blockchain;
+            }
+        }
+
+        public BlockchainTree GetBlockchainFromBranch(string uniqueId)
+        {
+            if (uniqueId == null)
+            {
+                return null;
+            }
+            
+            lock (_padlock)
+            {
+                var blockchainTree = GetBlockchainTree();
+                if (blockchainTree == null)
+                {
+                    return null;
+                }
+
+                var blockchain = new BlockchainTree {Blocks = new List<BlockBase>()};
+                BlockBase block = null;
+                do
+                {
+                    block = block == null
+                        ? blockchainTree.Blocks.FirstOrDefault(b => b.UniqueId == uniqueId)
                         : blockchainTree.Blocks.FirstOrDefault(b =>
                             block is Block current && b.UniqueId == current.ParentUniqueId);
 
@@ -217,7 +251,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
             }
         }
 
-        public void SaveBlockchain(BlockchainTree blockchainTree)
+        private void SaveBlockchain(BlockchainTree blockchainTree)
         {
             lock (_padlock)
             {

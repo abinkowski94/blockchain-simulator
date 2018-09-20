@@ -9,7 +9,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
         List<string> GetBlocksIds();
 
         List<string> GetLongestBlockchainIds();
-        
+
         List<BlockBase> GetBlocks(List<string> ids);
 
         BlockBase GetLastBlock();
@@ -19,6 +19,8 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
         BlockchainTree GetBlockchainTree();
 
         BlockchainTree GetLongestBlockchain();
+
+        BlockchainTree GetBlockchainFromBranch(string uniqueId);
 
         BlockchainTreeMetadata GetBlockchainMetadata();
 
