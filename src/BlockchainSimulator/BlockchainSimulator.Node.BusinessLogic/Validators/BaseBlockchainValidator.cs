@@ -1,9 +1,9 @@
-using System.Collections.Generic;
-using System.Linq;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Model.ValidationResults;
 using BlockchainSimulator.Node.BusinessLogic.Services;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Validators
 {
@@ -15,8 +15,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators
         {
             _merkleTreeValidator = merkleTreeValidator;
         }
-
-        protected abstract ValidationResult SpecificValidation(BlockBase blockchain);
 
         public ValidationResult Validate(BlockBase blockchain)
         {
@@ -62,6 +60,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators
             validationResult = _merkleTreeValidator.Validate(blockchain.Body.MerkleTree);
             return !validationResult.IsSuccess ? validationResult : SpecificValidation(blockchain);
         }
+
+        protected abstract ValidationResult SpecificValidation(BlockBase blockchain);
 
         private static ValidationResult ValidateParentHash(Block blockchain)
         {

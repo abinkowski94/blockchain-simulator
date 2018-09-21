@@ -5,11 +5,11 @@ using BlockchainSimulator.Node.BusinessLogic.Providers.Specific;
 using BlockchainSimulator.Node.BusinessLogic.Tests.Data;
 using BlockchainSimulator.Node.BusinessLogic.Validators;
 using BlockchainSimulator.Node.BusinessLogic.Validators.Specific;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators.Specific
@@ -36,8 +36,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators.Specific
         public void Validate_Blockchain_ErrorValidationResult()
         {
             // Arrange
-            var genesisTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.First().First();
-            var blockTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.Last().First();
+            var genesisTransactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.First().First();
+            var blockTransactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.Last().First();
 
             var genesisBlock = _proofOfWorkBlockProvider.CreateBlock(genesisTransactions, new DateTime(1, 1, 1));
             var blockchain =
@@ -57,8 +57,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators.Specific
         public void Validate_Blockchain_SuccessValidationResult()
         {
             // Arrange
-            var genesisTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.First().First();
-            var blockTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.Last().First();
+            var genesisTransactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.First().First();
+            var blockTransactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.Last().First();
 
             var genesisBlock = _proofOfWorkBlockProvider.CreateBlock(genesisTransactions, new DateTime(1, 1, 1));
             var blockchain =

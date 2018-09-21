@@ -5,28 +5,28 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Block
 {
     public abstract class BlockBase
     {
-        [JsonIgnore] 
+        [JsonIgnore]
         public string BlockJson => JsonConvert.SerializeObject(this);
 
-        [JsonIgnore] 
+        [JsonIgnore]
         public abstract int Depth { get; set; }
 
-        [JsonProperty("body")] 
+        [JsonProperty("body")]
         public Body Body { get; set; }
 
         [JsonProperty("header")]
         public Header Header { get; set; }
 
-        [JsonProperty("id")] 
+        [JsonProperty("id")]
         public string Id { get; set; }
 
         [JsonProperty("uniqueId")]
         public string UniqueId { get; set; }
 
-        [JsonProperty("isGenesis")] 
+        [JsonProperty("isGenesis")]
         public abstract bool IsGenesis { get; }
 
-        [JsonProperty("queueTime")] 
+        [JsonProperty("queueTime")]
         public TimeSpan QueueTime { set; get; }
     }
 }

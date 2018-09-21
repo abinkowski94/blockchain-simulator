@@ -13,10 +13,10 @@ namespace BlockchainSimulator.Node.DataAccess.Model.Block
 
         [JsonProperty("depth", Order = 6)]
         public int Depth { get; set; }
-        
+
         [JsonProperty("id", Order = 3)]
         public string Id { get; set; }
-        
+
         [JsonProperty("uniqueId", Order = 1)]
         public string UniqueId { get; set; }
 

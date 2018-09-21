@@ -1,10 +1,10 @@
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.Hosting;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {

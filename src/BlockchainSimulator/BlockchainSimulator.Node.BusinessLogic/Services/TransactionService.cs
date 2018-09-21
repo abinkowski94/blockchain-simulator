@@ -3,12 +3,12 @@ using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Queues;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
@@ -91,18 +91,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             return new SuccessResponse<Transaction>("The transaction has been found", result);
         }
 
-        private void MineTransactions()
-        {
-            var enqueueTime = DateTime.UtcNow;
-            _queue.EnqueueTask(token => new Task(() =>
-            {
-                var transactions = _pendingTransactions.Values.OrderByDescending(t => t.Fee)
-                    .Take(_blockchainConfiguration.BlockSize).ToList();
-                transactions.ForEach(t => _pendingTransactions.TryRemove(t.Id, out _));
-                _miningService.MineBlock(transactions.ToHashSet(), enqueueTime, token);
-            }, token));
-        }
-
         private static Transaction FindAndFillTransactionData(string transactionId, BlockBase block)
         {
             var counter = 0;
@@ -125,6 +113,18 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             }
 
             return null;
+        }
+
+        private void MineTransactions()
+        {
+            var enqueueTime = DateTime.UtcNow;
+            _queue.EnqueueTask(token => new Task(() =>
+            {
+                var transactions = _pendingTransactions.Values.OrderByDescending(t => t.Fee)
+                    .Take(_blockchainConfiguration.BlockSize).ToList();
+                transactions.ForEach(t => _pendingTransactions.TryRemove(t.Id, out _));
+                _miningService.MineBlock(transactions.ToHashSet(), enqueueTime, token);
+            }, token));
         }
     }
 }

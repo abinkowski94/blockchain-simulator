@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Model.Block;
+using System.Collections.Generic;
 
 namespace BlockchainSimulator.Node.DataAccess.Repositories
 {

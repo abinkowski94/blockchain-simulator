@@ -4,11 +4,11 @@ using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
 using BlockchainSimulator.Node.BusinessLogic.Providers.Specific;
 using BlockchainSimulator.Node.BusinessLogic.Tests.Data;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
@@ -60,9 +60,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
         public void CreateBlock_Transactions_Block()
         {
             // Arrange
-            var parentTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.First().First();
+            var parentTransactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.First().First();
             var parent = _blockProvider.CreateBlock(parentTransactions, new DateTime(1, 1, 1));
-            var transactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.Last().First();
+            var transactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.Last().First();
 
             // Act
             var result = _blockProvider.CreateBlock(transactions, new DateTime(1, 1, 1), parent) as Block;
@@ -88,7 +88,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
         public void CreateBlock_Transactions_GenesisBlock()
         {
             // Arrange
-            var transactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.Last().First();
+            var transactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.Last().First();
 
             // Act
             var result = _blockProvider.CreateBlock(transactions, new DateTime(1, 1, 1));

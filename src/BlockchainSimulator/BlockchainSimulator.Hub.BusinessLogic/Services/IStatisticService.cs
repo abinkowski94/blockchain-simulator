@@ -1,6 +1,6 @@
 using BlockchainSimulator.Common.Models.Statistics;
-using System.Collections.Generic;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
+using System.Collections.Generic;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {

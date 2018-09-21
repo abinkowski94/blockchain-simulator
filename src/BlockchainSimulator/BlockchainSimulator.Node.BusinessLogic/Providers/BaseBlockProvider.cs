@@ -1,10 +1,10 @@
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Services;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Configuration;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Providers
 {
@@ -18,8 +18,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
             _merkleTreeProvider = merkleTreeProvider;
             _nodeId = configuration["Node:Id"];
         }
-
-        protected abstract BlockBase FillBlock(BlockBase currentBlock);
 
         public BlockBase CreateBlock(HashSet<Transaction> transactions, DateTime enqueueTime,
             BlockBase parentBlock = null)
@@ -80,5 +78,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
 
             return FillBlock(newBlock);
         }
+
+        protected abstract BlockBase FillBlock(BlockBase currentBlock);
     }
 }

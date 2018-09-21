@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace BlockchainSimulator.Common.Models.Consensus
 {
@@ -13,7 +13,7 @@ namespace BlockchainSimulator.Common.Models.Consensus
         /// </summary>
         [JsonProperty]
         public string Id { get; set; }
-        
+
         /// <summary>
         /// The block encoded in base 64 string
         /// </summary>
@@ -25,7 +25,7 @@ namespace BlockchainSimulator.Common.Models.Consensus
         /// </summary>
         [JsonProperty("nodeSenderId")]
         public string NodeSenderId { get; set; }
-        
+
         /// <summary>
         /// The nodes accepted ids
         /// </summary>

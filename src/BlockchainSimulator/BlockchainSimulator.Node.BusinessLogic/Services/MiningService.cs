@@ -1,10 +1,10 @@
+using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
+using BlockchainSimulator.Node.DataAccess.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using BlockchainSimulator.Node.BusinessLogic.Model.Block;
-using BlockchainSimulator.Node.DataAccess.Repositories;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {

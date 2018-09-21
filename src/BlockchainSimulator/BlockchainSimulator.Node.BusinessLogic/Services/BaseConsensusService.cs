@@ -1,13 +1,13 @@
+using BlockchainSimulator.Common.Models.Consensus;
+using BlockchainSimulator.Common.Services;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
+using BlockchainSimulator.Node.BusinessLogic.Queues;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BlockchainSimulator.Common.Models.Consensus;
-using BlockchainSimulator.Common.Services;
-using BlockchainSimulator.Node.BusinessLogic.Queues;
 using ServerNode = BlockchainSimulator.Node.BusinessLogic.Model.Consensus.ServerNode;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services

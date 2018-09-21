@@ -33,6 +33,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
                 case Leaf leaf:
                     leaf.Transaction = transactions.FirstOrDefault(t => t.Id == leaf.TransactionId);
                     break;
+
                 case Transaction.Node node:
                     SetupTransactions(node.LeftNode, transactions);
                     SetupTransactions(node.RightNode, transactions);

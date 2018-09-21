@@ -102,7 +102,7 @@ namespace BlockchainSimulator.Common.Services
                 httpClientHandler.ServerCertificateCustomValidationCallback = (msg, cert, ch, err) => true;
                 var defaultTimeout = TimeSpan.FromSeconds(30);
 
-                using (var httpClient = new HttpClient(httpClientHandler) {Timeout = timeout ?? defaultTimeout})
+                using (var httpClient = new HttpClient(httpClientHandler) { Timeout = timeout ?? defaultTimeout })
                 {
                     try
                     {

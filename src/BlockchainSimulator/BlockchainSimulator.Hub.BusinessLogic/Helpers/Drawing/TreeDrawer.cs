@@ -40,6 +40,45 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             }
         }
 
+        private static List<TreeNodeModel<NodeModel>> GetChildNodes(List<NodeModel> data,
+            TreeNodeModel<NodeModel> parent)
+        {
+            var nodes = new List<TreeNodeModel<NodeModel>>();
+
+            foreach (var item in data.Where(p => p.ParentId == parent.Item.Id))
+            {
+                var treeNode = new TreeNodeModel<NodeModel>(item, parent);
+                treeNode.Children = GetChildNodes(data, treeNode);
+                nodes.Add(treeNode);
+            }
+
+            return nodes;
+        }
+
+        // converts list of sample items to hierarchical list of TreeNodeModels
+        private static TreeNodeModel<NodeModel> GetSampleTree(List<NodeModel> data)
+        {
+            var root = data.FirstOrDefault(p => p.ParentId == string.Empty);
+            var rootTreeNode = new TreeNodeModel<NodeModel>(root, null);
+
+            // add tree node children recursively
+            rootTreeNode.Children = GetChildNodes(data, rootTreeNode);
+
+            return rootTreeNode;
+        }
+
+        private static Size GetSize(TreeNodeModel<NodeModel> tree)
+        {
+            // tree sizes are 0-based, so add 1
+            var treeWidth = tree.Width + 1;
+            var treeHeight = tree.Height + 1;
+
+            var size = new Size(Convert.ToInt32(treeWidth * NodeWidth + (treeWidth + 1) * NodeMarginX),
+                treeHeight * NodeHeight + (treeHeight + 1) * NodeMarginY);
+
+            return size;
+        }
+
         private void DrawNode(TreeNodeModel<NodeModel> node, Graphics graphic)
         {
             // rectangle where node will be positioned
@@ -93,45 +132,6 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             {
                 DrawNode(item, graphic);
             }
-        }
-
-        private static List<TreeNodeModel<NodeModel>> GetChildNodes(List<NodeModel> data,
-            TreeNodeModel<NodeModel> parent)
-        {
-            var nodes = new List<TreeNodeModel<NodeModel>>();
-
-            foreach (var item in data.Where(p => p.ParentId == parent.Item.Id))
-            {
-                var treeNode = new TreeNodeModel<NodeModel>(item, parent);
-                treeNode.Children = GetChildNodes(data, treeNode);
-                nodes.Add(treeNode);
-            }
-
-            return nodes;
-        }
-
-        // converts list of sample items to hierarchical list of TreeNodeModels
-        private static TreeNodeModel<NodeModel> GetSampleTree(List<NodeModel> data)
-        {
-            var root = data.FirstOrDefault(p => p.ParentId == string.Empty);
-            var rootTreeNode = new TreeNodeModel<NodeModel>(root, null);
-
-            // add tree node children recursively
-            rootTreeNode.Children = GetChildNodes(data, rootTreeNode);
-
-            return rootTreeNode;
-        }
-
-        private static Size GetSize(TreeNodeModel<NodeModel> tree)
-        {
-            // tree sizes are 0-based, so add 1
-            var treeWidth = tree.Width + 1;
-            var treeHeight = tree.Height + 1;
-
-            var size = new Size(Convert.ToInt32(treeWidth * NodeWidth + (treeWidth + 1) * NodeMarginX),
-                treeHeight * NodeHeight + (treeHeight + 1) * NodeMarginY);
-
-            return size;
         }
 
         private void PaintTree(Graphics graphic, TreeNodeModel<NodeModel> tree)

@@ -1,7 +1,7 @@
-using System.Collections.Generic;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using BlockchainSimulator.Node.WebApi.Models.Blockchain;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace BlockchainSimulator.Node.WebApi.Controllers
 {
@@ -55,7 +55,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         {
             return _blockchainRepository.GetBlocks(ids);
         }
-        
+
         /// <summary>
         /// Gets the longest blockchain ids
         /// </summary>

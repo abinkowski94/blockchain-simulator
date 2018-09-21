@@ -22,7 +22,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
         {
             // Arrange
             const string id = "1";
-            var block = new Block {Id = id};
+            var block = new Block { Id = id };
 
             _blockchainRepositoryMock.Setup(p => p.GetBlock(id))
                 .Returns(block);
@@ -47,7 +47,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
             const string id = "1";
 
             _blockchainRepositoryMock.Setup(p => p.GetBlock(id))
-                .Returns((BlockBase) null);
+                .Returns((BlockBase)null);
 
             // Act
             var result = _blockchainController.GetBlock(id);

@@ -1,8 +1,8 @@
-using System.Collections.Generic;
 using BlockchainSimulator.Node.DataAccess.Converters.Specific;
 using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Model.Block;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace BlockchainSimulator.Node.DataAccess.Converters
 {
@@ -10,10 +10,10 @@ namespace BlockchainSimulator.Node.DataAccess.Converters
     {
         public static BlockchainTree DeserializeBlockchain(JsonTextReader reader)
         {
-            return new JsonSerializer {Converters = {new BlockConverter(), new NodeConverter()}}
+            return new JsonSerializer { Converters = { new BlockConverter(), new NodeConverter() } }
                 .Deserialize<BlockchainTree>(reader);
         }
-        
+
         public static BlockBase DeserializeBlock(string json)
         {
             if (json == null)
@@ -23,10 +23,10 @@ namespace BlockchainSimulator.Node.DataAccess.Converters
 
             return JsonConvert.DeserializeObject<BlockBase>(json, new JsonSerializerSettings
             {
-                Converters = {new BlockConverter(), new NodeConverter()}
+                Converters = { new BlockConverter(), new NodeConverter() }
             });
         }
-        
+
         public static List<BlockBase> DeserializeBlocks(string json)
         {
             if (json == null)
@@ -36,7 +36,7 @@ namespace BlockchainSimulator.Node.DataAccess.Converters
 
             return JsonConvert.DeserializeObject<List<BlockBase>>(json, new JsonSerializerSettings
             {
-                Converters = {new BlockConverter(), new NodeConverter()}
+                Converters = { new BlockConverter(), new NodeConverter() }
             });
         }
     }

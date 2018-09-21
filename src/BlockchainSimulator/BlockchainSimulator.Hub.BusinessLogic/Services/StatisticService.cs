@@ -3,12 +3,12 @@ using BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
 using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using OfficeOpenXml;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {
@@ -174,7 +174,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 Directory.CreateDirectory(treesPaths);
             }
-            
+
             statistics.ForEach(s =>
             {
                 treeInfos = s.BlockchainStatistics.BlockInfos.GroupBy(i => i.UniqueId).Select(g => g.First());
@@ -191,7 +191,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 Name = i.Id,
                 ParentId = i.ParentUniqueId ?? "R"
             }).ToList();
-            treeNodes.Add(new NodeModel {Id = "R", Name = "R", ParentId = string.Empty});
+            treeNodes.Add(new NodeModel { Id = "R", Name = "R", ParentId = string.Empty });
 
             return treeNodes;
         }

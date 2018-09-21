@@ -1,5 +1,6 @@
 using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Common.Models.Statistics;
+using BlockchainSimulator.Common.Models.WebClient;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Common.Services;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
@@ -17,7 +18,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Common.Models.WebClient;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {
@@ -68,6 +68,21 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 WaitForStatistics(simulation, settings);
                 ClearNodes(simulation);
             }
+        }
+
+        private static bool HasSimulationTimeElapsed(Simulation simulation, SimulationSettings settings,
+            bool wait = true)
+        {
+            if (wait && settings.ForceEndAfter.HasValue && simulation.LastRunTime.HasValue)
+            {
+                var timeDifference = DateTime.UtcNow - simulation.LastRunTime.Value;
+                if (timeDifference > settings.ForceEndAfter)
+                {
+                    wait = false;
+                }
+            }
+
+            return !wait;
         }
 
         private void SpawnServers(Simulation simulation, SimulationSettings settings)
@@ -153,30 +168,30 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 {
                     if (settings.NodesAndTransactions.TryGetValue(node.Id, out var number))
                     {
-                        LinqExtensions.RepeatAction((int) number, () =>
-                        {
-                            if (HasSimulationTimeElapsed(simulation, settings))
-                            {
-                                return;
-                            }
+                        LinqExtensions.RepeatAction((int)number, () =>
+                       {
+                           if (HasSimulationTimeElapsed(simulation, settings))
+                           {
+                               return;
+                           }
 
-                            var transaction = new Transaction
-                            {
-                                Sender = Guid.NewGuid().ToString(),
-                                Recipient = Guid.NewGuid().ToString(),
-                                Amount = randomGenerator.Next(1, 1000),
-                                Fee = (decimal) randomGenerator.NextDouble()
-                            };
+                           var transaction = new Transaction
+                           {
+                               Sender = Guid.NewGuid().ToString(),
+                               Recipient = Guid.NewGuid().ToString(),
+                               Amount = randomGenerator.Next(1, 1000),
+                               Fee = (decimal)randomGenerator.NextDouble()
+                           };
 
-                            var uri = $"{node.HttpAddress}/api/transactions";
-                            var content = new JsonContent(transaction);
-                            var responseMessage = _httpService.Post(uri, content, _nodeTimeout, token);
+                           var uri = $"{node.HttpAddress}/api/transactions";
+                           var content = new JsonContent(transaction);
+                           var responseMessage = _httpService.Post(uri, content, _nodeTimeout, token);
 
-                            if (responseMessage.IsSuccessStatusCode)
-                            {
-                                Interlocked.Increment(ref transactionsSent);
-                            }
-                        });
+                           if (responseMessage.IsSuccessStatusCode)
+                           {
+                               Interlocked.Increment(ref transactionsSent);
+                           }
+                       });
                     }
                 }, token);
 
@@ -269,7 +284,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                         node.NodeThread = null;
                     }
                 }, token);
-                
+
                 Thread.Sleep(_hostingTime);
 
                 var directoryPath = $@"{_directoryPath}\nodes";
@@ -280,21 +295,6 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
                 simulation.Status = SimulationStatuses.ReadyToRun;
             }, token));
-        }
-
-        private static bool HasSimulationTimeElapsed(Simulation simulation, SimulationSettings settings,
-            bool wait = true)
-        {
-            if (wait && settings.ForceEndAfter.HasValue && simulation.LastRunTime.HasValue)
-            {
-                var timeDifference = DateTime.UtcNow - simulation.LastRunTime.Value;
-                if (timeDifference > settings.ForceEndAfter)
-                {
-                    wait = false;
-                }
-            }
-
-            return !wait;
         }
     }
 }

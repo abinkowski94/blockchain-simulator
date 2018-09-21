@@ -11,7 +11,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Block
             set { }
         }
 
-        [JsonProperty("isGenesis")] 
+        [JsonProperty("isGenesis")]
         public override bool IsGenesis => true;
     }
 }

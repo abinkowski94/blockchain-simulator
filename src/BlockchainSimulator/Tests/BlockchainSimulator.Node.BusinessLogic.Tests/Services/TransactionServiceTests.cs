@@ -7,13 +7,13 @@ using BlockchainSimulator.Node.BusinessLogic.Providers.Specific;
 using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.BusinessLogic.Tests.Data;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
@@ -202,7 +202,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
                 new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _blockchainConfigurationMock.Object,
                     new Mock<IConfiguration>().Object);
 
-            var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>) ts.First())
+            var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>)ts.First())
                 .ToList();
 
             transactionSetList[1].First().Id = "111111";

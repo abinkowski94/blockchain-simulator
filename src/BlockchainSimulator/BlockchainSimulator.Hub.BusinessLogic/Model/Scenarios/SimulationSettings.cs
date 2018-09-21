@@ -9,7 +9,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios
     public class SimulationSettings
     {
         public int TransactionsSent { get; set; }
-        
+
         /// <summary>
         /// Ends the simulation after given time
         /// </summary>

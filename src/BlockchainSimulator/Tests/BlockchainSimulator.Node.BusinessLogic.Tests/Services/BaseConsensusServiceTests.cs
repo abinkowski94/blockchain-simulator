@@ -1,5 +1,7 @@
+using BlockchainSimulator.Common.Services;
 using BlockchainSimulator.Node.BusinessLogic.Model.Consensus;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
+using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using Moq;
 using System;
@@ -9,8 +11,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Common.Services;
-using BlockchainSimulator.Node.BusinessLogic.Queues;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
@@ -26,7 +26,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             _backgroundTaskQueueMock = new Mock<IBackgroundTaskQueue>();
             _httpServiceMock = new Mock<IHttpService>();
             _consensusService = new Mock<BaseConsensusService>(_backgroundTaskQueueMock.Object, _httpServiceMock.Object)
-                {CallBase = true}.Object;
+            { CallBase = true }.Object;
         }
 
         [Fact]
@@ -53,10 +53,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public void ConnectNode_Node_ErrorResponseAlreadyExists()
         {
             // Arrange
-            _consensusService.ConnectNode(new ServerNode {Id = "1", HttpAddress = "http://test:4200"});
+            _consensusService.ConnectNode(new ServerNode { Id = "1", HttpAddress = "http://test:4200" });
 
             // Act
-            var response = _consensusService.ConnectNode(new ServerNode {Id = "1", HttpAddress = "http://test:4200"})
+            var response = _consensusService.ConnectNode(new ServerNode { Id = "1", HttpAddress = "http://test:4200" })
                 as ErrorResponse<ServerNode>;
 
             // Assert
@@ -74,7 +74,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public async Task ConnectNode_Node_SuccessResponse()
         {
             // Arrange
-            var serverNode = new ServerNode {Id = "1", HttpAddress = "http://test:4200"};
+            var serverNode = new ServerNode { Id = "1", HttpAddress = "http://test:4200" };
 
             var token = new CancellationToken();
             Func<CancellationToken, Task> queueTask = null;
@@ -120,8 +120,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public void DisconnectFromNetwork_Empty_SuccessResponse()
         {
             // Arrange
-            _consensusService.ConnectNode(new ServerNode {Id = "1", HttpAddress = "http://test:4200"});
-            _consensusService.ConnectNode(new ServerNode {Id = "2", HttpAddress = "http://test:4200"});
+            _consensusService.ConnectNode(new ServerNode { Id = "1", HttpAddress = "http://test:4200" });
+            _consensusService.ConnectNode(new ServerNode { Id = "2", HttpAddress = "http://test:4200" });
 
             // Act
             var result = _consensusService.DisconnectFromNetwork() as SuccessResponse<List<ServerNode>>;
@@ -155,7 +155,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         {
             // Arrange
             const string id = "1";
-            _consensusService.ConnectNode(new ServerNode {Id = id, HttpAddress = "http://test:4200"});
+            _consensusService.ConnectNode(new ServerNode { Id = id, HttpAddress = "http://test:4200" });
 
             // Act
             var result = _consensusService.DisconnectNode(id) as SuccessResponse<ServerNode>;
@@ -172,8 +172,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public void GetNodes_Empty_SuccessResponseWithNodes()
         {
             // Arrange
-            _consensusService.ConnectNode(new ServerNode {Id = "1", HttpAddress = "https://test:4200", Delay = 100});
-            _consensusService.ConnectNode(new ServerNode {Id = "2", HttpAddress = "https://test:4200", Delay = 1000});
+            _consensusService.ConnectNode(new ServerNode { Id = "1", HttpAddress = "https://test:4200", Delay = 100 });
+            _consensusService.ConnectNode(new ServerNode { Id = "2", HttpAddress = "https://test:4200", Delay = 1000 });
 
             // Act
             var result = _consensusService.GetNodes() as SuccessResponse<List<ServerNode>>;
