@@ -3,12 +3,11 @@ using BlockchainSimulator.Node.DataAccess.Converters.Specific;
 using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Model.Block;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace BlockchainSimulator.Node.DataAccess.Repositories
 {
@@ -16,62 +15,40 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
     {
         private readonly IFileRepository _fileRepository;
         private readonly JsonSerializer _serializer;
-        private readonly string _blockchainFileName;
+        private readonly IMemoryCache _cache;
 
+        private readonly string _blockchainFileName;
         private readonly object _padlock = new object();
 
-        public BlockchainRepository(IFileRepository fileRepository)
+        public BlockchainRepository(IFileRepository fileRepository, IMemoryCache cache)
         {
             _fileRepository = fileRepository;
-            _serializer = new JsonSerializer { Converters = { new BlockConverter(), new NodeConverter() } };
+            _serializer = new JsonSerializer {Converters = {new BlockConverter(), new NodeConverter()}};
+            _cache = cache;
             _blockchainFileName = "blockchainTree.json";
         }
 
-        public List<string> GetLongestBlockchainIds()
+        public BlockBase GetBlock(string uniqueId)
         {
-            var longestBlockchain = GetLongestBlockchain();
-            return longestBlockchain.Blocks.Select(b => b.UniqueId).ToList();
+            return uniqueId == null
+                ? null
+                : _cache.GetOrCreate(CacheKeys.BlockId(uniqueId),
+                    entry => GetBlockchainTree()?.Blocks?.FirstOrDefault(b => b.UniqueId == uniqueId));
         }
 
-        public BlockchainTree GetBlockchainTree()
+        public BlockBase GetLastBlock()
         {
-            lock (_padlock)
-            {
-                using (var streamReader = _fileRepository.GetFileReader(_blockchainFileName))
-                using (var reader = new JsonTextReader(streamReader))
-                {
-                    return streamReader == StreamReader.Null ? null : BlockchainConverter.DeserializeBlockchain(reader);
-                }
-            }
+            return _cache.GetOrCreate(CacheKeys.LastBlock,
+                entry => GetBlockchainTree()?.Blocks?.OrderByDescending(b => b.Depth).ThenBy(b => b.Header.TimeStamp)
+                    .FirstOrDefault());
         }
 
-        public BlockchainTree GetLongestBlockchain()
+        public BlockchainTreeMetadata GetBlockchainMetadata()
         {
-            lock (_padlock)
+            return new BlockchainTreeMetadata
             {
-                var blockchainTree = GetBlockchainTree();
-                if (blockchainTree == null)
-                {
-                    return null;
-                }
-
-                var blockchain = new BlockchainTree { Blocks = new List<BlockBase>() };
-                BlockBase block = null;
-                do
-                {
-                    block = block == null
-                        ? blockchainTree.Blocks.OrderByDescending(b => b.Depth).FirstOrDefault()
-                        : blockchainTree.Blocks.FirstOrDefault(b =>
-                            block is Block current && b.UniqueId == current.ParentUniqueId);
-
-                    if (block != null)
-                    {
-                        blockchain.Blocks.Add(block);
-                    }
-                } while (block != null);
-
-                return blockchain;
-            }
+                Nodes = GetBlockchainTree()?.Blocks?.Count ?? 0
+            };
         }
 
         public BlockchainTree GetBlockchainFromBranch(string uniqueId)
@@ -89,7 +66,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                     return null;
                 }
 
-                var blockchain = new BlockchainTree { Blocks = new List<BlockBase>() };
+                var blockchain = new BlockchainTree {Blocks = new List<BlockBase>()};
                 BlockBase block = null;
                 do
                 {
@@ -108,105 +85,54 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
             }
         }
 
-        public List<string> GetBlocksIds()
+        public BlockchainTree GetLongestBlockchain()
         {
-            lock (_padlock)
+            return _cache.GetOrCreate(CacheKeys.LongestBlockchain, entry =>
             {
-                using (var streamReader = _fileRepository.GetFileReader(_blockchainFileName))
-                using (var reader = new JsonTextReader(streamReader))
+                var blockchainTree = GetBlockchainTree();
+                if (blockchainTree == null)
                 {
-                    if (streamReader == StreamReader.Null)
-                    {
-                        return null;
-                    }
-
-                    var jObject = JObject.Load(reader);
-                    var jArray = (JArray)jObject.First.Last;
-                    return jArray.Select(b => b.Value<string>("uniqueId")).ToList();
+                    return null;
                 }
-            }
+
+                var blockchain = new BlockchainTree {Blocks = new List<BlockBase>()};
+                BlockBase block = null;
+                do
+                {
+                    block = block == null
+                        ? blockchainTree.Blocks.OrderByDescending(b => b.Depth).FirstOrDefault()
+                        : blockchainTree.Blocks.FirstOrDefault(b =>
+                            // ReSharper disable once AccessToModifiedClosure
+                            block is Block current && b.UniqueId == current.ParentUniqueId);
+
+                    if (block != null)
+                    {
+                        blockchain.Blocks.Add(block);
+                    }
+                } while (block != null);
+
+                return blockchain;
+            });
         }
 
-        public List<BlockBase> GetBlocks(List<string> ids)
+        public BlockchainTree GetBlockchainTree()
         {
-            lock (_padlock)
+            return _cache.GetOrCreate(CacheKeys.BlockchainTree, entry =>
             {
-                using (var streamReader = _fileRepository.GetFileReader(_blockchainFileName))
-                using (var reader = new JsonTextReader(streamReader))
+                lock (_padlock)
                 {
-                    if (streamReader == StreamReader.Null)
+                    using (var stream = _fileRepository.GetFileReader(_blockchainFileName))
+                    using (var reader = new JsonTextReader(stream))
                     {
-                        return null;
+                        return stream == StreamReader.Null ? null : BlockchainConverter.DeserializeBlockchain(reader);
                     }
-
-                    var jObject = JObject.Load(reader);
-                    var jArray = (JArray)jObject.First.Last;
-                    var blocks = jArray.Where(b => ids.Contains(b.Value<string>("uniqueId")));
-                    return blocks.Select(b => b.ToObject<BlockBase>(_serializer)).ToList();
                 }
-            }
+            });
         }
 
-        public BlockBase GetLastBlock()
+        public bool BlockExists(string uniqueId)
         {
-            lock (_padlock)
-            {
-                using (var streamReader = _fileRepository.GetFileReader(_blockchainFileName))
-                using (var reader = new JsonTextReader(streamReader))
-                {
-                    if (streamReader == StreamReader.Null)
-                    {
-                        return null;
-                    }
-
-                    var jObject = JObject.Load(reader);
-                    var jArray = (JArray)jObject.First.Last;
-                    var block = jArray.OrderByDescending(b => b.Value<int>("depth"))
-                        .ThenBy(b => b["header"].Value<DateTime>("timeStamp")).FirstOrDefault();
-                    return block?.ToObject<BlockBase>(_serializer);
-                }
-            }
-        }
-
-        public BlockBase GetBlock(string id)
-        {
-            lock (_padlock)
-            {
-                using (var streamReader = _fileRepository.GetFileReader(_blockchainFileName))
-                using (var reader = new JsonTextReader(streamReader))
-                {
-                    if (streamReader == StreamReader.Null)
-                    {
-                        return null;
-                    }
-
-                    var jObject = JObject.Load(reader);
-                    var jArray = (JArray)jObject.First.Last;
-                    var block = jArray.FirstOrDefault(b => b.Value<string>("uniqueId") == id);
-                    return block?.ToObject<BlockBase>(_serializer);
-                }
-            }
-        }
-
-        public BlockchainTreeMetadata GetBlockchainMetadata()
-        {
-            lock (_padlock)
-            {
-                using (var streamReader = _fileRepository.GetFileReader(_blockchainFileName))
-                using (var reader = new JsonTextReader(streamReader))
-                {
-                    if (streamReader == StreamReader.Null)
-                    {
-                        return null;
-                    }
-
-                    var jObject = JObject.Load(reader);
-                    return new BlockchainTreeMetadata
-                    {
-                        Nodes = ((JArray)jObject.First.Last).Count
-                    };
-                }
-            }
+            return GetBlockchainTree()?.Blocks?.Any(b => b.UniqueId == uniqueId) ?? false;
         }
 
         public void AddBlock(BlockBase blockBase)
@@ -221,7 +147,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                         throw new DataException("The blockchain tree is empty and the provided block is not genesis!");
                     }
 
-                    SaveBlockchain(new BlockchainTree { Blocks = new List<BlockBase> { blockBase } });
+                    SaveBlockchain(new BlockchainTree {Blocks = new List<BlockBase> {blockBase}});
                 }
                 else
                 {
@@ -232,35 +158,19 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
             }
         }
 
-        public bool BlockExists(string uniqueId)
-        {
-            lock (_padlock)
-            {
-                using (var streamReader = _fileRepository.GetFileReader(_blockchainFileName))
-                using (var reader = new JsonTextReader(streamReader))
-                {
-                    if (streamReader == StreamReader.Null)
-                    {
-                        return false;
-                    }
-
-                    var jObject = JObject.Load(reader);
-                    var jArray = (JArray)jObject.First.Last;
-                    return jArray.Any(b => b.Value<string>("uniqueId") == uniqueId);
-                }
-            }
-        }
-
         private void SaveBlockchain(BlockchainTree blockchainTree)
         {
-            lock (_padlock)
+            _cache.Remove(CacheKeys.LastBlock);
+            _cache.Remove(CacheKeys.BlockchainTree);
+            _cache.Remove(CacheKeys.LongestBlockchain);
+
+            _cache.Set(CacheKeys.BlockchainTree, blockchainTree);
+
+            using (var streamWriter = _fileRepository.GetFileWriter(_blockchainFileName))
+            using (var jsonWriter = new JsonTextWriter(streamWriter))
             {
-                using (var streamWriter = _fileRepository.GetFileWriter(_blockchainFileName))
-                using (var jsonWriter = new JsonTextWriter(streamWriter))
-                {
-                    _serializer.Serialize(jsonWriter, blockchainTree);
-                    jsonWriter.Flush();
-                }
+                _serializer.Serialize(jsonWriter, blockchainTree);
+                jsonWriter.Flush();
             }
         }
     }

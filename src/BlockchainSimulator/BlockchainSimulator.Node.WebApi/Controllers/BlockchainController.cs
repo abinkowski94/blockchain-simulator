@@ -1,7 +1,6 @@
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using BlockchainSimulator.Node.WebApi.Models.Blockchain;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 
 namespace BlockchainSimulator.Node.WebApi.Controllers
 {
@@ -43,37 +42,6 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         public ActionResult<object> GetBlockchainTree()
         {
             return _blockchainRepository.GetBlockchainTree();
-        }
-
-        /// <summary>
-        /// Gets the blocks by ids
-        /// </summary>
-        /// <param name="ids">The blocks ids</param>
-        /// <returns>List of blocks</returns>
-        [HttpPost("ids")]
-        public ActionResult<object> GetBlocks([FromBody] List<string> ids)
-        {
-            return _blockchainRepository.GetBlocks(ids);
-        }
-
-        /// <summary>
-        /// Gets the longest blockchain ids
-        /// </summary>
-        /// <returns>The longest blockchain ids</returns>
-        [HttpGet("longest-ids")]
-        public ActionResult<object> GetLongestBlockchainBlocksIds()
-        {
-            return _blockchainRepository.GetLongestBlockchainIds();
-        }
-
-        /// <summary>
-        /// Gets the blocks ids
-        /// </summary>
-        /// <returns>The blocks ids</returns>
-        [HttpGet("ids")]
-        public ActionResult<object> GetBlocksIds()
-        {
-            return _blockchainRepository.GetBlocksIds();
         }
 
         /// <summary>

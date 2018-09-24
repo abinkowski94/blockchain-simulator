@@ -48,6 +48,7 @@ namespace BlockchainSimulator.Node.WebApi
             services.AddDefaultConfiguration();
             services.AddBlockchainServices(Configuration);
             services.AddSwagger("node");
+            services.AddMemoryCache();
         }
     }
 }

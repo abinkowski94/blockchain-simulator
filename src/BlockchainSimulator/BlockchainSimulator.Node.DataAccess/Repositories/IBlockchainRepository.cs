@@ -1,28 +1,21 @@
 using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Model.Block;
-using System.Collections.Generic;
 
 namespace BlockchainSimulator.Node.DataAccess.Repositories
 {
     public interface IBlockchainRepository
     {
-        List<string> GetBlocksIds();
-
-        List<string> GetLongestBlockchainIds();
-
-        List<BlockBase> GetBlocks(List<string> ids);
-
+        BlockBase GetBlock(string uniqueId);
+        
         BlockBase GetLastBlock();
 
-        BlockBase GetBlock(string id);
-
-        BlockchainTree GetBlockchainTree();
+        BlockchainTreeMetadata GetBlockchainMetadata();
+        
+        BlockchainTree GetBlockchainFromBranch(string uniqueId);
 
         BlockchainTree GetLongestBlockchain();
 
-        BlockchainTree GetBlockchainFromBranch(string uniqueId);
-
-        BlockchainTreeMetadata GetBlockchainMetadata();
+        BlockchainTree GetBlockchainTree();
 
         void AddBlock(BlockBase blockBase);
 
