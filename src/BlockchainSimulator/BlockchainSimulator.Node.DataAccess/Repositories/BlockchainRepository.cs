@@ -140,7 +140,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
             lock (_padlock)
             {
                 var metaData = GetBlockchainMetadata();
-                if (metaData == null || metaData.Nodes < 1)
+                if (metaData.Nodes < 1)
                 {
                     if (!blockBase.IsGenesis)
                     {

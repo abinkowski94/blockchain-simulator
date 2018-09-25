@@ -30,10 +30,31 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             {
                 _statisticService.RegisterMiningAttempt();
 
+                var cancellationTokenSource = new CancellationTokenSource();
                 var lastBlock = LocalMapper.Map<BlockBase>(_blockchainRepository.GetLastBlock());
-                var newBlock = _blockProvider.CreateBlock(transactions, enqueueTime, lastBlock);
+                var newBlockTask = _blockProvider.CreateBlock(transactions, enqueueTime, lastBlock,
+                    cancellationTokenSource.Token);
 
-                var result = _consensusService.AcceptBlock(newBlock);
+                while (!newBlockTask.IsCompleted)
+                {
+                    if (lastBlock?.UniqueId != _blockchainRepository.GetLastBlock()?.UniqueId)
+                    {
+                        cancellationTokenSource.Cancel();
+                    }
+                    
+                    if (newBlockTask.IsCanceled)
+                    {
+                        cancellationTokenSource = new CancellationTokenSource();
+                        lastBlock = LocalMapper.Map<BlockBase>(_blockchainRepository.GetLastBlock());
+                        newBlockTask = _blockProvider.CreateBlock(transactions, enqueueTime, lastBlock,
+                            cancellationTokenSource.Token);
+                        
+                        _statisticService.RegisterAbandonedBlock();
+                    }
+                }
+
+
+                var result = _consensusService.AcceptBlock(newBlockTask.Result);
                 if (!result.IsSuccess)
                 {
                     _statisticService.RegisterAbandonedBlock();

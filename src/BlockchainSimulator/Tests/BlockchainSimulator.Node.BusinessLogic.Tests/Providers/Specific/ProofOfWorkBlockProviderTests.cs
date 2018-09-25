@@ -9,6 +9,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
@@ -57,15 +58,15 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
         }
 
         [Fact]
-        public void CreateBlock_Transactions_Block()
+        public async Task CreateBlock_Transactions_Block()
         {
             // Arrange
             var parentTransactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.First().First();
-            var parent = _blockProvider.CreateBlock(parentTransactions, new DateTime(1, 1, 1));
+            var parent = await _blockProvider.CreateBlock(parentTransactions, new DateTime(1, 1, 1));
             var transactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.Last().First();
 
             // Act
-            var result = _blockProvider.CreateBlock(transactions, new DateTime(1, 1, 1), parent) as Block;
+            var result = await _blockProvider.CreateBlock(transactions, new DateTime(1, 1, 1), parent) as Block;
 
             // Assert
             Assert.NotNull(result);
@@ -85,13 +86,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
         }
 
         [Fact]
-        public void CreateBlock_Transactions_GenesisBlock()
+        public async Task CreateBlock_Transactions_GenesisBlock()
         {
             // Arrange
             var transactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.Last().First();
 
             // Act
-            var result = _blockProvider.CreateBlock(transactions, new DateTime(1, 1, 1));
+            var result = await _blockProvider.CreateBlock(transactions, new DateTime(1, 1, 1));
 
             // Assert
             Assert.NotNull(result);

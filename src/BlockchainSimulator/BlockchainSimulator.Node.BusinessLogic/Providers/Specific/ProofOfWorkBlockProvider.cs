@@ -3,6 +3,8 @@ using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Providers.Specific
 {
@@ -17,27 +19,31 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers.Specific
             _blockchainConfiguration = blockchainConfiguration;
         }
 
-        protected override BlockBase FillBlock(BlockBase currentBlock)
+        protected override async Task<BlockBase> FillBlock(BlockBase currentBlock, CancellationToken token)
         {
             currentBlock.Header.Version = _blockchainConfiguration.Version;
             currentBlock.Header.Target = _blockchainConfiguration.Target;
-            currentBlock.Header.Nonce = GetProof(currentBlock);
+            currentBlock.Header.Nonce = await GetProofAsync(currentBlock, token);
 
             return currentBlock;
         }
 
-        private static string GetProof(BlockBase block)
+        private static Task<string> GetProofAsync(BlockBase block, CancellationToken token)
         {
-            long expectedNonce = 1;
-            block.Header.Nonce = Convert.ToString(expectedNonce, 16);
-
-            while (!EncryptionService.GetSha256Hash(block.BlockJson).StartsWith(block.Header.Target))
+            return Task.Run(() =>
             {
-                expectedNonce++;
+                long expectedNonce = 1;
                 block.Header.Nonce = Convert.ToString(expectedNonce, 16);
-            }
 
-            return Convert.ToString(expectedNonce, 16);
+                while (!EncryptionService.GetSha256Hash(block.BlockJson).StartsWith(block.Header.Target))
+                {
+                    expectedNonce++;
+                    block.Header.Nonce = Convert.ToString(expectedNonce, 16);
+                    token.ThrowIfCancellationRequested();
+                }
+
+                return Convert.ToString(expectedNonce, 16);
+            }, token);
         }
     }
 }

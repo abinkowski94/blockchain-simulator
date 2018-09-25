@@ -208,7 +208,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             transactionSetList[1].First().Id = "111111";
 
             BlockBase block = null;
-            transactionSetList.ForEach(ts => block = blockchainProvider.CreateBlock(ts, new DateTime(1, 1, 1), block));
+            transactionSetList.ForEach(async ts => block = await blockchainProvider.CreateBlock(ts, new DateTime(1, 1, 1), block));
 
             _blockchainServiceMock.Setup(p => p.GetBlockchainTree())
                 .Returns(new SuccessResponse<BlockBase>("The blockchain!", block));

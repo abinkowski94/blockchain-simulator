@@ -5,6 +5,8 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Providers
 {
@@ -19,8 +21,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
             _nodeId = configuration["Node:Id"];
         }
 
-        public BlockBase CreateBlock(HashSet<Transaction> transactions, DateTime enqueueTime,
-            BlockBase parentBlock = null)
+        public async Task<BlockBase> CreateBlock(HashSet<Transaction> transactions, DateTime enqueueTime,
+            BlockBase parentBlock = null, CancellationToken token = default(CancellationToken))
         {
             if (transactions == null)
             {
@@ -76,9 +78,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
             newBlock.Header = header;
             newBlock.Body = body;
 
-            return FillBlock(newBlock);
+            return await FillBlock(newBlock, token);
         }
 
-        protected abstract BlockBase FillBlock(BlockBase currentBlock);
+        protected abstract Task<BlockBase> FillBlock(BlockBase currentBlock, CancellationToken token);
     }
 }

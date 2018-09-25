@@ -10,6 +10,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators.Specific
@@ -33,15 +34,15 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators.Specific
         }
 
         [Fact]
-        public void Validate_Blockchain_ErrorValidationResult()
+        public async Task Validate_Blockchain_ErrorValidationResult()
         {
             // Arrange
-            var genesisTransactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.First().First();
-            var blockTransactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.Last().First();
+            var genesisTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.First().First();
+            var blockTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.Last().First();
 
-            var genesisBlock = _proofOfWorkBlockProvider.CreateBlock(genesisTransactions, new DateTime(1, 1, 1));
+            var genesisBlock = await _proofOfWorkBlockProvider.CreateBlock(genesisTransactions, new DateTime(1, 1, 1));
             var blockchain =
-                _proofOfWorkBlockProvider.CreateBlock(blockTransactions, new DateTime(1, 1, 1), genesisBlock);
+                await _proofOfWorkBlockProvider.CreateBlock(blockTransactions, new DateTime(1, 1, 1), genesisBlock);
             blockchain.Header.Nonce = "0";
             blockchain.Header.TimeStamp = new DateTime(1, 1, 1);
 
@@ -54,15 +55,15 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators.Specific
         }
 
         [Fact]
-        public void Validate_Blockchain_SuccessValidationResult()
+        public async Task Validate_Blockchain_SuccessValidationResult()
         {
             // Arrange
-            var genesisTransactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.First().First();
-            var blockTransactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.Last().First();
+            var genesisTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.First().First();
+            var blockTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.Last().First();
 
-            var genesisBlock = _proofOfWorkBlockProvider.CreateBlock(genesisTransactions, new DateTime(1, 1, 1));
+            var genesisBlock = await _proofOfWorkBlockProvider.CreateBlock(genesisTransactions, new DateTime(1, 1, 1));
             var blockchain =
-                _proofOfWorkBlockProvider.CreateBlock(blockTransactions, new DateTime(1, 1, 1), genesisBlock);
+                await _proofOfWorkBlockProvider.CreateBlock(blockTransactions, new DateTime(1, 1, 1), genesisBlock);
 
             // Act
             var result = _proofOfWorkValidator.Validate(blockchain);
@@ -74,10 +75,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators.Specific
 
         [Theory]
         [MemberData(nameof(TransactionDataSet.TransactionData), MemberType = typeof(TransactionDataSet))]
-        public void Validate_GenesisBlocks_SuccessValidationResults(HashSet<Transaction> transactions)
+        public async Task Validate_GenesisBlocks_SuccessValidationResults(HashSet<Transaction> transactions)
         {
             // Arrange
-            var block = _proofOfWorkBlockProvider.CreateBlock(transactions, new DateTime(1, 1, 1));
+            var block = await _proofOfWorkBlockProvider.CreateBlock(transactions, new DateTime(1, 1, 1));
 
             // Act
             var result = _proofOfWorkValidator.Validate(block);
