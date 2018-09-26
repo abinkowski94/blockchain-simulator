@@ -6,9 +6,11 @@ using Newtonsoft.Json;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using BlockchainSimulator.Common.Extensions;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {
@@ -164,10 +166,13 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
         private static void CreateBlockchainTrees(List<Statistic> statistics, string directoryPath)
         {
             var treeInfos = statistics.SelectMany(s => s.BlockchainStatistics.BlockInfos).GroupBy(i => i.UniqueId)
-                .Select(g => g.First());
+                .Select(g => g.First()).ToList();
 
             var treeNodes = GetTreeNodes(treeInfos);
             DrawAndSaveBlockchainTree(treeNodes, directoryPath, "blockchain-tree.bmp");
+
+            var compressedTreeNodes = GetTreeNodes(treeInfos, true);
+            DrawAndSaveBlockchainTree(compressedTreeNodes, directoryPath, "blockchain-tree-compressed.bmp");
 
             var treesPaths = $"{directoryPath}/trees";
             if (!Directory.Exists(treesPaths))
@@ -177,23 +182,107 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
             statistics.ForEach(s =>
             {
-                treeInfos = s.BlockchainStatistics.BlockInfos.GroupBy(i => i.UniqueId).Select(g => g.First());
+                treeInfos = s.BlockchainStatistics.BlockInfos.GroupBy(i => i.UniqueId).Select(g => g.First()).ToList();
                 treeNodes = GetTreeNodes(treeInfos);
                 DrawAndSaveBlockchainTree(treeNodes, treesPaths, $"{s.NodeId}-blockchain-tree.bmp");
             });
         }
 
-        private static List<NodeModel> GetTreeNodes(IEnumerable<BlockInfo> mainTreeInfos)
+        private static List<NodeModel> GetTreeNodes(IEnumerable<BlockInfo> mainTreeInfos, bool compressed = false)
         {
+            var root = new NodeModel {Id = "R", Name = "R", ParentId = string.Empty};
             var treeNodes = mainTreeInfos.Select(i => new NodeModel
             {
                 Id = i.UniqueId,
-                Name = i.Id,
+                Name = Convert.ToInt64(i.Id, 16).ToString(),
                 ParentId = i.ParentUniqueId ?? "R"
             }).ToList();
-            treeNodes.Add(new NodeModel { Id = "R", Name = "R", ParentId = string.Empty });
 
-            return treeNodes;
+            treeNodes.Add(root);
+            treeNodes.ForEach(n =>
+            {
+                n.Parent = treeNodes.FirstOrDefault(node => node.Id == n.ParentId);
+                n.Children = treeNodes.Where(node => node.ParentId == n.Id).ToList();
+            });
+
+            ColorNodes(treeNodes);
+            if (compressed)
+            {
+                CompressChains(root, treeNodes);
+            }
+
+            return SortTreeNodes(root);
+        }
+
+        private static void ColorNodes(IEnumerable<NodeModel> treeNodes)
+        {
+            var deepestNode = treeNodes.OrderByDescending(n => n.Depth).FirstOrDefault();
+            while (deepestNode != null)
+            {
+                deepestNode.Colour = Pens.Green;
+                deepestNode = deepestNode.Parent;
+            }
+        }
+
+        private static void CompressChains(NodeModel root, List<NodeModel> treeNodes)
+        {
+            CompressChainsOfNodes(root, treeNodes);
+            treeNodes.ForEach(n =>
+            {
+                n.Parent = treeNodes.FirstOrDefault(node => node.Id == n.ParentId);
+                n.Children = treeNodes.Where(node => node.ParentId == n.Id).ToList();
+            });
+        }
+
+        private static NodeModel CompressChainsOfNodes(NodeModel root, List<NodeModel> treeNodes)
+        {
+            if (root.Children.Count > 1)
+            {
+                root.Children.ForEach(c => CompressChainsOfNodes(c, treeNodes));
+            }
+            else if (root.Children.Count == 1)
+            {
+                var child = root.Children.First();
+                var tailNode = CompressChainsOfNodes(child, treeNodes);
+
+                if (child == tailNode)
+                {
+                    return child;
+                }
+
+                child.IsCompressed = true;
+                child.Name = "...";
+                child.Children.ForEach(c => treeNodes.Remove(c));
+                tailNode.ParentId = child.Id;
+                if (!treeNodes.Contains(tailNode))
+                {
+                    treeNodes.Add(tailNode);
+                }
+
+                return tailNode;
+            }
+
+            return root;
+        }
+
+        private static List<NodeModel> SortTreeNodes(NodeModel root, List<NodeModel> result = null)
+        {
+            if (result == null)
+            {
+                result = new List<NodeModel> {root};
+            }
+            else
+            {
+                result.Add(root);
+            }
+
+            if (root.Children.Any())
+            {
+                root.Children.OrderByDescending(c => c.Height).ThenByDescending(c => c.IsCompressed)
+                    .ForEach(c => SortTreeNodes(c, result));
+            }
+
+            return result;
         }
 
         private static void DrawAndSaveBlockchainTree(List<NodeModel> models, string directoryPath, string fileName)

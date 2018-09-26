@@ -9,17 +9,15 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
 {
     public class TreeDrawer
     {
-        private const int NodeHeight = 30;
-        private const int NodeMarginX = 50;
-        private const int NodeMarginY = 40;
-        private const int NodeWidth = 30;
+        private const int _nodeHeight = 30;
+        private const int _nodeMarginX = 50;
+        private const int _nodeMarginY = 40;
+        private const int _nodeWidth = 60;
         private readonly string _path;
-        private readonly Pen _nodePen;
 
         public TreeDrawer(string path)
         {
             _path = path;
-            _nodePen = Pens.Black;
         }
 
         public void DrawGraph(List<NodeModel> data)
@@ -73,58 +71,65 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             var treeWidth = tree.Width + 1;
             var treeHeight = tree.Height + 1;
 
-            var size = new Size(Convert.ToInt32(treeWidth * NodeWidth + (treeWidth + 1) * NodeMarginX),
-                treeHeight * NodeHeight + (treeHeight + 1) * NodeMarginY);
+            var size = new Size(Convert.ToInt32(treeWidth * _nodeWidth + (treeWidth + 1) * _nodeMarginX),
+                treeHeight * _nodeHeight + (treeHeight + 1) * _nodeMarginY);
 
             return size;
         }
 
-        private void DrawNode(TreeNodeModel<NodeModel> node, Graphics graphic)
+        private static void DrawNode(TreeNodeModel<NodeModel> node, Graphics graphic)
         {
+            // Set the pen
+            var nodePen = node.Item.Colour;
+
             // rectangle where node will be positioned
-            var nodeRect = new Rectangle(Convert.ToInt32(NodeMarginX + node.X * (NodeWidth + NodeMarginX)),
-                NodeMarginY + node.Y * (NodeHeight + NodeMarginY), NodeWidth, NodeHeight);
+            var nodeRect = new Rectangle(Convert.ToInt32(_nodeMarginX + node.X * (_nodeWidth + _nodeMarginX)),
+                _nodeMarginY + node.Y * (_nodeHeight + _nodeMarginY), _nodeWidth, _nodeHeight);
 
             // draw box
-            graphic.DrawRectangle(_nodePen, nodeRect);
+            if (!node.Item.IsCompressed)
+            {
+                graphic.DrawRectangle(nodePen, nodeRect);
+            }
 
             // draw content
-            graphic.DrawString(node.ToString(), new Font(FontFamily.GenericMonospace, 8), Brushes.Black,
-                nodeRect.X + 10,
-                nodeRect.Y + 10);
+            var font = new Font(FontFamily.GenericMonospace, 8);
+            var stringSize = graphic.MeasureString(node.ToString(), font);
+            graphic.DrawString(node.ToString(), font, nodePen.Brush, nodeRect.X + _nodeWidth / 2 - stringSize.Width / 2,
+                nodeRect.Y + _nodeHeight / 2 - stringSize.Height / 2);
 
             // draw line to parent
             if (node.Parent != null)
             {
                 var nodeTopMiddle = new Point(nodeRect.X + nodeRect.Width / 2, nodeRect.Y);
-                graphic.DrawLine(_nodePen, nodeTopMiddle,
-                    new Point(nodeTopMiddle.X, nodeTopMiddle.Y - NodeMarginY / 2));
+                var nodeBottomMiddle = new Point(nodeTopMiddle.X, nodeTopMiddle.Y - _nodeMarginY / 2);
+                graphic.DrawLine(nodePen, nodeTopMiddle, nodeBottomMiddle);
             }
 
             // draw line to children
             if (node.Children.Count > 0)
             {
-                var nodeBottomMiddle = new Point(nodeRect.X + (nodeRect.Width / 2), nodeRect.Y + nodeRect.Height);
-                graphic.DrawLine(_nodePen, nodeBottomMiddle,
-                    new Point(nodeBottomMiddle.X, nodeBottomMiddle.Y + (NodeMarginY / 2)));
+                var nodeBottomMiddle = new Point(nodeRect.X + nodeRect.Width / 2, nodeRect.Y + nodeRect.Height);
+                var nodeTopMiddle = new Point(nodeBottomMiddle.X, nodeBottomMiddle.Y + _nodeMarginY / 2);
+                graphic.DrawLine(nodePen, nodeBottomMiddle, nodeTopMiddle);
 
                 // draw line over children
                 if (node.Children.Count > 1)
                 {
-                    var childrenLineStartX = Convert.ToInt32(NodeMarginX + node.GetRightMostChild().X *
+                    var childrenLineStartX = Convert.ToInt32(_nodeMarginX + node.GetRightMostChild().X *
                                                              // ReSharper disable once PossibleLossOfFraction
-                                                             (NodeWidth + NodeMarginX) + NodeWidth / 2);
-                    var childrenLineStartY = nodeBottomMiddle.Y + NodeMarginY / 2;
+                                                             (_nodeWidth + _nodeMarginX) + _nodeWidth / 2);
+                    var childrenLineStartY = nodeBottomMiddle.Y + _nodeMarginY / 2;
                     var childrenLineStart = new Point(childrenLineStartX, childrenLineStartY);
 
-                    var childrenLineEndX = Convert.ToInt32(NodeMarginX +
-                                                           node.GetLeftMostChild().X * (NodeWidth + NodeMarginX) +
+                    var childrenLineEndX = Convert.ToInt32(_nodeMarginX +
+                                                           node.GetLeftMostChild().X * (_nodeWidth + _nodeMarginX) +
                                                            // ReSharper disable once PossibleLossOfFraction
-                                                           NodeWidth / 2);
-                    var childrenLineEndY = nodeBottomMiddle.Y + NodeMarginY / 2;
+                                                           _nodeWidth / 2);
+                    var childrenLineEndY = nodeBottomMiddle.Y + _nodeMarginY / 2;
                     var childrenLineEnd = new Point(childrenLineEndX, childrenLineEndY);
 
-                    graphic.DrawLine(_nodePen, childrenLineStart, childrenLineEnd);
+                    graphic.DrawLine(Pens.Black, childrenLineStart, childrenLineEnd);
                 }
             }
 
@@ -134,7 +139,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             }
         }
 
-        private void PaintTree(Graphics graphic, TreeNodeModel<NodeModel> tree)
+        private static void PaintTree(Graphics graphic, TreeNodeModel<NodeModel> tree)
         {
             graphic.Clear(Color.White);
             DrawNode(tree, graphic);
