@@ -44,7 +44,7 @@ namespace BlockchainSimulator.Common.Queues
 
                     await task;
                 }
-                catch (TaskCanceledException)
+                catch (OperationCanceledException)
                 {
                     Console.WriteLine("The task has been cancelled due to timeout!");
                 }

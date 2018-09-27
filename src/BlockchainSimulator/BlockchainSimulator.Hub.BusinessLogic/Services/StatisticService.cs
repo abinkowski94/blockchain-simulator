@@ -36,6 +36,12 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             CreateBlockchainTrees(statistics, directoryPath);
         }
 
+        private static void SaveSettings(string directoryPath, SimulationSettings settings)
+        {
+            var jsonPath = $@"{directoryPath}\simulation-settings.json";
+            File.WriteAllText(jsonPath, JsonConvert.SerializeObject(settings));
+        }
+
         private static void CreateExcelFile(string directoryPath, IReadOnlyCollection<Statistic> statistics,
             SimulationSettings settings)
         {
@@ -52,44 +58,12 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     package.Workbook.Properties.Keywords = "blockchain, simulation, results";
 
                     CreateCollectiveResultsSheet(settings, package, longestBlockchainStatistics);
-                    CreateNodesStatisticsSheet(statistics, package);
+                    CreateNodesStatisticsSheet(statistics.OrderBy(s => s.NodeId), package);
 
                     var path = $@"{directoryPath}\simulation-results.xlsx";
                     package.SaveAs(new FileInfo(path));
                 }
             }
-        }
-
-        private static void CreateNodesStatisticsSheet(IEnumerable<Statistic> statistics, ExcelPackage package)
-        {
-            var nodesSheet = package.Workbook.Worksheets.Add("Node's statistics");
-            var row = 0;
-
-            nodesSheet.Cells[++row, 1].Value = "Mining queue statistics";
-            nodesSheet.Cells[row, 1].Style.Font.Bold = true;
-            nodesSheet.Cells[row, 1].Style.Font.Size = 13;
-            row += 2;
-
-            nodesSheet.Cells[++row, 1].Value = "Node Id";
-            nodesSheet.Cells[row, 2].Value = "Total mining attempts";
-            nodesSheet.Cells[row, 3].Value = "Max queue length";
-            nodesSheet.Cells[row, 4].Value = "Average queue time (s)";
-            nodesSheet.Cells[row, 5].Value = "Total queue time (s)";
-            nodesSheet.Cells[row, 6].Value = "Total abandoned blocks count";
-            nodesSheet.Cells[row, 7].Value = "Total rejected incoming blocks count";
-
-            foreach (var stat in statistics)
-            {
-                nodesSheet.Cells[++row, 1].Value = stat.NodeId;
-                nodesSheet.Cells[row, 2].Value = stat.MiningQueueStatistics.TotalMiningAttemptsCount;
-                nodesSheet.Cells[row, 3].Value = stat.MiningQueueStatistics.MaxQueueLength;
-                nodesSheet.Cells[row, 4].Value = stat.MiningQueueStatistics.AverageQueueTime.TotalSeconds;
-                nodesSheet.Cells[row, 5].Value = stat.MiningQueueStatistics.TotalQueueTime.TotalSeconds;
-                nodesSheet.Cells[row, 6].Value = stat.MiningQueueStatistics.AbandonedBlocksCount;
-                nodesSheet.Cells[row, 7].Value = stat.MiningQueueStatistics.RejectedIncomingBlockchainCount;
-            }
-
-            nodesSheet.Cells[1, 1, row, 7].AutoFitColumns();
         }
 
         private static void CreateCollectiveResultsSheet(SimulationSettings settings, ExcelPackage package,
@@ -161,6 +135,38 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             }
 
             simulationResultsSheet.Cells[1, 1, row, 6].AutoFitColumns();
+        }
+
+        private static void CreateNodesStatisticsSheet(IEnumerable<Statistic> statistics, ExcelPackage package)
+        {
+            var nodesSheet = package.Workbook.Worksheets.Add("Node's statistics");
+            var row = 0;
+
+            nodesSheet.Cells[++row, 1].Value = "Mining queue statistics";
+            nodesSheet.Cells[row, 1].Style.Font.Bold = true;
+            nodesSheet.Cells[row, 1].Style.Font.Size = 13;
+            row += 2;
+
+            nodesSheet.Cells[++row, 1].Value = "Node Id";
+            nodesSheet.Cells[row, 2].Value = "Total mining attempts";
+            nodesSheet.Cells[row, 3].Value = "Max queue length";
+            nodesSheet.Cells[row, 4].Value = "Average queue time (s)";
+            nodesSheet.Cells[row, 5].Value = "Total queue time (s)";
+            nodesSheet.Cells[row, 6].Value = "Total abandoned blocks count";
+            nodesSheet.Cells[row, 7].Value = "Total rejected incoming blocks count";
+
+            foreach (var stat in statistics)
+            {
+                nodesSheet.Cells[++row, 1].Value = stat.NodeId;
+                nodesSheet.Cells[row, 2].Value = stat.MiningQueueStatistics.TotalMiningAttemptsCount;
+                nodesSheet.Cells[row, 3].Value = stat.MiningQueueStatistics.MaxQueueLength;
+                nodesSheet.Cells[row, 4].Value = stat.MiningQueueStatistics.AverageQueueTime.TotalSeconds;
+                nodesSheet.Cells[row, 5].Value = stat.MiningQueueStatistics.TotalQueueTime.TotalSeconds;
+                nodesSheet.Cells[row, 6].Value = stat.MiningQueueStatistics.AbandonedBlocksCount;
+                nodesSheet.Cells[row, 7].Value = stat.MiningQueueStatistics.RejectedIncomingBlockchainCount;
+            }
+
+            nodesSheet.Cells[1, 1, row, 7].AutoFitColumns();
         }
 
         private static void CreateBlockchainTrees(List<Statistic> statistics, string directoryPath)
@@ -290,12 +296,6 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             var imagePath = $@"{directoryPath}\{fileName}";
             var drawer = new TreeDrawer(imagePath);
             drawer.DrawGraph(models);
-        }
-
-        private static void SaveSettings(string directoryPath, SimulationSettings settings)
-        {
-            var jsonPath = $@"{directoryPath}\simulation-settings.json";
-            File.WriteAllText(jsonPath, JsonConvert.SerializeObject(settings));
         }
     }
 }
