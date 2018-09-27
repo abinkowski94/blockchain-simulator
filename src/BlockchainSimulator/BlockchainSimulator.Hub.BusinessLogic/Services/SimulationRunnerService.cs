@@ -7,15 +7,12 @@ using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Transactions;
 using Microsoft.AspNetCore.Hosting;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,7 +24,6 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
         private readonly TimeSpan _nodeTimeout;
         private readonly TimeSpan _networkWaitInterval;
         private readonly int _hostingRetryCount;
-        private readonly string _pathToLibrary;
         private readonly string _directoryPath;
         private readonly object _padlock = new object();
 
@@ -44,10 +40,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             _networkWaitInterval = TimeSpan.FromSeconds(5);
             _hostingRetryCount = 5;
 
-            var pathToFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-            _pathToLibrary = $@"{pathToFolder}\Node\BlockchainSimulator.Node.WebApi.dll";
             _directoryPath = environment.ContentRootPath ?? Directory.GetCurrentDirectory();
-
             _statisticService = statisticService;
             _httpService = httpService;
             _queue = queue;
@@ -57,222 +50,22 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
         {
             lock (_padlock)
             {
+                // Change status to pending
                 simulation.Status = SimulationStatuses.Pending;
 
-                SpawnServers(simulation, settings);
-                PingServers(simulation, settings);
-                ConnectNodes(simulation);
-                SendTransactions(simulation, settings);
-                WaitForNetwork(simulation, settings);
-                StopAllJobs(simulation);
-                WaitForStatistics(simulation, settings);
-                ClearNodes(simulation);
-            }
-        }
-
-        private static bool HasSimulationTimeElapsed(Simulation simulation, SimulationSettings settings,
-            bool wait = true)
-        {
-            if (wait && settings.ForceEndAfter.HasValue && simulation.LastRunTime.HasValue)
-            {
-                var timeDifference = DateTime.UtcNow - simulation.LastRunTime.Value;
-                if (timeDifference > settings.ForceEndAfter)
-                {
-                    wait = false;
-                }
-            }
-
-            return !wait;
-        }
-
-        private void SpawnServers(Simulation simulation, SimulationSettings settings)
-        {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
-            {
-                simulation.Status = SimulationStatuses.Preparing;
-
-                if (Directory.Exists($@"{_directoryPath}\nodes"))
-                {
-                    Directory.Delete($@"{_directoryPath}\nodes", true);
-                }
-
-                simulation.ServerNodes.Where(n => n.NeedsSpawn && settings.NodesAndTransactions.Keys.Contains(n.Id))
-                    .ParallelForEach(node =>
-                    {
-                        var pathToDirectory = $@"{_directoryPath}\nodes\{node.Id}";
-                        Directory.CreateDirectory(pathToDirectory);
-
-                        node.NodeThread = Process.Start(new ProcessStartInfo
-                        {
-                            ArgumentList =
-                            {
-                                _pathToLibrary,
-                                $"urls|-|{node.HttpAddress}",
-                                $@"contentRoot|-|{pathToDirectory}",
-                                $"Node:Id|-|{node.Id}",
-                                $"Node:Type|-|{simulation.BlockchainConfiguration.Type}",
-                                $"BlockchainConfiguration:Version|-|{simulation.BlockchainConfiguration.Version}",
-                                $"BlockchainConfiguration:Target|-|{simulation.BlockchainConfiguration.Target}",
-                                $"BlockchainConfiguration:BlockSize|-|{simulation.BlockchainConfiguration.BlockSize}"
-                            },
-                            FileName = "dotnet"
-                        });
-                    }, token);
-
-                Thread.Sleep(_hostingTime);
-            }, token));
-        }
-
-        private void PingServers(Simulation simulation, SimulationSettings settings)
-        {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
-            {
-                simulation.ServerNodes.Where(n => settings.NodesAndTransactions.Keys.Contains(n.Id))
-                    .ParallelForEach(node =>
-                    {
-                        var uri = $"{node.HttpAddress}/api/info";
-                        var responseMessage = _httpService.Get(uri, _nodeTimeout, _hostingRetryCount, token);
-                        node.IsConnected = responseMessage.IsSuccessStatusCode;
-                    }, token);
-            }, token));
-        }
-
-        private void ConnectNodes(Simulation simulation)
-        {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
-            {
-                simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
-                {
-                    simulation.ServerNodes.Where(n => n.IsConnected == true && node.ConnectedTo.Contains(n.Id))
-                        .ForEach(otherNode =>
-                        {
-                            var body = JsonConvert.SerializeObject(otherNode);
-                            var content = new StringContent(body, Encoding.UTF8, "application/json");
-                            _httpService.Put($"{node.HttpAddress}/api/consensus", content, _nodeTimeout, token);
-                        });
-                }, token);
-            }, token));
-        }
-
-        private void SendTransactions(Simulation simulation, SimulationSettings settings)
-        {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
-            {
-                simulation.LastRunTime = DateTime.UtcNow;
-                simulation.Status = SimulationStatuses.Running;
-
-                var randomGenerator = new Random();
-                var transactionsSent = settings.TransactionsSent;
-
-                simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
-                {
-                    if (settings.NodesAndTransactions.TryGetValue(node.Id, out var number))
-                    {
-                        LinqExtensions.RepeatAction((int)number, () =>
-                       {
-                           if (HasSimulationTimeElapsed(simulation, settings))
-                           {
-                               return;
-                           }
-
-                           var transaction = new Transaction
-                           {
-                               Sender = Guid.NewGuid().ToString(),
-                               Recipient = Guid.NewGuid().ToString(),
-                               Amount = randomGenerator.Next(1, 1000),
-                               Fee = (decimal)randomGenerator.NextDouble()
-                           };
-
-                           var uri = $"{node.HttpAddress}/api/transactions";
-                           var content = new JsonContent(transaction);
-                           var responseMessage = _httpService.Post(uri, content, _nodeTimeout, token);
-
-                           if (responseMessage.IsSuccessStatusCode)
-                           {
-                               Interlocked.Increment(ref transactionsSent);
-                           }
-                       });
-                    }
-                }, token);
-
-                settings.TransactionsSent = transactionsSent;
-            }, token));
-        }
-
-        private void WaitForNetwork(Simulation simulation, SimulationSettings settings)
-        {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
-            {
-                simulation.Status = SimulationStatuses.WaitingForNetwork;
-                bool wait;
-
-                do
-                {
-                    wait = !simulation.ServerNodes.Where(n => n.IsConnected == true).All(node =>
-                    {
-                        var uri = $"{node.HttpAddress}/api/statistic/mining-queue";
-                        var response = _httpService.Get(uri, _nodeTimeout, token);
-                        return response.IsSuccessStatusCode && response.Content.ReadAs<MiningQueueStatus>().IsEmpty;
-                    });
-
-                    wait = !HasSimulationTimeElapsed(simulation, settings, wait);
-
-                    // The interval
-                    Thread.Sleep(_networkWaitInterval);
-                } while (wait);
-            }, token));
-        }
-
-        private void StopAllJobs(Simulation simulation)
-        {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
-            {
-                simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
-                {
-                    var uri = $"{node.HttpAddress}/api/info";
-                    var response = _httpService.Post(uri, new JsonContent(null), _nodeTimeout, token);
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        Console.WriteLine($"Could not stop jobs for node id:{node.Id}");
-                    }
-                }, token);
-            }, token));
-        }
-
-        private void WaitForStatistics(Simulation simulation, SimulationSettings settings)
-        {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
-            {
-                simulation.Status = SimulationStatuses.WaitingForStatistics;
-                var statistics = new ConcurrentBag<Statistic>();
-
-                simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
-                {
-                    var response = _httpService.Get($"{node.HttpAddress}/api/statistic", _nodeTimeout, token);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var statistic = response.Content.ReadAs<SuccessResponse<Statistic>>();
-                        statistics.Add(statistic.Result);
-                    }
-                }, token);
-
-                var scenarioId = simulation.ScenarioId.ToString();
-                _statisticService.ExtractAndSaveStatistics(statistics.ToList(), settings, scenarioId);
-            }, token));
-        }
-
-        private void ClearNodes(Simulation simulation)
-        {
-            _queue.QueueBackgroundWorkItem(token => new Task(() =>
-            {
-                simulation.ServerNodes.ParallelForEach(node =>
+                // Queue simulation
+                _queue.QueueBackgroundWorkItem(token => new Task(() =>
                 {
                     try
                     {
-                        if (node.NodeThread?.CloseMainWindow() != true)
-                        {
-                            node.NodeThread?.Kill();
-                        }
+                        SpawnServers(simulation, settings, token);
+                        PingServers(simulation, settings, token);
+                        ConnectNodes(simulation, token);
+                        SendTransactions(simulation, settings, token);
+                        WaitForNetwork(simulation, settings, token);
+                        StopAllJobs(simulation, token);
+                        WaitForStatistics(simulation, settings, token);
+                        ClearNodes(simulation, token);
                     }
                     catch (Exception e)
                     {
@@ -280,21 +73,248 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     }
                     finally
                     {
-                        node.NodeThread?.Dispose();
-                        node.NodeThread = null;
+                        simulation.Status = SimulationStatuses.ReadyToRun;
                     }
+                }, token));
+            }
+        }
+
+        private void SpawnServers(Simulation simulation, SimulationSettings settings, CancellationToken token)
+        {
+            // Set status
+            simulation.Status = SimulationStatuses.Preparing;
+
+            // Create temporary directory for noes storage
+            if (Directory.Exists($@"{_directoryPath}\nodes"))
+            {
+                Directory.Delete($@"{_directoryPath}\nodes", true);
+            }
+
+            // Find the external dynamic link library for nodes to spawn
+            var pathToFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            var pathToLibrary = $@"{pathToFolder}\Node\BlockchainSimulator.Node.WebApi.dll";
+            if (!File.Exists(pathToLibrary))
+            {
+                throw new SystemException(
+                    "Could not find the library \"BlockchainSimulator.Node.WebApi.dll\" in order to spawn hubs!");
+            }
+
+            // Spawn nodes
+            simulation.ServerNodes.Where(n => n.NeedsSpawn && settings.NodesAndTransactions.Keys.Contains(n.Id))
+                .ParallelForEach(node =>
+                {
+                    var pathToDirectory = $@"{_directoryPath}\nodes\{node.Id}";
+                    Directory.CreateDirectory(pathToDirectory);
+
+                    node.NodeThread = Process.Start(new ProcessStartInfo
+                    {
+                        ArgumentList =
+                        {
+                            pathToLibrary,
+                            $"urls|-|{node.HttpAddress}",
+                            $@"contentRoot|-|{pathToDirectory}",
+                            $"Node:Id|-|{node.Id}",
+                            $"Node:Type|-|{simulation.BlockchainConfiguration.Type}",
+                            $"BlockchainConfiguration:Version|-|{simulation.BlockchainConfiguration.Version}",
+                            $"BlockchainConfiguration:Target|-|{simulation.BlockchainConfiguration.Target}",
+                            $"BlockchainConfiguration:BlockSize|-|{simulation.BlockchainConfiguration.BlockSize}"
+                        },
+                        FileName = "dotnet"
+                    });
                 }, token);
 
-                Thread.Sleep(_hostingTime);
+            // Wait for processes to start
+            Thread.Sleep(_hostingTime);
+        }
 
-                var directoryPath = $@"{_directoryPath}\nodes";
-                if (Directory.Exists(directoryPath))
+        private void PingServers(Simulation simulation, SimulationSettings settings, CancellationToken token)
+        {
+            // Ping each node by using info endpoint
+            simulation.ServerNodes.Where(n => settings.NodesAndTransactions.Keys.Contains(n.Id)).ParallelForEach(node =>
+            {
+                var uri = $"{node.HttpAddress}/api/info";
+                var responseMessage = _httpService.Get(uri, _nodeTimeout, _hostingRetryCount, token);
+                if ((node.IsConnected = responseMessage.IsSuccessStatusCode) != true)
                 {
-                    Directory.Delete(directoryPath, true);
+                    Console.WriteLine($"Could not ping server node: {node.Id}");
+                }
+            }, token);
+        }
+
+        private void ConnectNodes(Simulation simulation, CancellationToken token)
+        {
+            // Connect nodes that are connected
+            simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
+            {
+                simulation.ServerNodes.Where(n => n.IsConnected == true && node.ConnectedTo.Contains(n.Id))
+                    .ForEach(otherNode =>
+                    {
+                        var uri = $"{node.HttpAddress}/api/consensus";
+                        var content = new JsonContent(otherNode);
+                        var response = _httpService.Put(uri, content, _nodeTimeout, token);
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            Console.WriteLine($"Could not connect node: {node.Id} with: {otherNode.Id}");
+                        }
+                    });
+            }, token);
+        }
+
+        private void SendTransactions(Simulation simulation, SimulationSettings settings, CancellationToken token)
+        {
+            // Create random generator and referential value for number of transactions sent
+            var randomGenerator = new Random();
+            var transactionsSent = settings.TransactionsSent;
+
+            // Change simulation status and run time
+            simulation.Status = SimulationStatuses.Running;
+            simulation.LastRunTime = DateTime.UtcNow;
+
+            // Send given number of transactions to each node
+            simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
+            {
+                if (settings.NodesAndTransactions.TryGetValue(node.Id, out var number))
+                {
+                    var uri = $"{node.HttpAddress}/api/transactions";
+                    LinqExtensions.RepeatAction(number, () =>
+                    {
+                        if (HasSimulationTimeElapsed(simulation, settings))
+                        {
+                            return;
+                        }
+
+                        var transaction = new Transaction
+                        {
+                            Sender = Guid.NewGuid().ToString(),
+                            Recipient = Guid.NewGuid().ToString(),
+                            Amount = randomGenerator.Next(1, 1000),
+                            Fee = (decimal) randomGenerator.NextDouble()
+                        };
+
+                        var content = new JsonContent(transaction);
+                        var responseMessage = _httpService.Post(uri, content, _nodeTimeout, token);
+
+                        if (responseMessage.IsSuccessStatusCode)
+                        {
+                            // Interlocked is used because of parallel foreach
+                            Interlocked.Increment(ref transactionsSent);
+                        }
+                    });
+                }
+            }, token);
+
+            // Set the number of sent transactions
+            settings.TransactionsSent = transactionsSent;
+        }
+
+        private void WaitForNetwork(Simulation simulation, SimulationSettings settings, CancellationToken token)
+        {
+            // Change status
+            simulation.Status = SimulationStatuses.WaitingForNetwork;
+
+            // TODO: To be simplified (Use signalR)
+            bool wait;
+            do
+            {
+                wait = !simulation.ServerNodes.Where(n => n.IsConnected == true).All(node =>
+                {
+                    var uri = $"{node.HttpAddress}/api/statistic/mining-queue";
+                    var response = _httpService.Get(uri, _nodeTimeout, token);
+                    return response.IsSuccessStatusCode && response.Content.ReadAs<MiningQueueStatus>().IsEmpty;
+                });
+
+                if (wait)
+                {
+                    wait = !HasSimulationTimeElapsed(simulation, settings);
                 }
 
-                simulation.Status = SimulationStatuses.ReadyToRun;
-            }, token));
+                // The interval
+                Thread.Sleep(_networkWaitInterval);
+            } while (wait);
+        }
+
+        private void StopAllJobs(Simulation simulation, CancellationToken token)
+        {
+            // Stopping all jobs in connected nodes
+            simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
+            {
+                var uri = $"{node.HttpAddress}/api/info";
+                var response = _httpService.Post(uri, new JsonContent(null), _nodeTimeout, token);
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Could not stop jobs for node id:{node.Id}");
+                }
+            }, token);
+        }
+
+        private void WaitForStatistics(Simulation simulation, SimulationSettings settings, CancellationToken token)
+        {
+            // Change status
+            simulation.Status = SimulationStatuses.WaitingForStatistics;
+
+            // Get statistics in parallel mode
+            var statistics = new ConcurrentBag<Statistic>();
+            simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
+            {
+                var response = _httpService.Get($"{node.HttpAddress}/api/statistic", _nodeTimeout, token);
+                if (response.IsSuccessStatusCode)
+                {
+                    var statistic = response.Content.ReadAs<SuccessResponse<Statistic>>();
+                    statistics.Add(statistic.Result);
+                }
+            }, token);
+
+            // Extract statistics and save them
+            var scenarioId = simulation.ScenarioId.ToString();
+            _statisticService.ExtractAndSaveStatistics(statistics.ToList(), settings, scenarioId);
+        }
+
+        private void ClearNodes(Simulation simulation, CancellationToken token)
+        {
+            // Kill all nodes processes
+            simulation.ServerNodes.ParallelForEach(node =>
+            {
+                try
+                {
+                    if (node.NodeThread?.CloseMainWindow() != true)
+                    {
+                        node.NodeThread?.Kill();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                finally
+                {
+                    node.NodeThread?.Dispose();
+                    node.NodeThread = null;
+                }
+            }, token);
+
+            // Wait for processes to end
+            Thread.Sleep(_hostingTime);
+
+            // Remove temporary directory
+            var directoryPath = $@"{_directoryPath}\nodes";
+            if (Directory.Exists(directoryPath))
+            {
+                Directory.Delete(directoryPath, true);
+            }
+
+            // Change status
+            simulation.Status = SimulationStatuses.ReadyToRun;
+        }
+
+        private static bool HasSimulationTimeElapsed(Simulation simulation, SimulationSettings settings)
+        {
+            if (!settings.ForceEndAfter.HasValue || !simulation.LastRunTime.HasValue)
+            {
+                return false;
+            }
+
+            var timeDifference = DateTime.UtcNow - simulation.LastRunTime.Value;
+            return timeDifference > settings.ForceEndAfter;
         }
     }
 }

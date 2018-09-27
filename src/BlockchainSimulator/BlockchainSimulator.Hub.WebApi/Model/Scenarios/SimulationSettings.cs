@@ -19,6 +19,6 @@ namespace BlockchainSimulator.Hub.WebApi.Model.Scenarios
         /// Dictionary of nodes and number of transactions to be sent
         /// </summary>
         [JsonProperty("nodesAndTransactions", Order = 1)]
-        public Dictionary<string, long> NodesAndTransactions { get; set; }
+        public Dictionary<string, int> NodesAndTransactions { get; set; }
     }
 }

@@ -101,7 +101,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             simulationResultsSheet.Cells[++row, 1].Value = "Transactions count";
             simulationResultsSheet.Cells[row, 2].Value =
                 longestBlockchainStatistics.BlockchainStatistics.TotalTransactionsCount;
-            simulationResultsSheet.Cells[++row, 1].Value = "Total queue time for blocks (s)";
+            simulationResultsSheet.Cells[++row, 1].Value = "Total queue time (s)";
             simulationResultsSheet.Cells[row, 2].Value =
                 longestBlockchainStatistics.BlockchainStatistics.TotalQueueTimeForBlocks.TotalSeconds;
             simulationResultsSheet.Cells[++row, 1].Value = "Blockchain tree height";
@@ -139,10 +139,10 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
         private static void CreateNodesStatisticsSheet(IEnumerable<Statistic> statistics, ExcelPackage package)
         {
-            var nodesSheet = package.Workbook.Worksheets.Add("Node's statistics");
+            var nodesSheet = package.Workbook.Worksheets.Add("Nodes statistics");
             var row = 0;
 
-            nodesSheet.Cells[++row, 1].Value = "Mining queue statistics";
+            nodesSheet.Cells[++row, 1].Value = "Queues statistics";
             nodesSheet.Cells[row, 1].Style.Font.Bold = true;
             nodesSheet.Cells[row, 1].Style.Font.Size = 13;
             row += 2;
@@ -196,11 +196,11 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
         private static List<NodeModel> GetTreeNodes(IEnumerable<BlockInfo> mainTreeInfos, bool compressed = false)
         {
-            var root = new NodeModel {Id = "R", Name = "R", ParentId = string.Empty};
+            var root = new NodeModel {Id = "R", Content = "R", ParentId = string.Empty};
             var treeNodes = mainTreeInfos.Select(i => new NodeModel
             {
                 Id = i.UniqueId,
-                Name = Convert.ToInt64(i.Id, 16).ToString(),
+                Content = Convert.ToInt64(i.Id, 16).ToString(),
                 ParentId = i.ParentUniqueId ?? "R"
             }).ToList();
 
@@ -211,7 +211,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 n.Children = treeNodes.Where(node => node.ParentId == n.Id).ToList();
             });
 
-            ColorNodes(treeNodes);
+            ColorLongestNodesPath(treeNodes);
             if (compressed)
             {
                 CompressChains(root, treeNodes);
@@ -220,7 +220,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             return SortTreeNodes(root);
         }
 
-        private static void ColorNodes(IEnumerable<NodeModel> treeNodes)
+        private static void ColorLongestNodesPath(IEnumerable<NodeModel> treeNodes)
         {
             var deepestNode = treeNodes.OrderByDescending(n => n.Depth).FirstOrDefault();
             while (deepestNode != null)
@@ -232,6 +232,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
         private static void CompressChains(NodeModel root, List<NodeModel> treeNodes)
         {
+            // Set fixed height and compress the chains
+            treeNodes.ForEach(n => n.Height = n.Height);
             CompressChainsOfNodes(root, treeNodes);
             treeNodes.ForEach(n =>
             {
@@ -257,7 +259,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 }
 
                 child.IsCompressed = true;
-                child.Name = "...";
+                child.Content = "...";
                 child.Children.ForEach(c => treeNodes.Remove(c));
                 tailNode.ParentId = child.Id;
                 if (!treeNodes.Contains(tailNode))

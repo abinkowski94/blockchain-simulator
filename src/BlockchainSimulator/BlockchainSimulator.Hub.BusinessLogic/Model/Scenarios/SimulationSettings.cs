@@ -18,6 +18,6 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios
         /// <summary>
         /// Dictionary of nodes and number of transactions to be sent
         /// </summary>
-        public Dictionary<string, long> NodesAndTransactions { get; set; }
+        public Dictionary<string, int> NodesAndTransactions { get; set; }
     }
 }
