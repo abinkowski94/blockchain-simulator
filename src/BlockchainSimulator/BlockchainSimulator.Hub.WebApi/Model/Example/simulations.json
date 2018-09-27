@@ -93,9 +93,9 @@
                 },
                 {
                     "connectedTo": [
-                        "1",
                         "9",
-                        "10"
+                        "10",
+                        "1"
                     ],
                     "delay": 0,
                     "httpAddress": "https://localhost:5008",
