@@ -9,6 +9,7 @@ using BlockchainSimulator.Node.BusinessLogic.Validators;
 using BlockchainSimulator.Node.DataAccess.Converters;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -28,10 +29,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly IBlockchainValidator _blockchainValidator;
         private readonly IStatisticService _statisticService;
+        private readonly IServiceProvider _serviceProvider;
+        private IMiningService _miningService;
 
         public ProofOfWorkConsensusService(IBackgroundTaskQueue queue, IHttpService httpService,
             IBlockchainRepository blockchainRepository, IBlockchainValidator blockchainValidator,
-            IStatisticService statisticService, IConfiguration configuration) : base(queue, httpService)
+            IStatisticService statisticService, IConfiguration configuration, IServiceProvider serviceProvider)
+            : base(queue, httpService)
         {
             _encodedBlocksIds = new ConcurrentBag<string>();
             _nodeId = configuration["Node:Id"];
@@ -39,6 +43,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             _blockchainRepository = blockchainRepository;
             _blockchainValidator = blockchainValidator;
             _statisticService = statisticService;
+            _serviceProvider = serviceProvider;
         }
 
         public override void AcceptExternalBlock(EncodedBlock encodedBlock)
@@ -57,6 +62,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                         DistributeBlock(encodedBlock);
                     }
                 }
+
+                ReMineBlocks();
             });
         }
 
@@ -213,6 +220,15 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
             _statisticService.RegisterRejectedBlock();
             return new ErrorResponse<bool>($"The parent block with id: {block.ParentUniqueId} don't exist!", false);
+        }
+
+        private void ReMineBlocks()
+        {
+            if (_miningService == null)
+            {
+                _miningService = _serviceProvider.GetService<IMiningService>();
+            }
+            _miningService.ReMineBlocks();
         }
     }
 }

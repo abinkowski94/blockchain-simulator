@@ -8,5 +8,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
     public interface IMiningService
     {
         void MineBlock(HashSet<Transaction> transactions, DateTime enqueueTime, CancellationToken token);
+
+        void ReMineBlocks();
     }
 }
