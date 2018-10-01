@@ -1,3 +1,4 @@
+using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Common.Models.Statistics;
 using BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
@@ -10,7 +11,6 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using BlockchainSimulator.Common.Extensions;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {
@@ -31,9 +31,30 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 Directory.CreateDirectory(directoryPath);
             }
 
-            SaveSettings(directoryPath, settings);
-            CreateExcelFile(directoryPath, statistics, settings);
-            CreateBlockchainTrees(statistics, directoryPath);
+            try
+            {
+                SaveSettings(directoryPath, settings);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            try
+            {
+                CreateExcelFile(directoryPath, statistics, settings);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            try
+            {
+                CreateBlockchainTrees(statistics, directoryPath);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         private static void SaveSettings(string directoryPath, SimulationSettings settings)
@@ -196,7 +217,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
         private static List<NodeModel> GetTreeNodes(IEnumerable<BlockInfo> mainTreeInfos, bool compressed = false)
         {
-            var root = new NodeModel {Id = "R", Content = "R", ParentId = string.Empty};
+            var root = new NodeModel { Id = "R", Content = "R", ParentId = string.Empty };
             var treeNodes = mainTreeInfos.Select(i => new NodeModel
             {
                 Id = i.UniqueId,
@@ -277,7 +298,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
         {
             if (result == null)
             {
-                result = new List<NodeModel> {root};
+                result = new List<NodeModel> { root };
             }
             else
             {
