@@ -75,6 +75,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         public void ReMineBlocks()
         {
+            _statisticService.RegisterWork(true);
+
             if (_transactionService == null)
             {
                 _transactionService = _serviceProvider.GetService<ITransactionService>();
@@ -94,7 +96,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                             .Where(t => !longestBlockchainTransactionsIds.Contains(t.Id))
                             .Where(t => pendingTransactions.All(pt => pt.Id != t.Id)).ToList();
 
-                        transactionsToReMine.ForEach(t => _transactionService.AddTransaction(t));
+                        if (transactionsToReMine.Any())
+                        {
+                            transactionsToReMine.ForEach(t => _transactionService.AddTransaction(t));
+                        }
+                        else
+                        {
+                            _statisticService.RegisterWork(false);
+                        }
                     }
                 }
             }

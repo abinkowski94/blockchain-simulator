@@ -50,6 +50,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
         {
             Task.Run(() =>
             {
+                _statisticService.RegisterWork(true);
+
                 if (encodedBlock?.Base64Block != null && !_encodedBlocksIds.Contains(encodedBlock.Id))
                 {
                     var blockchainJson = Encoding.UTF8.GetString(Convert.FromBase64String(encodedBlock.Base64Block));
@@ -107,8 +109,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 var parentBlockValidationResult = ValidateParentBlock(block, senderNodeId);
                 if (!parentBlockValidationResult.IsSuccess)
                 {
-                    Console.WriteLine(parentBlockValidationResult.Message);
-                    Console.WriteLine(_nodeId);
+                    _statisticService.RegisterRejectedBlock();
                     return parentBlockValidationResult;
                 }
 
@@ -200,14 +201,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             var nodeAddress = ServerNodes.Values.FirstOrDefault(n => n.Id == senderNodeId)?.HttpAddress;
             if (nodeAddress == null)
             {
-                _statisticService.RegisterRejectedBlock();
                 return new ErrorResponse<bool>($"The parent block with id: {block.ParentUniqueId} don't exist!", false);
             }
 
             var httpResponse = HttpService.Get($"{nodeAddress}/api/blockchain/{block.ParentUniqueId}");
             if (!httpResponse.IsSuccessStatusCode)
             {
-                _statisticService.RegisterRejectedBlock();
                 return new ErrorResponse<bool>($"The parent block with id: {block.ParentUniqueId} don't exist!", false);
             }
 
@@ -218,7 +217,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 return AcceptBlock(blockBase, senderNodeId);
             }
 
-            _statisticService.RegisterRejectedBlock();
             return new ErrorResponse<bool>($"The parent block with id: {block.ParentUniqueId} don't exist!", false);
         }
 

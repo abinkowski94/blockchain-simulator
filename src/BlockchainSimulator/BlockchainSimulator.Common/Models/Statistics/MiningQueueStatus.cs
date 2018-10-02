@@ -10,8 +10,8 @@ namespace BlockchainSimulator.Common.Models.Statistics
         /// <summary>
         /// Is queue empty
         /// </summary>
-        [JsonProperty("isEmpty", Order = 1)]
-        public bool IsEmpty => Length == 0;
+        [JsonProperty("isWorking", Order = 1)]
+        public bool IsWorking { get; set; }
 
         /// <summary>
         /// The length of the queue

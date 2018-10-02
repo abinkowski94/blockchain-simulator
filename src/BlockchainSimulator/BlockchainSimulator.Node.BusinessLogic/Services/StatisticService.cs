@@ -24,6 +24,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private int _miningAttemptsCount;
         private int _abandonedBlockCount;
         private TimeSpan _totalMiningQueueTime;
+        private bool _isWorking = true;
 
         public StatisticService(IBlockchainConfiguration blockchainConfiguration,
             IBlockchainRepository blockchainRepository, IConfiguration configuration)
@@ -80,6 +81,20 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             AddBlockchainStatistics(result, blockchainTree, blockchain);
 
             return new SuccessResponse<Statistic>($"The statistics has been generated on: {DateTime.UtcNow}", result);
+        }
+
+        public void RegisterWork(bool isWorking)
+        {
+            _isWorking = isWorking;
+        }
+
+        public Common.Models.Statistics.MiningQueueStatus GetStatus()
+        {
+            return new Common.Models.Statistics.MiningQueueStatus
+            {
+                IsWorking = _isWorking,
+                Length = _currentMiningQueueLength
+            };
         }
 
         private static void AddTransactionsStatistics(BlockchainStatistics blockchainStatistics,
