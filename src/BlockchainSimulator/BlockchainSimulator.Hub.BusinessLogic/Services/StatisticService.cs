@@ -196,10 +196,10 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 .Select(g => g.First()).ToList();
 
             var treeNodes = GetTreeNodes(treeInfos);
-            DrawAndSaveBlockchainTree(treeNodes, directoryPath, "blockchain-tree.bmp");
+            DrawAndSaveBlockchainTree(treeNodes, directoryPath, "blockchain-tree.jpg");
 
             var compressedTreeNodes = GetTreeNodes(treeInfos, true);
-            DrawAndSaveBlockchainTree(compressedTreeNodes, directoryPath, "blockchain-tree-compressed.bmp");
+            DrawAndSaveBlockchainTree(compressedTreeNodes, directoryPath, "blockchain-tree-compressed.jpg");
 
             var treesPaths = $"{directoryPath}/trees";
             if (!Directory.Exists(treesPaths))
@@ -211,7 +211,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 treeInfos = s.BlockchainStatistics.BlockInfos.GroupBy(i => i.UniqueId).Select(g => g.First()).ToList();
                 treeNodes = GetTreeNodes(treeInfos);
-                DrawAndSaveBlockchainTree(treeNodes, treesPaths, $"{s.NodeId}-blockchain-tree.bmp");
+                DrawAndSaveBlockchainTree(treeNodes, treesPaths, $"{s.NodeId}-blockchain-tree.jpg");
             });
         }
 

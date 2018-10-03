@@ -18,6 +18,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly IConfiguration _configuration;
 
+        private readonly object _padlock = new object();
         private int _rejectedIncomingBlockCount;
         private int _currentMiningQueueLength;
         private int _maxMiningQueueLength;
@@ -85,7 +86,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         public void RegisterWork(bool isWorking)
         {
-            _isWorking = isWorking;
+            lock (_padlock)
+            {
+                _isWorking = isWorking;
+            }
         }
 
         public Common.Models.Statistics.MiningQueueStatus GetStatus()

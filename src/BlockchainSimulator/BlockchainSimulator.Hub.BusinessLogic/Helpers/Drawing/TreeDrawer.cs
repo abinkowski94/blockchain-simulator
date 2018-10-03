@@ -33,7 +33,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
                 PaintTree(graphic, tree);
                 using (var stream = new FileStream(_path, FileMode.Create, FileAccess.ReadWrite))
                 {
-                    myBitmap.Save(stream, ImageFormat.Bmp);
+                    myBitmap.Save(stream, ImageFormat.Jpeg);
                 }
             }
         }

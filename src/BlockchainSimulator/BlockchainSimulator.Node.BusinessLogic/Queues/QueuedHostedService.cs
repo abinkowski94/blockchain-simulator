@@ -1,3 +1,4 @@
+using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -39,10 +40,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
                 {
                     Console.WriteLine("The task has been cancelled due to timeout!");
                 }
+                catch (AggregateException exception)
+                {
+                    Console.WriteLine("Many errors occurred during the operation!");
+                    exception.InnerExceptions.ForEach(e => Console.WriteLine(e.Message));
+                }
                 catch (Exception e)
                 {
-                    // TODO: log errors
-                    Console.WriteLine(e);
+                    Console.WriteLine(e.Message);
                 }
             }
         }
