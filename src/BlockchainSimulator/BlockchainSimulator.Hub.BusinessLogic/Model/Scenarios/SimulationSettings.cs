@@ -16,6 +16,11 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios
         public TimeSpan? ForceEndAfter { get; set; }
 
         /// <summary>
+        /// Sends all transactions in one request
+        /// </summary>
+        public bool SendTransactionsTogether { get; set; }
+
+        /// <summary>
         /// Dictionary of nodes and number of transactions to be sent
         /// </summary>
         public Dictionary<string, int> NodesAndTransactions { get; set; }

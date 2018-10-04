@@ -106,6 +106,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                         }
                     }
                 }
+                else
+                {
+                    _statisticService.RegisterWork(false);
+                }
             }
         }
     }

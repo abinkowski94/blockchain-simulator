@@ -42,6 +42,20 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         }
 
         /// <summary>
+        /// Adds transactions to the pending list
+        /// </summary>
+        /// <param name="transactions">The list of transactions</param>
+        /// <returns>The newly added transactions</returns>
+        [HttpPost("multiple")]
+        public ActionResult<BaseResponse> AddTransactions([FromBody] List<Transaction> transactions)
+        {
+            var mappedTransactions = LocalMapper.Map<List<BusinessLogic.Model.Transaction.Transaction>>(transactions);
+            var result = _transactionService.AddTransactions(mappedTransactions);
+
+            return result.GetActionResult<List<BusinessLogic.Model.Transaction.Transaction>, List<Transaction>>(this);
+        }
+
+        /// <summary>
         /// Gets the list of pending transactions
         /// </summary>
         /// <returns>List of pending transactions</returns>

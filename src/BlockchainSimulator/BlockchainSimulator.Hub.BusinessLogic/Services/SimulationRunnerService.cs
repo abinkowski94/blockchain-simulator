@@ -9,6 +9,7 @@ using BlockchainSimulator.Hub.BusinessLogic.Model.Transactions;
 using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -186,31 +187,50 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 if (settings.NodesAndTransactions.TryGetValue(node.Id, out var number))
                 {
-                    var uri = $"{node.HttpAddress}/api/transactions";
+                    var transactionsToSend = new List<Transaction>();
                     LinqExtensions.RepeatAction(number, () =>
                     {
-                        if (HasSimulationTimeElapsed(simulation, settings))
+                        if (!HasSimulationTimeElapsed(simulation, settings))
                         {
-                            return;
+                            transactionsToSend.Add(new Transaction
+                            {
+                                Sender = Guid.NewGuid().ToString(),
+                                Recipient = Guid.NewGuid().ToString(),
+                                Amount = randomGenerator.Next(1, 1000),
+                                Fee = (decimal)randomGenerator.NextDouble()
+                            });
                         }
+                    });
 
-                        var transaction = new Transaction
-                        {
-                            Sender = Guid.NewGuid().ToString(),
-                            Recipient = Guid.NewGuid().ToString(),
-                            Amount = randomGenerator.Next(1, 1000),
-                            Fee = (decimal)randomGenerator.NextDouble()
-                        };
-
-                        var content = new JsonContent(transaction);
+                    // Send transactions in one request together or one by one
+                    if (settings.SendTransactionsTogether)
+                    {
+                        var uri = $"{node.HttpAddress}/api/transactions/multiple";
+                        var content = new JsonContent(transactionsToSend);
                         var responseMessage = _httpService.Post(uri, content, _nodeTimeout, token);
-
                         if (responseMessage.IsSuccessStatusCode)
                         {
                             // Interlocked is used because of parallel for-each
-                            Interlocked.Increment(ref transactionsSent);
+                            Interlocked.Add(ref transactionsSent, transactionsToSend.Count);
                         }
-                    });
+                    }
+                    else
+                    {
+                        transactionsToSend.ForEach(t =>
+                        {
+                            if (!HasSimulationTimeElapsed(simulation, settings))
+                            {
+                                var uri = $"{node.HttpAddress}/api/transactions";
+                                var content = new JsonContent(t);
+                                var responseMessage = _httpService.Post(uri, content, _nodeTimeout, token);
+                                if (responseMessage.IsSuccessStatusCode)
+                                {
+                                    // Interlocked is used because of parallel for-each
+                                    Interlocked.Increment(ref transactionsSent);
+                                }
+                            }
+                        });
+                    }
                 }
             }, token);
 

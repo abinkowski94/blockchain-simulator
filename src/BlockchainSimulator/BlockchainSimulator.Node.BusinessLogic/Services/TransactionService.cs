@@ -64,6 +64,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             }
         }
 
+        public BaseResponse<List<Transaction>> AddTransactions(List<Transaction> transactions)
+        {
+            var responses = transactions.Select(t => AddTransaction(t)).ToList();
+            var result = responses.Select(r => r.Result).ToList();
+
+            return new SuccessResponse<List<Transaction>>("The transactions has been added!", result);
+        }
+
         public BaseResponse<List<Transaction>> GetPendingTransactions()
         {
             var result = _pendingTransactions.Values.OrderByDescending(t => t.Fee).ToList();
