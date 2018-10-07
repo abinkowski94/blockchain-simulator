@@ -28,18 +28,21 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
             IConfiguration configuration)
         {
             // Repositories
-            services.AddSingleton<IFileRepository, FileRepository>();
             services.AddSingleton<IBlockchainRepository, BlockchainRepository>();
+            services.AddSingleton<IFileRepository, FileRepository>();
 
             // Queues and hosted services
-            services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
-            services.AddHostedService<QueuedHostedService>();
+            services.AddSingleton<IMiningQueue, MiningQueue>();
+            services.AddHostedService<MiningHostedService>();
+            services.AddSingleton<Common.Queues.IBackgroundTaskQueue, Common.Queues.BackgroundTaskQueue>();
+            services.AddHostedService<Common.Queues.QueuedHostedService>();
 
             // Services
-            services.AddSingleton<IBlockchainService, BlockchainService>();
             services.AddSingleton<ITransactionService, TransactionService>();
-            services.AddSingleton<IMiningService, MiningService>();
+            services.AddSingleton<IBlockchainService, BlockchainService>();
             services.AddSingleton<IStatisticService, StatisticService>();
+            services.AddSingleton<IMiningService, MiningService>();
+            services.AddTransient<IConfigurationService, ConfigurationService>();
             services.AddTransient<IHttpService, HttpService>();
 
             // Specific

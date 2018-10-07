@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using BlockchainSimulator.Common.Extensions;
 
 namespace BlockchainSimulator.Common.Queues
 {
@@ -11,10 +12,22 @@ namespace BlockchainSimulator.Common.Queues
     /// </summary>
     public class BackgroundTaskQueue : IBackgroundTaskQueue
     {
+        /// <summary>
+        /// The signal semaphore that allows to dequeue only when there are tasks to dequeue
+        /// </summary>
         private readonly SemaphoreSlim _signal = new SemaphoreSlim(0);
 
+        /// <summary>
+        /// The queue of tasks waiting for consumption
+        /// </summary>
         private readonly ConcurrentQueue<Func<CancellationToken, Task>> _workItems =
             new ConcurrentQueue<Func<CancellationToken, Task>>();
+
+        /// <inheritdoc />
+        /// <summary>
+        /// The length of the queue
+        /// </summary>
+        public int Length => _workItems.Count;
 
         /// <inheritdoc />
         /// <summary>
@@ -44,6 +57,16 @@ namespace BlockchainSimulator.Common.Queues
 
             _workItems.Enqueue(workItem);
             _signal.Release();
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Clears the queue
+        /// </summary>
+        public void Clear()
+        {
+            LinqExtensions.RepeatAction(_workItems.Count, () => _signal.WaitAsync());
+            _workItems.Clear();
         }
     }
 }

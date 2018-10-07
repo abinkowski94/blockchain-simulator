@@ -10,11 +10,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Queues
 {
     public class MiningQueueTests
     {
-        private readonly BackgroundTaskQueue _taskQueue;
+        private readonly MiningQueue _taskQueue;
 
         public MiningQueueTests()
         {
-            _taskQueue = new BackgroundTaskQueue(new Mock<IStatisticService>().Object);
+            _taskQueue = new MiningQueue(new Mock<IStatisticService>().Object);
         }
 
         [Fact]
@@ -25,7 +25,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Queues
             _taskQueue.EnqueueTask(t => Task.Run(() => Thread.Sleep(100), t));
 
             // Act
-            var result = await _taskQueue.DequeueAsync(token);
+            var result = await _taskQueue.DequeueTaskAsync(token);
             await result(token);
 
             // Assert

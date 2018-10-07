@@ -56,6 +56,16 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         }
 
         /// <summary>
+        /// Forces mining
+        /// </summary>
+        /// <returns>The response if force mining succeeded</returns>
+        [HttpPost("force-mining")]
+        public ActionResult<BaseResponse> ForceMining()
+        {
+            return _transactionService.ForceMining().GetActionResult<bool, bool>(this);
+        }
+
+        /// <summary>
         /// Gets the list of pending transactions
         /// </summary>
         /// <returns>List of pending transactions</returns>

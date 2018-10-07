@@ -22,7 +22,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
     {
         private readonly Mock<IBlockchainConfiguration> _blockchainConfigurationMock;
         private readonly Mock<IBlockchainService> _blockchainServiceMock;
-        private readonly Mock<IBackgroundTaskQueue> _miningQueueMock;
+        private readonly Mock<IMiningQueue> _miningQueueMock;
         private readonly Mock<IMiningService> _miningServiceMock;
         private readonly TransactionService _transactionService;
 
@@ -30,7 +30,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         {
             _blockchainServiceMock = new Mock<IBlockchainService>();
             _blockchainConfigurationMock = new Mock<IBlockchainConfiguration>();
-            _miningQueueMock = new Mock<IBackgroundTaskQueue>();
+            _miningQueueMock = new Mock<IMiningQueue>();
             _miningServiceMock = new Mock<IMiningService>();
 
             _transactionService = new TransactionService(_blockchainServiceMock.Object, _miningServiceMock.Object,
@@ -187,7 +187,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             Assert.NotNull(result.Message);
             Assert.Single(result.Errors);
             Assert.Equal("File not found!", result.Errors.First());
-            Assert.Equal("An error occured while reading blockchain from local storage!", result.Message);
+            Assert.Equal("An error occurred while reading blockchain from local storage!", result.Message);
         }
 
         [Fact]
@@ -202,13 +202,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
                 new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _blockchainConfigurationMock.Object,
                     new Mock<IConfiguration>().Object);
 
-            var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>)ts.First())
+            var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>) ts.First())
                 .ToList();
 
             transactionSetList[1].First().Id = "111111";
 
             BlockBase block = null;
-            transactionSetList.ForEach(async ts => block = await blockchainProvider.CreateBlock(ts, new DateTime(1, 1, 1), block));
+            transactionSetList.ForEach(ts =>
+                block = blockchainProvider.CreateBlock(ts, new DateTime(1, 1, 1), block).Result);
 
             _blockchainServiceMock.Setup(p => p.GetBlockchainTree())
                 .Returns(new SuccessResponse<BlockBase>("The blockchain!", block));

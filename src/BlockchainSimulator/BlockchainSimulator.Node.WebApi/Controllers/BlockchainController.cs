@@ -45,6 +45,16 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         }
 
         /// <summary>
+        /// Gets last block
+        /// </summary>
+        /// <returns>The last block</returns>
+        [HttpGet("last-block")]
+        public ActionResult<object> GetLastBlock()
+        {
+            return _blockchainRepository.GetLastBlock();
+        }
+
+        /// <summary>
         /// Gets the block with given id
         /// </summary>
         /// <param name="id">The id of the block</param>

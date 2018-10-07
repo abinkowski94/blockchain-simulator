@@ -23,7 +23,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
         public BlockchainRepository(IFileRepository fileRepository, IMemoryCache cache)
         {
             _fileRepository = fileRepository;
-            _serializer = new JsonSerializer { Converters = { new BlockConverter(), new NodeConverter() } };
+            _serializer = new JsonSerializer {Converters = {new BlockConverter(), new NodeConverter()}};
             _cache = cache;
             _blockchainFileName = "blockchainTree.json";
         }
@@ -66,7 +66,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                     return null;
                 }
 
-                var blockchain = new BlockchainTree { Blocks = new List<BlockBase>() };
+                var blockchain = new BlockchainTree {Blocks = new List<BlockBase>()};
                 BlockBase block = null;
                 do
                 {
@@ -95,7 +95,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                     return null;
                 }
 
-                var blockchain = new BlockchainTree { Blocks = new List<BlockBase>() };
+                var blockchain = new BlockchainTree {Blocks = new List<BlockBase>()};
                 BlockBase block = null;
                 do
                 {
@@ -117,17 +117,19 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
 
         public BlockchainTree GetBlockchainTree()
         {
-            lock (_padlock)
+            var blocks = _cache.GetOrCreate(CacheKeys.BlockchainTree, entry =>
             {
-                return _cache.GetOrCreate(CacheKeys.BlockchainTree, entry =>
+                lock (_padlock)
                 {
                     using (var stream = _fileRepository.GetFileReader(_blockchainFileName))
                     using (var reader = new JsonTextReader(stream))
                     {
                         return stream == StreamReader.Null ? null : BlockchainConverter.DeserializeBlockchain(reader);
                     }
-                });
-            }
+                }
+            })?.Blocks?.ToList();
+
+            return new BlockchainTree {Blocks = blocks};
         }
 
         public bool BlockExists(string uniqueId)
@@ -147,7 +149,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                         throw new DataException("The blockchain tree is empty and the provided block is not genesis!");
                     }
 
-                    SaveBlockchain(new BlockchainTree { Blocks = new List<BlockBase> { blockBase } });
+                    SaveBlockchain(new BlockchainTree {Blocks = new List<BlockBase> {blockBase}});
                 }
                 else
                 {

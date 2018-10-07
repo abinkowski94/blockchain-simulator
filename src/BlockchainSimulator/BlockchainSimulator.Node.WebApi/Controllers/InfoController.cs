@@ -1,26 +1,32 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
-using System.Linq;
+using BlockchainSimulator.Common.Models.Responses;
+using BlockchainSimulator.Node.BusinessLogic.Services;
+using BlockchainSimulator.Node.WebApi.Extensions;
 
 namespace BlockchainSimulator.Node.WebApi.Controllers
 {
+    /// <inheritdoc />
     /// <summary>
     /// The info controller
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
-    public class InfoController
+    public class InfoController : BaseController
     {
-        private readonly IConfiguration _configuration;
+        /// <summary>
+        /// The configuration service
+        /// </summary>
+        private readonly IConfigurationService _configurationService;
 
+        /// <inheritdoc />
         /// <summary>
         /// The constructor
         /// </summary>
-        /// <param name="configuration">The configuration</param>
-        public InfoController(IConfiguration configuration)
+        /// <param name="configurationService">The configuration service</param>
+        public InfoController(IConfigurationService configurationService)
         {
-            _configuration = configuration;
+            _configurationService = configurationService;
         }
 
         /// <summary>
@@ -30,7 +36,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         [HttpGet]
         public List<KeyValuePair<string, string>> GetInfo()
         {
-            return _configuration.AsEnumerable().Where(kv => kv.Value != null).ToList();
+            return _configurationService.GetConfigurationInfo();
         }
 
         /// <summary>
@@ -38,10 +44,9 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         /// </summary>
         /// <returns>True if all services has been stopped</returns>
         [HttpPost]
-        public bool StopAllJobs()
+        public ActionResult<BaseResponse> StopAllJobs()
         {
-            // TODO: Add service and add method to stop all jobs
-            return true;
+            return _configurationService.StopAllJobs().GetActionResult<bool, bool>(this);
         }
     }
 }

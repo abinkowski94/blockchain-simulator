@@ -4,12 +4,16 @@ using System.Threading.Tasks;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Queues
 {
-    public interface IBackgroundTaskQueue
+    public interface IMiningQueue
     {
         int Length { get; }
 
-        Task<Func<CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken);
+        bool IsWorking { get; set; }
+
+        Task<Func<CancellationToken, Task>> DequeueTaskAsync(CancellationToken cancellationToken);
 
         void EnqueueTask(Func<CancellationToken, Task> workItem);
+
+        void Clear();
     }
 }

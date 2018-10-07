@@ -2,12 +2,12 @@ using BlockchainSimulator.Common.Models.Consensus;
 using BlockchainSimulator.Common.Services;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
-using BlockchainSimulator.Node.BusinessLogic.Queues;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlockchainSimulator.Common.Queues;
 using ServerNode = BlockchainSimulator.Node.BusinessLogic.Model.Consensus.ServerNode;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
@@ -16,20 +16,22 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
     {
         protected readonly ConcurrentDictionary<string, ServerNode> ServerNodes;
 
-        protected readonly IBackgroundTaskQueue Queue;
+        protected readonly IBackgroundTaskQueue BackgroundQueue;
         protected readonly IHttpService HttpService;
 
-        protected BaseConsensusService(IBackgroundTaskQueue queue, IHttpService httpService)
+        protected BaseConsensusService(IBackgroundTaskQueue backgroundQueue, IHttpService httpService)
         {
             ServerNodes = new ConcurrentDictionary<string, ServerNode>();
 
             HttpService = httpService;
-            Queue = queue;
+            BackgroundQueue = backgroundQueue;
         }
 
         public abstract void AcceptExternalBlock(EncodedBlock encodedBlock);
 
         public abstract BaseResponse<bool> AcceptBlock(BlockBase blockBase);
+
+        public abstract BaseResponse<bool> SynchronizeWithOtherNodes();
 
         public BaseResponse<ServerNode> ConnectNode(ServerNode serverNode)
         {
@@ -79,7 +81,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         private void CheckNodeConnection(ServerNode serverNode)
         {
-            Queue.EnqueueTask(token => Task.Run(() =>
+            BackgroundQueue.QueueBackgroundWorkItem(token => Task.Run(() =>
             {
                 var timeout = TimeSpan.FromSeconds(30);
                 var response = HttpService.Get($"{serverNode.HttpAddress}/api/info", timeout, token);

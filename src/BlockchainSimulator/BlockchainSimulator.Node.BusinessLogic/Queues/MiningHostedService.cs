@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Queues
 {
-    public class QueuedHostedService : BackgroundService
+    public class MiningHostedService : BackgroundService
     {
-        private readonly IBackgroundTaskQueue _queue;
+        private readonly IMiningQueue _queue;
         private readonly IMiningService _miningService;
 
-        public QueuedHostedService(IBackgroundTaskQueue queue, IMiningService miningService)
+        public MiningHostedService(IMiningQueue queue, IMiningService miningService)
         {
             _queue = queue;
             _miningService = miningService;
@@ -22,19 +22,25 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var workItem = await _queue.DequeueAsync(cancellationToken);
+                // Dequeue task
+                var workItem = await _queue.DequeueTaskAsync(cancellationToken);
+                _queue.IsWorking = true;
 
                 try
                 {
+                    // Start task if is in state created
                     var task = workItem(cancellationToken);
                     if (task.Status == TaskStatus.Created)
                     {
                         task.Start();
                     }
 
+                    // Execute task
                     await task;
 
-                    _miningService.ReMineBlocks();
+                    // Set queue working status and re-mine blocks
+                    _queue.IsWorking = _queue.Length > 0;
+                    _miningService.ReMineBlocksAndSynchronize();
                 }
                 catch (OperationCanceledException)
                 {

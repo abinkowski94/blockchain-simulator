@@ -9,6 +9,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
     {
         void MineBlock(HashSet<Transaction> transactions, DateTime enqueueTime, CancellationToken token);
 
-        void ReMineBlocks();
+        void ReMineBlocksAndSynchronize();
     }
 }

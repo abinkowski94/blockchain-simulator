@@ -18,14 +18,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IBlockchainConfiguration _blockchainConfiguration;
         private readonly IBlockchainService _blockchainService;
         private readonly IMiningService _miningService;
-        private readonly IBackgroundTaskQueue _queue;
+        private readonly IMiningQueue _queue;
         private readonly string _nodeId;
         private readonly object _padlock = new object();
 
         public ConcurrentDictionary<string, Transaction> RegisteredTransactions { get; }
 
         public TransactionService(IBlockchainService blockchainService, IMiningService miningService,
-            IBlockchainConfiguration blockchainConfiguration, IBackgroundTaskQueue queue, IConfiguration configuration)
+            IBlockchainConfiguration blockchainConfiguration, IMiningQueue queue, IConfiguration configuration)
         {
             _pendingTransactions = new ConcurrentDictionary<string, Transaction>();
             _blockchainConfiguration = blockchainConfiguration;
@@ -66,10 +66,16 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         public BaseResponse<List<Transaction>> AddTransactions(List<Transaction> transactions)
         {
-            var responses = transactions.Select(t => AddTransaction(t)).ToList();
+            var responses = transactions.Select(AddTransaction).ToList();
             var result = responses.Select(r => r.Result).ToList();
 
             return new SuccessResponse<List<Transaction>>("The transactions has been added!", result);
+        }
+
+        public BaseResponse<bool> ForceMining()
+        {
+            MineTransactions();
+            return new SuccessResponse<bool>("Mining has been forced successfully!", true);
         }
 
         public BaseResponse<List<Transaction>> GetPendingTransactions()
@@ -97,6 +103,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             }
 
             return new SuccessResponse<Transaction>("The transaction has been found", result);
+        }
+
+        public void Clear()
+        {
+            _pendingTransactions.Clear();
+            RegisteredTransactions.Clear();
         }
 
         private static Transaction FindAndFillTransactionData(string transactionId, BlockBase block)

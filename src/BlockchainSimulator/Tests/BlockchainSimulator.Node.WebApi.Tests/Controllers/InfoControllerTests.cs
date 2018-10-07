@@ -1,7 +1,8 @@
-using BlockchainSimulator.Node.WebApi.Controllers;
-using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using BlockchainSimulator.Node.WebApi.Controllers;
 using System.Linq;
+using BlockchainSimulator.Node.BusinessLogic.Services;
+using Moq;
 using Xunit;
 
 namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
@@ -9,23 +10,24 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
     public class InfoControllerTests
     {
         private readonly InfoController _infoController;
+        private readonly Mock<IConfigurationService> _configurationServiceMock;
 
         public InfoControllerTests()
         {
-            var configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(new List<KeyValuePair<string, string>>
-                {
-                    new KeyValuePair<string, string>("Config", null),
-                    new KeyValuePair<string, string>("Config:Testing", "testingValue"),
-                    new KeyValuePair<string, string>("Config:Test", "testValue")
-                }).Build();
-            _infoController = new InfoController(configuration);
+            _configurationServiceMock = new Mock<IConfigurationService>();
+            _infoController = new InfoController(_configurationServiceMock.Object);
         }
 
         [Fact]
         public void GetInfo_Empty_Configuration()
         {
             // Arrange
+            _configurationServiceMock.Setup(p => p.GetConfigurationInfo())
+                .Returns(new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("Config:Testing", "testingValue"),
+                    new KeyValuePair<string, string>("Config:Test", "testValue")
+                });
 
             // Act
             var result = _infoController.GetInfo();

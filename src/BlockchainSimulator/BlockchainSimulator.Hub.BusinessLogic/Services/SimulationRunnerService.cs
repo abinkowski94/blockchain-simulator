@@ -64,6 +64,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                         ConnectNodes(simulation, token);
                         SendTransactions(simulation, settings, token);
                         WaitForNetwork(simulation, settings, token);
+                        ForceMining(simulation, token);
+                        WaitForNetwork(simulation, settings, token);
                         StopAllJobs(simulation, token);
                         WaitForStatistics(simulation, settings, token);
                         ClearNodes(simulation, token);
@@ -197,7 +199,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                                 Sender = Guid.NewGuid().ToString(),
                                 Recipient = Guid.NewGuid().ToString(),
                                 Amount = randomGenerator.Next(1, 1000),
-                                Fee = (decimal)randomGenerator.NextDouble()
+                                Fee = (decimal) randomGenerator.NextDouble()
                             });
                         }
                     });
@@ -259,9 +261,26 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     wait = !HasSimulationTimeElapsed(simulation, settings);
                 }
 
-                // The interval
-                Thread.Sleep(_networkWaitInterval);
+                if (wait)
+                {
+                    // The interval
+                    Thread.Sleep(_networkWaitInterval);
+                }
             } while (wait);
+        }
+
+        private void ForceMining(Simulation simulation, CancellationToken token)
+        {
+            // Forces mining for all nodes
+            simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
+            {
+                var uri = $"{node.HttpAddress}/api/transactions/force-mining";
+                var response = _httpService.Post(uri, new JsonContent(null), _nodeTimeout, token);
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Could not force mining for: {node.Id}");
+                }
+            }, token);
         }
 
         private void StopAllJobs(Simulation simulation, CancellationToken token)
@@ -273,7 +292,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 var response = _httpService.Post(uri, new JsonContent(null), _nodeTimeout, token);
                 if (!response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine($"Could not stop jobs for node id:{node.Id}");
+                    Console.WriteLine($"Could not stop jobs for node id: {node.Id}");
                 }
             }, token);
         }
@@ -302,7 +321,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
         private void ClearNodes(Simulation simulation, CancellationToken token)
         {
-            // Kill all nodes processes
+            // Kill all processes of nodes
             simulation.ServerNodes.ParallelForEach(node =>
             {
                 try

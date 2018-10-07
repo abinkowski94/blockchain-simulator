@@ -32,6 +32,7 @@ namespace BlockchainSimulator.Common.Queues
         {
             while (!cancellationToken.IsCancellationRequested)
             {
+                // Dequeue task and set working true
                 var workItem = await _taskQueue.DequeueAsync(cancellationToken);
 
                 try
@@ -42,6 +43,7 @@ namespace BlockchainSimulator.Common.Queues
                         task.Start();
                     }
 
+                    // Execute task
                     await task;
                 }
                 catch (OperationCanceledException)
@@ -50,7 +52,6 @@ namespace BlockchainSimulator.Common.Queues
                 }
                 catch (Exception e)
                 {
-                    // TODO: log errors
                     Console.WriteLine(e);
                 }
             }

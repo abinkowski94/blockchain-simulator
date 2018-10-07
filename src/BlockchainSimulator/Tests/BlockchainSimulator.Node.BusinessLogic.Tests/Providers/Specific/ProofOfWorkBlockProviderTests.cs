@@ -34,24 +34,24 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
         }
 
         [Fact]
-        public void CreateBlock_EmptyTransactionSet_Null()
+        public async Task CreateBlock_EmptyTransactionSet_Null()
         {
             // Arrange
 
             // Act
-            var result = _blockProvider.CreateBlock(new HashSet<Transaction>(), new DateTime(1, 1, 1));
+            var result = await _blockProvider.CreateBlock(new HashSet<Transaction>(), new DateTime(1, 1, 1));
 
             // Assert
             Assert.Null(result);
         }
 
         [Fact]
-        public void CreateBlock_Null_Null()
+        public async Task CreateBlock_Null_Null()
         {
             // Arrange
 
             // Act
-            var result = _blockProvider.CreateBlock(null, new DateTime(1, 1, 1));
+            var result = await _blockProvider.CreateBlock(null, new DateTime(1, 1, 1));
 
             // Assert
             Assert.Null(result);

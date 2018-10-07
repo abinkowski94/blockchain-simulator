@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using BlockchainSimulator.Common.Queues;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
@@ -21,11 +22,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly IBlockProvider _blockProvider;
         private readonly IBackgroundTaskQueue _queue;
+        private readonly IMiningQueue _miningQueue;
         private ITransactionService _transactionService;
 
-        public MiningService(IBlockchainRepository blockchainRepository, IConsensusService consensusService,
-            IStatisticService statisticService, IBlockProvider blockProvider, IBackgroundTaskQueue queue,
-            IBlockchainConfiguration blockchainConfiguration, IServiceProvider serviceProvider)
+        public MiningService(IBlockchainConfiguration blockchainConfiguration,
+            IBlockchainRepository blockchainRepository, IConsensusService consensusService,
+            IStatisticService statisticService, IServiceProvider serviceProvider, IBlockProvider blockProvider,
+            IBackgroundTaskQueue queue, IMiningQueue miningQueue)
         {
             _blockchainConfiguration = blockchainConfiguration;
             _blockchainRepository = blockchainRepository;
@@ -34,10 +37,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _serviceProvider = serviceProvider;
             _blockProvider = blockProvider;
             _queue = queue;
+            _miningQueue = miningQueue;
         }
 
         public void MineBlock(HashSet<Transaction> transactions, DateTime enqueueTime, CancellationToken token)
         {
+            _statisticService.RegisterWork(true);
+
             if (!token.IsCancellationRequested)
             {
                 _statisticService.RegisterMiningAttempt();
@@ -73,17 +79,19 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             }
         }
 
-        public void ReMineBlocks()
+        public void ReMineBlocksAndSynchronize()
         {
-            _statisticService.RegisterWork(true);
-
-            if (_transactionService == null)
+            if (_miningQueue.IsWorking || _queue.Length > 0)
             {
-                _transactionService = _serviceProvider.GetService<ITransactionService>();
+                _statisticService.RegisterWork(true);
             }
-
-            if (_queue.Length == 0)
+            else
             {
+                if (_transactionService == null)
+                {
+                    _transactionService = _serviceProvider.GetService<ITransactionService>();
+                }
+
                 var pendingTransactions = _transactionService.GetPendingTransactions().Result;
                 if (pendingTransactions.Count < _blockchainConfiguration.BlockSize)
                 {
@@ -102,7 +110,15 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                         }
                         else
                         {
-                            _statisticService.RegisterWork(false);
+                            var synchronizationResponse = _consensusService.SynchronizeWithOtherNodes();
+                            if (!synchronizationResponse.IsSuccess || !synchronizationResponse.Result)
+                            {
+                                _statisticService.RegisterWork(false);
+                            }
+                            else
+                            {
+                                ReMineBlocksAndSynchronize();
+                            }
                         }
                     }
                 }

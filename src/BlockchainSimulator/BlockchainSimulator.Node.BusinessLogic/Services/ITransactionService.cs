@@ -16,5 +16,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         BaseResponse<Transaction> GetTransaction(string id);
 
         BaseResponse<List<Transaction>> AddTransactions(List<Transaction> transactions);
+
+        BaseResponse<bool> ForceMining();
+        
+        void Clear();
     }
 }
