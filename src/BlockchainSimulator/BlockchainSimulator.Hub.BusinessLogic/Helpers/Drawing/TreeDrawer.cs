@@ -9,10 +9,10 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
 {
     public class TreeDrawer
     {
-        private const int _nodeHeight = 30;
-        private const int _nodeMarginX = 50;
-        private const int _nodeMarginY = 40;
-        private const int _nodeWidth = 60;
+        private const int NodeHeight = 30;
+        private const int NodeMarginX = 50;
+        private const int NodeMarginY = 40;
+        private const int NodeWidth = 60;
         private readonly string _path;
 
         public TreeDrawer(string path)
@@ -71,8 +71,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             var treeWidth = tree.Width + 1;
             var treeHeight = tree.Height + 1;
 
-            var size = new Size(Convert.ToInt32(treeWidth * _nodeWidth + (treeWidth + 1) * _nodeMarginX),
-                treeHeight * _nodeHeight + (treeHeight + 1) * _nodeMarginY);
+            var size = new Size(Convert.ToInt32(treeWidth * NodeWidth + (treeWidth + 1) * NodeMarginX),
+                treeHeight * NodeHeight + (treeHeight + 1) * NodeMarginY);
 
             return size;
         }
@@ -83,8 +83,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             var nodePen = node.Item.Colour;
 
             // rectangle where node will be positioned
-            var nodeRect = new Rectangle(Convert.ToInt32(_nodeMarginX + node.X * (_nodeWidth + _nodeMarginX)),
-                _nodeMarginY + node.Y * (_nodeHeight + _nodeMarginY), _nodeWidth, _nodeHeight);
+            var nodeRect = new Rectangle(Convert.ToInt32(NodeMarginX + node.X * (NodeWidth + NodeMarginX)),
+                NodeMarginY + node.Y * (NodeHeight + NodeMarginY), NodeWidth, NodeHeight);
 
             // draw box
             if (!node.Item.IsCompressed)
@@ -95,14 +95,14 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             // draw content
             var font = new Font(FontFamily.GenericMonospace, 8);
             var stringSize = graphic.MeasureString(node.ToString(), font);
-            graphic.DrawString(node.ToString(), font, nodePen.Brush, nodeRect.X + _nodeWidth / 2 - stringSize.Width / 2,
-                nodeRect.Y + _nodeHeight / 2 - stringSize.Height / 2);
+            graphic.DrawString(node.ToString(), font, nodePen.Brush, nodeRect.X + NodeWidth / 2 - stringSize.Width / 2,
+                nodeRect.Y + NodeHeight / 2 - stringSize.Height / 2);
 
             // draw line to parent
             if (node.Parent != null)
             {
                 var nodeTopMiddle = new Point(nodeRect.X + nodeRect.Width / 2, nodeRect.Y);
-                var nodeBottomMiddle = new Point(nodeTopMiddle.X, nodeTopMiddle.Y - _nodeMarginY / 2);
+                var nodeBottomMiddle = new Point(nodeTopMiddle.X, nodeTopMiddle.Y - NodeMarginY / 2);
                 graphic.DrawLine(nodePen, nodeTopMiddle, nodeBottomMiddle);
             }
 
@@ -110,23 +110,23 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
             if (node.Children.Count > 0)
             {
                 var nodeBottomMiddle = new Point(nodeRect.X + nodeRect.Width / 2, nodeRect.Y + nodeRect.Height);
-                var nodeTopMiddle = new Point(nodeBottomMiddle.X, nodeBottomMiddle.Y + _nodeMarginY / 2);
+                var nodeTopMiddle = new Point(nodeBottomMiddle.X, nodeBottomMiddle.Y + NodeMarginY / 2);
                 graphic.DrawLine(nodePen, nodeBottomMiddle, nodeTopMiddle);
 
                 // draw line over children
                 if (node.Children.Count > 1)
                 {
-                    var childrenLineStartX = Convert.ToInt32(_nodeMarginX + node.GetRightMostChild().X *
+                    var childrenLineStartX = Convert.ToInt32(NodeMarginX + node.GetRightMostChild().X *
                                                              // ReSharper disable once PossibleLossOfFraction
-                                                             (_nodeWidth + _nodeMarginX) + _nodeWidth / 2);
-                    var childrenLineStartY = nodeBottomMiddle.Y + _nodeMarginY / 2;
+                                                             (NodeWidth + NodeMarginX) + NodeWidth / 2);
+                    var childrenLineStartY = nodeBottomMiddle.Y + NodeMarginY / 2;
                     var childrenLineStart = new Point(childrenLineStartX, childrenLineStartY);
 
-                    var childrenLineEndX = Convert.ToInt32(_nodeMarginX +
-                                                           node.GetLeftMostChild().X * (_nodeWidth + _nodeMarginX) +
+                    var childrenLineEndX = Convert.ToInt32(NodeMarginX +
+                                                           node.GetLeftMostChild().X * (NodeWidth + NodeMarginX) +
                                                            // ReSharper disable once PossibleLossOfFraction
-                                                           _nodeWidth / 2);
-                    var childrenLineEndY = nodeBottomMiddle.Y + _nodeMarginY / 2;
+                                                           NodeWidth / 2);
+                    var childrenLineEndY = nodeBottomMiddle.Y + NodeMarginY / 2;
                     var childrenLineEnd = new Point(childrenLineEndX, childrenLineEndY);
 
                     graphic.DrawLine(Pens.Black, childrenLineStart, childrenLineEnd);

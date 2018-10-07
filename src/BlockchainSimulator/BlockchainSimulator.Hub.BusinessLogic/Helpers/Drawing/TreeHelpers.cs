@@ -6,9 +6,9 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
 {
     public static class TreeHelpers<T> where T : class
     {
-        private const int _nodeSize = 1;
-        private const float _siblingDistance = 0.0F;
-        private const float _treeDistance = 0.0F;
+        private const int NodeSize = 1;
+        private const float SiblingDistance = 0.0F;
+        private const float TreeDistance = 0.0F;
 
         public static void CalculateNodePositions(TreeNodeModel<T> rootNode)
         {
@@ -69,7 +69,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
                 // if there is a previous sibling in this set, set X to previous sibling + designated distance
                 if (!node.IsLeftMost())
                 {
-                    node.X = node.GetPreviousSibling().X + _nodeSize + _siblingDistance;
+                    node.X = node.GetPreviousSibling().X + NodeSize + SiblingDistance;
                 }
                 else
                 {
@@ -87,7 +87,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
                 }
                 else
                 {
-                    node.X = node.GetPreviousSibling().X + _nodeSize + _siblingDistance;
+                    node.X = node.GetPreviousSibling().X + NodeSize + SiblingDistance;
                     node.Mod = node.X - node.Children[0].X;
                 }
             }
@@ -103,7 +103,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
                 }
                 else
                 {
-                    node.X = node.GetPreviousSibling().X + _nodeSize + _siblingDistance;
+                    node.X = node.GetPreviousSibling().X + NodeSize + SiblingDistance;
                     node.Mod = node.X - mid;
                 }
             }
@@ -117,7 +117,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Helpers.Drawing
 
         private static void CheckForConflicts(TreeNodeModel<T> node)
         {
-            const float minDistance = _treeDistance + _nodeSize;
+            const float minDistance = TreeDistance + NodeSize;
             var shiftValue = 0F;
 
             var nodeContour = new Dictionary<int, float>();
