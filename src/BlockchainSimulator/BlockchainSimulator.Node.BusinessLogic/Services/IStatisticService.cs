@@ -1,4 +1,3 @@
-using BlockchainSimulator.Common.Models.Statistics;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using System;
 
@@ -18,8 +17,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         void RegisterAbandonedBlock();
 
-        void RegisterWork(bool isWorking);
-
-        MiningQueueStatus GetStatus();
+        void RegisterWorkingStatus(bool isWorking);
     }
 }

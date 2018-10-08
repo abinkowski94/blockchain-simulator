@@ -1,8 +1,8 @@
+using BlockchainSimulator.Common.Extensions;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Common.Extensions;
 
 namespace BlockchainSimulator.Common.Queues
 {
@@ -10,7 +10,7 @@ namespace BlockchainSimulator.Common.Queues
     /// <summary>
     /// The background queue
     /// </summary>
-    public class BackgroundTaskQueue : IBackgroundTaskQueue
+    public class BackgroundQueue : IBackgroundQueue
     {
         /// <summary>
         /// The signal semaphore that allows to dequeue only when there are tasks to dequeue
@@ -48,7 +48,7 @@ namespace BlockchainSimulator.Common.Queues
         /// Adds background work item to the queue
         /// </summary>
         /// <param name="workItem">The work item</param>
-        public void QueueBackgroundWorkItem(Func<CancellationToken, Task> workItem)
+        public void Enqueue(Func<CancellationToken, Task> workItem)
         {
             if (workItem == null)
             {

@@ -11,13 +11,13 @@ namespace BlockchainSimulator.Common.Queues
     /// </summary>
     public class QueuedHostedService : BackgroundService
     {
-        private readonly IBackgroundTaskQueue _taskQueue;
+        private readonly IBackgroundQueue _taskQueue;
 
         /// <summary>
         /// The constructor
         /// </summary>
         /// <param name="taskQueue">The queue</param>
-        public QueuedHostedService(IBackgroundTaskQueue taskQueue)
+        public QueuedHostedService(IBackgroundQueue taskQueue)
         {
             _taskQueue = taskQueue;
         }

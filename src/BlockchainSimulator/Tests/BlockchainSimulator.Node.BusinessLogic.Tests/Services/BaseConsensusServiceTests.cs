@@ -1,4 +1,4 @@
-using BlockchainSimulator.Common.Services;
+using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Model.Consensus;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Services;
@@ -6,26 +6,24 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using BlockchainSimulator.Common.Queues;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
 {
     public class BaseConsensusServiceTests
     {
-        private readonly Mock<IBackgroundTaskQueue> _backgroundTaskQueueMock;
-        private readonly Mock<IHttpService> _httpServiceMock;
+        private readonly Mock<IStatisticService> _statisticServiceMock;
+        private readonly Mock<IBackgroundQueue> _backgroundQueueMock;
         private readonly IConsensusService _consensusService;
 
         public BaseConsensusServiceTests()
         {
-            _backgroundTaskQueueMock = new Mock<IBackgroundTaskQueue>();
-            _httpServiceMock = new Mock<IHttpService>();
-            _consensusService = new Mock<BaseConsensusService>(_backgroundTaskQueueMock.Object, _httpServiceMock.Object)
+            _statisticServiceMock = new Mock<IStatisticService>();
+            _backgroundQueueMock = new Mock<IBackgroundQueue>();
+
+            _consensusService = new Mock<BaseConsensusService>(_statisticServiceMock.Object, _backgroundQueueMock.Object)
             { CallBase = true }.Object;
         }
 
@@ -38,7 +36,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             var response = _consensusService.ConnectNode(new ServerNode()) as ErrorResponse<ServerNode>;
 
             // Assert
-            _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
+            _backgroundQueueMock.Verify(p => p.Enqueue(It.IsAny<Func<CancellationToken, Task>>()),
                 Times.Never);
 
             Assert.NotNull(response);
@@ -46,7 +44,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             Assert.Equal("Invalid input node", response.Message);
             Assert.Equal(2, response.Errors.Length);
             Assert.Contains("The node's id can not be null!", response.Errors);
-            Assert.Contains("The node's http address cannot be null!", response.Errors);
+            Assert.Contains("The node's HTTP address cannot be null!", response.Errors);
         }
 
         [Fact]
@@ -60,7 +58,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
                 as ErrorResponse<ServerNode>;
 
             // Assert
-            _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
+            _backgroundQueueMock.Verify(p => p.Enqueue(It.IsAny<Func<CancellationToken, Task>>()),
                 Times.Once);
 
             Assert.NotNull(response);
@@ -71,26 +69,16 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         }
 
         [Fact]
-        public async Task ConnectNode_Node_SuccessResponse()
+        public void ConnectNode_Node_SuccessResponse()
         {
             // Arrange
             var serverNode = new ServerNode { Id = "1", HttpAddress = "http://test:4200" };
 
-            var token = new CancellationToken();
-            Func<CancellationToken, Task> queueTask = null;
-            _backgroundTaskQueueMock.Setup(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()))
-                .Callback((Func<CancellationToken, Task> func) => queueTask = func);
-
-            _httpServiceMock.Setup(p => p.Get($"{serverNode.HttpAddress}/api/info", It.IsAny<TimeSpan>(), token))
-                .Returns(new HttpResponseMessage(HttpStatusCode.OK));
-
             // Act
             var response = _consensusService.ConnectNode(serverNode) as SuccessResponse<ServerNode>;
-            await queueTask(token);
 
             // Assert
-            _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()));
-            _httpServiceMock.Verify(p => p.Get($"{serverNode.HttpAddress}/api/info", It.IsAny<TimeSpan>(), token));
+            _backgroundQueueMock.Verify(p => p.Enqueue(It.IsAny<Func<CancellationToken, Task>>()));
 
             Assert.NotNull(response);
             Assert.NotNull(response.Result);
@@ -106,7 +94,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             var response = _consensusService.ConnectNode(null) as ErrorResponse<ServerNode>;
 
             // Assert
-            _backgroundTaskQueueMock.Verify(p => p.QueueBackgroundWorkItem(It.IsAny<Func<CancellationToken, Task>>()),
+            _backgroundQueueMock.Verify(p => p.Enqueue(It.IsAny<Func<CancellationToken, Task>>()),
                 Times.Never);
 
             Assert.NotNull(response);

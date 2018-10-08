@@ -40,7 +40,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
 
                     // Set queue working status and re-mine blocks
                     _queue.IsWorking = _queue.Length > 0;
-                    _miningService.ReMineBlocksAndSynchronize();
+                    _miningService.ReMineAndSynchronizeBlocks();
                 }
                 catch (OperationCanceledException)
                 {

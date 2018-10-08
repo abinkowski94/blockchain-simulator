@@ -1,4 +1,5 @@
 using BlockchainSimulator.Common.Extensions;
+using BlockchainSimulator.Common.Hubs;
 using BlockchainSimulator.Common.Models.Statistics;
 using BlockchainSimulator.Common.Models.WebClient;
 using BlockchainSimulator.Common.Queues;
@@ -7,6 +8,7 @@ using BlockchainSimulator.Hub.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios;
 using BlockchainSimulator.Hub.BusinessLogic.Model.Transactions;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -29,10 +31,10 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
         private readonly object _padlock = new object();
 
         private readonly IStatisticService _statisticService;
-        private readonly IBackgroundTaskQueue _queue;
+        private readonly IBackgroundQueue _queue;
         private readonly IHttpService _httpService;
 
-        public SimulationRunnerService(IStatisticService statisticService, IBackgroundTaskQueue queue,
+        public SimulationRunnerService(IStatisticService statisticService, IBackgroundQueue queue,
             IHttpService httpService, IHostingEnvironment environment)
         {
             //TODO: Add times to global configuration
@@ -55,12 +57,12 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 simulation.Status = SimulationStatuses.Pending;
 
                 // Queue simulation
-                _queue.QueueBackgroundWorkItem(token => new Task(() =>
+                _queue.Enqueue(token => new Task(() =>
                 {
                     try
                     {
                         SpawnServers(simulation, settings, token);
-                        PingServers(simulation, settings, token);
+                        PingAndConnectWithServers(simulation, settings, token);
                         ConnectNodes(simulation, token);
                         SendTransactions(simulation, settings, token);
                         WaitForNetwork(simulation, settings, token);
@@ -72,7 +74,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e);
+                        Console.WriteLine(e.Message);
                     }
                     finally
                     {
@@ -141,9 +143,9 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             Thread.Sleep(_hostingTime);
         }
 
-        private void PingServers(Simulation simulation, SimulationSettings settings, CancellationToken token)
+        private void PingAndConnectWithServers(Simulation simulation, SimulationSettings settings, CancellationToken token)
         {
-            // Ping each node by using info endpoint
+            // Ping each node by using info endpoint and connect in order to update status
             simulation.ServerNodes.Where(n => settings.NodesAndTransactions.Keys.Contains(n.Id)).ParallelForEach(node =>
             {
                 var uri = $"{node.HttpAddress}/api/info";
@@ -151,6 +153,28 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 if ((node.IsConnected = responseMessage.IsSuccessStatusCode) != true)
                 {
                     Console.WriteLine($"Could not ping server node: {node.Id}");
+                }
+                else if (responseMessage.IsSuccessStatusCode)
+                {
+                    var url = $"{node.HttpAddress}/simulationHub";
+                    node.HubConnection = new HubConnectionBuilder().WithUrl(url).Build();
+
+                    // Reconnect when connection is closing
+                    node.HubConnection.Closed += async error =>
+                    {
+                        await Task.Delay(new Random().Next(0, 5) * 1000);
+                        await node.HubConnection.StartAsync(token);
+                    };
+
+                    // Register action: change of working status
+                    var mehtodName = nameof(ISiumlationClient.ChangeWorkingStatus);
+                    node.HubConnection.On<bool>(mehtodName, isWorking =>
+                    {
+                        node.IsWorking = isWorking;
+                    });
+
+                    // Start the connection
+                    node.HubConnection.StartAsync(token).Wait();
                 }
             }, token);
         }
@@ -199,7 +223,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                                 Sender = Guid.NewGuid().ToString(),
                                 Recipient = Guid.NewGuid().ToString(),
                                 Amount = randomGenerator.Next(1, 1000),
-                                Fee = (decimal) randomGenerator.NextDouble()
+                                Fee = (decimal)randomGenerator.NextDouble()
                             });
                         }
                     });
@@ -242,31 +266,9 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
         private void WaitForNetwork(Simulation simulation, SimulationSettings settings, CancellationToken token)
         {
-            // Change status
+            // Change status and wait
             simulation.Status = SimulationStatuses.WaitingForNetwork;
-
-            // TODO: To be simplified (Use signalR)
-            bool wait;
-            do
-            {
-                wait = simulation.ServerNodes.Where(n => n.IsConnected == true).Any(node =>
-                {
-                    var uri = $"{node.HttpAddress}/api/statistic/mining-queue";
-                    var response = _httpService.Get(uri, _nodeTimeout, token);
-                    return response.IsSuccessStatusCode && response.Content.ReadAs<MiningQueueStatus>().IsWorking;
-                });
-
-                if (wait)
-                {
-                    wait = !HasSimulationTimeElapsed(simulation, settings);
-                }
-
-                if (wait)
-                {
-                    // The interval
-                    Thread.Sleep(_networkWaitInterval);
-                }
-            } while (wait);
+            SpinWait.SpinUntil(() => simulation.ServerNodes.Where(n => n.IsConnected == true).All(n => !n.IsWorking));
         }
 
         private void ForceMining(Simulation simulation, CancellationToken token)
@@ -330,10 +332,6 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     {
                         node.NodeThread?.Kill();
                     }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
                 }
                 finally
                 {

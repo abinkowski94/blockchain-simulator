@@ -7,8 +7,13 @@ namespace BlockchainSimulator.Common.Queues
     /// <summary>
     /// The background queue
     /// </summary>
-    public interface IBackgroundTaskQueue
+    public interface IBackgroundQueue
     {
+        /// <summary>
+        /// The length of the queue
+        /// </summary>
+        int Length { get; }
+
         /// <summary>
         /// Dequeue the work item
         /// </summary>
@@ -20,12 +25,7 @@ namespace BlockchainSimulator.Common.Queues
         /// Adds background work item to the queue
         /// </summary>
         /// <param name="workItem">The work item</param>
-        void QueueBackgroundWorkItem(Func<CancellationToken, Task> workItem);
-
-        /// <summary>
-        /// The length of the queue
-        /// </summary>
-        int Length { get; }
+        void Enqueue(Func<CancellationToken, Task> workItem);
 
         /// <summary>
         /// Clears the queue

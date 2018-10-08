@@ -9,11 +9,11 @@ namespace BlockchainSimulator.Common.Tests.Queues
     public class QueuedHostedServiceTests
     {
         private readonly QueuedHostedService _hostedService;
-        private readonly BackgroundTaskQueue _queue;
+        private readonly BackgroundQueue _queue;
 
         public QueuedHostedServiceTests()
         {
-            _queue = new BackgroundTaskQueue();
+            _queue = new BackgroundQueue();
             _hostedService = new QueuedHostedService(_queue);
         }
 
@@ -22,7 +22,7 @@ namespace BlockchainSimulator.Common.Tests.Queues
         {
             // Arrange
             var token = new CancellationToken();
-            _queue.QueueBackgroundWorkItem(t => Task.Run(() => Thread.Sleep(100), t));
+            _queue.Enqueue(t => Task.Run(() => Thread.Sleep(100), t));
 
             // Act
             await _hostedService.StartAsync(token);
@@ -36,7 +36,7 @@ namespace BlockchainSimulator.Common.Tests.Queues
         {
             // Arrange
             var token = new CancellationToken();
-            _queue.QueueBackgroundWorkItem(t => Task.Run(() => throw new Exception(), t));
+            _queue.Enqueue(t => Task.Run(() => throw new Exception(), t));
 
             // Act
             await _hostedService.StartAsync(token);

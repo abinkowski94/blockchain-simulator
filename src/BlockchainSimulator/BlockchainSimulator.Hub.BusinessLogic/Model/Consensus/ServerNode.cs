@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -50,5 +51,17 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Model.Consensus
         /// </summary>
         [JsonIgnore]
         public Process NodeThread { get; set; }
+
+        /// <summary>
+        /// The hub connection
+        /// </summary>
+        [JsonIgnore]
+        public HubConnection HubConnection { get; set; }
+
+        /// <summary>
+        /// Represents status of the node
+        /// </summary>
+        [JsonIgnore]
+        public bool IsWorking { get; set; } = true;
     }
 }

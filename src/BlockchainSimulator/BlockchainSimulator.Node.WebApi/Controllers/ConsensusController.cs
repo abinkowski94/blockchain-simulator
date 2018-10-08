@@ -28,17 +28,6 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         }
 
         /// <summary>
-        /// Checks and accepts the incoming block and adds if it is valid
-        /// </summary>
-        /// <param name="encodedBlock">The encoded block</param>
-        /// <returns>The response if the block has been accepted or not</returns>
-        [HttpPost]
-        public void AcceptBlockchain([FromBody] EncodedBlock encodedBlock)
-        {
-            _consensusService.AcceptExternalBlock(encodedBlock);
-        }
-
-        /// <summary>
         /// Allows to connect new node one way communication
         /// </summary>
         /// <param name="serverNode">The node</param>

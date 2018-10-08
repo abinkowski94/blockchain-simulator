@@ -1,4 +1,5 @@
 ﻿using BlockchainSimulator.Common.AppStart;
+using BlockchainSimulator.Node.BusinessLogic.Hubs;
 using BlockchainSimulator.Node.WebApi.AppStart;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -37,6 +38,11 @@ namespace BlockchainSimulator.Node.WebApi
         {
             app.UseDefaultConfiguration(env);
             app.UseSwagger("BlockchainTree simulator (Node API)");
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<ConsensusHub>("/consensusHub");
+                routes.MapHub<SimulationHub>("/simulationHub");
+            });
         }
 
         /// <summary>
@@ -49,6 +55,7 @@ namespace BlockchainSimulator.Node.WebApi
             services.AddBlockchainServices(Configuration);
             services.AddSwagger("node");
             services.AddMemoryCache();
+            services.AddSignalR();
         }
     }
 }

@@ -8,11 +8,11 @@ namespace BlockchainSimulator.Common.Tests.Queues
 {
     public class BackgroundTaskQueueTests
     {
-        private readonly BackgroundTaskQueue _taskQueue;
+        private readonly BackgroundQueue _taskQueue;
 
         public BackgroundTaskQueueTests()
         {
-            _taskQueue = new BackgroundTaskQueue();
+            _taskQueue = new BackgroundQueue();
         }
 
         [Fact]
@@ -20,7 +20,7 @@ namespace BlockchainSimulator.Common.Tests.Queues
         {
             // Arrange
             var token = new CancellationToken();
-            _taskQueue.QueueBackgroundWorkItem(t => Task.Run(() => Thread.Sleep(100), t));
+            _taskQueue.Enqueue(t => Task.Run(() => Thread.Sleep(100), t));
 
             // Act
             var result = await _taskQueue.DequeueAsync(token);
@@ -36,7 +36,7 @@ namespace BlockchainSimulator.Common.Tests.Queues
             // Arrange
 
             // Act
-            void Action() => _taskQueue.QueueBackgroundWorkItem(null);
+            void Action() => _taskQueue.Enqueue(null);
 
             // Assert
             Assert.Throws<ArgumentNullException>((Action)Action);
@@ -48,7 +48,7 @@ namespace BlockchainSimulator.Common.Tests.Queues
             // Arrange
 
             // Act
-            _taskQueue.QueueBackgroundWorkItem(token => Task.Run(() => Thread.Sleep(100), token));
+            _taskQueue.Enqueue(token => Task.Run(() => Thread.Sleep(100), token));
 
             // Assert
         }

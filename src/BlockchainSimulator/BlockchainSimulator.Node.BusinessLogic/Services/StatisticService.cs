@@ -1,10 +1,13 @@
 using BlockchainSimulator.Common.Extensions;
+using BlockchainSimulator.Common.Hubs;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
+using BlockchainSimulator.Node.BusinessLogic.Hubs;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Model.Statistics;
 using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Model.Block;
 using BlockchainSimulator.Node.DataAccess.Repositories;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -14,22 +17,25 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class StatisticService : IStatisticService
     {
+        private readonly IHubContext<SimulationHub, ISiumlationClient> _simulationHubContext;
         private readonly IBlockchainConfiguration _blockchainConfiguration;
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly IConfiguration _configuration;
-
         private readonly object _padlock = new object();
+
         private int _rejectedIncomingBlockCount;
         private int _currentMiningQueueLength;
         private int _maxMiningQueueLength;
         private int _miningAttemptsCount;
         private int _abandonedBlockCount;
+        private bool _isWorking;
         private TimeSpan _totalMiningQueueTime;
-        private bool _isWorking = true;
 
-        public StatisticService(IBlockchainConfiguration blockchainConfiguration,
-            IBlockchainRepository blockchainRepository, IConfiguration configuration)
+        public StatisticService(IHubContext<SimulationHub, ISiumlationClient> simulationHubContext,
+            IBlockchainConfiguration blockchainConfiguration, IBlockchainRepository blockchainRepository,
+            IConfiguration configuration)
         {
+            _simulationHubContext = simulationHubContext;
             _blockchainConfiguration = blockchainConfiguration;
             _blockchainRepository = blockchainRepository;
             _configuration = configuration;
@@ -84,25 +90,20 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             return new SuccessResponse<Statistic>($"The statistics has been generated on: {DateTime.UtcNow}", result);
         }
 
-        public void RegisterWork(bool isWorking)
+        public void RegisterWorkingStatus(bool isWorking)
         {
             lock (_padlock)
             {
-                _isWorking = isWorking;
+                if (_isWorking != isWorking)
+                {
+                    _isWorking = isWorking;
+                    _simulationHubContext.Clients.All.ChangeWorkingStatus(_isWorking);
+                }
             }
         }
 
-        public Common.Models.Statistics.MiningQueueStatus GetStatus()
-        {
-            return new Common.Models.Statistics.MiningQueueStatus
-            {
-                IsWorking = _isWorking,
-                Length = _currentMiningQueueLength
-            };
-        }
-
         private static void AddTransactionsStatistics(BlockchainStatistics blockchainStatistics,
-            BlockchainTree blockchain)
+                    BlockchainTree blockchain)
         {
             blockchainStatistics.TransactionsStatistics = new List<TransactionStatistics>();
 

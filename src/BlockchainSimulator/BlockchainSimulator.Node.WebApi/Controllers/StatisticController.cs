@@ -1,5 +1,4 @@
 using BlockchainSimulator.Common.Models.Responses;
-using BlockchainSimulator.Common.Models.Statistics;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.WebApi.Extensions;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +14,9 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
     [Route("api/[controller]")]
     public class StatisticController : BaseController
     {
+        /// <summary>
+        /// The statistics service
+        /// </summary>
         private readonly IStatisticService _statisticService;
 
         /// <inheritdoc />
@@ -36,16 +38,6 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         {
             return _statisticService.GetStatistics()
                 .GetActionResult<Statistic, Common.Models.Statistics.Statistic>(this);
-        }
-
-        /// <summary>
-        /// Gets the status of mining queue
-        /// </summary>
-        /// <returns>Status of the mining queue</returns>
-        [HttpGet("mining-queue")]
-        public ActionResult<MiningQueueStatus> GetStatus()
-        {
-            return _statisticService.GetStatus();
         }
     }
 }

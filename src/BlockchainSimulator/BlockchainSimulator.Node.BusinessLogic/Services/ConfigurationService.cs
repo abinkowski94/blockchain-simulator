@@ -11,11 +11,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
     {
         private readonly ITransactionService _transactionService;
         private readonly IConfiguration _configuration;
-        private readonly IBackgroundTaskQueue _queue;
+        private readonly IBackgroundQueue _queue;
         private readonly IMiningQueue _miningQueue;
 
         public ConfigurationService(IConfiguration configuration, ITransactionService transactionService,
-            IMiningQueue miningQueue, IBackgroundTaskQueue queue)
+            IMiningQueue miningQueue, IBackgroundQueue queue)
         {
             _configuration = configuration;
             _transactionService = transactionService;

@@ -1,29 +1,29 @@
+using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Common.Models.Consensus;
-using BlockchainSimulator.Common.Services;
+using BlockchainSimulator.Common.Queues;
+using BlockchainSimulator.Node.BusinessLogic.Hubs;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
+using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BlockchainSimulator.Common.Queues;
 using ServerNode = BlockchainSimulator.Node.BusinessLogic.Model.Consensus.ServerNode;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
-    public abstract class BaseConsensusService : BaseService, IConsensusService
+    public abstract class BaseConsensusService : BaseService, IConsensusService, IDisposable
     {
         protected readonly ConcurrentDictionary<string, ServerNode> ServerNodes;
+        protected readonly IStatisticService StatisticService;
+        protected readonly IBackgroundQueue BackgroundQueue;
 
-        protected readonly IBackgroundTaskQueue BackgroundQueue;
-        protected readonly IHttpService HttpService;
-
-        protected BaseConsensusService(IBackgroundTaskQueue backgroundQueue, IHttpService httpService)
+        protected BaseConsensusService(IStatisticService statisticService, IBackgroundQueue backgroundQueue)
         {
             ServerNodes = new ConcurrentDictionary<string, ServerNode>();
-
-            HttpService = httpService;
+            StatisticService = statisticService;
             BackgroundQueue = backgroundQueue;
         }
 
@@ -42,7 +42,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             }
 
             serverNode.IsConnected = null;
-            CheckNodeConnection(serverNode);
+            CreateNodeConnection(serverNode);
 
             if (!ServerNodes.TryAdd(serverNode.Id, serverNode))
             {
@@ -79,14 +79,43 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 ServerNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList());
         }
 
-        private void CheckNodeConnection(ServerNode serverNode)
+        public void Dispose()
         {
-            BackgroundQueue.QueueBackgroundWorkItem(token => Task.Run(() =>
+            ServerNodes.Values.ForEach(async n =>
             {
-                var timeout = TimeSpan.FromSeconds(30);
-                var response = HttpService.Get($"{serverNode.HttpAddress}/api/info", timeout, token);
-                serverNode.IsConnected = response.IsSuccessStatusCode;
-            }, token));
+                await n.HubConnection.StopAsync();
+                await n.HubConnection.DisposeAsync();
+            });
+        }
+
+        private void CreateNodeConnection(ServerNode serverNode)
+        {
+            BackgroundQueue.Enqueue(async token =>
+            {
+                var url = $"{serverNode.HttpAddress}/consensusHub";
+                serverNode.HubConnection = new HubConnectionBuilder().WithUrl(url).Build();
+
+                // Reconnect when connection is closing
+                serverNode.HubConnection.Closed += async error =>
+                {
+                    await Task.Delay(new Random().Next(0, 5) * 1000);
+                    await serverNode.HubConnection.StartAsync(token);
+                };
+
+                // Register action: acceptance of external block
+                var mehtodName = nameof(IConsensusClient.ReceiveBlock);
+                serverNode.HubConnection.On<EncodedBlock>(mehtodName, encodedBlock =>
+                {
+                    StatisticService.RegisterWorkingStatus(true);
+                    AcceptExternalBlock(encodedBlock);
+                });
+
+                // Start the connection
+                await serverNode.HubConnection.StartAsync(token);
+
+                // Sets the connection status
+                serverNode.IsConnected = true;
+            });
         }
 
         private List<string> ValidateNode(ServerNode serverNode)
@@ -105,7 +134,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
             if (serverNode.HttpAddress == null)
             {
-                validationErrors.Add("The node's http address cannot be null!");
+                validationErrors.Add("The node's HTTP address cannot be null!");
             }
 
             if (serverNode.Id != null && ServerNodes.ContainsKey(serverNode.Id))
