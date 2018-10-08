@@ -34,6 +34,7 @@ namespace BlockchainSimulator.Common.Queues
             {
                 // Dequeue task and set working true
                 var workItem = await _taskQueue.DequeueAsync(cancellationToken);
+                _taskQueue.IsWorking = true;
 
                 try
                 {
@@ -45,6 +46,8 @@ namespace BlockchainSimulator.Common.Queues
 
                     // Execute task
                     await task;
+
+                    _taskQueue.IsWorking = _taskQueue.Length > 0;
                 }
                 catch (OperationCanceledException)
                 {

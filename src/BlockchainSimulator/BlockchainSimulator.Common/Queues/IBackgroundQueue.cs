@@ -15,6 +15,11 @@ namespace BlockchainSimulator.Common.Queues
         int Length { get; }
 
         /// <summary>
+        /// Indicates whether the queue is working
+        /// </summary>
+        bool IsWorking { get; set; }
+
+        /// <summary>
         /// Dequeue the work item
         /// </summary>
         /// <param name="cancellationToken">The cancellation token</param>

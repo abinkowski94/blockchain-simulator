@@ -25,7 +25,6 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
     {
         private readonly TimeSpan _hostingTime;
         private readonly TimeSpan _nodeTimeout;
-        private readonly TimeSpan _networkWaitInterval;
         private readonly int _hostingRetryCount;
         private readonly string _directoryPath;
         private readonly object _padlock = new object();
@@ -40,7 +39,6 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             //TODO: Add times to global configuration
             _nodeTimeout = TimeSpan.FromSeconds(10);
             _hostingTime = TimeSpan.FromSeconds(10);
-            _networkWaitInterval = TimeSpan.FromSeconds(5);
             _hostingRetryCount = 5;
 
             _directoryPath = environment.ContentRootPath ?? Directory.GetCurrentDirectory();
@@ -65,9 +63,9 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                         PingAndConnectWithServers(simulation, settings, token);
                         ConnectNodes(simulation, token);
                         SendTransactions(simulation, settings, token);
-                        WaitForNetwork(simulation, settings, token);
+                        WaitForNetwork(simulation, settings);
                         ForceMining(simulation, token);
-                        WaitForNetwork(simulation, settings, token);
+                        WaitForNetwork(simulation, settings);
                         StopAllJobs(simulation, token);
                         WaitForStatistics(simulation, settings, token);
                         ClearNodes(simulation, token);
@@ -167,8 +165,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     };
 
                     // Register action: change of working status
-                    var mehtodName = nameof(ISiumlationClient.ChangeWorkingStatus);
-                    node.HubConnection.On<bool>(mehtodName, isWorking =>
+                    const string methodName = nameof(ISiumlationClient.ChangeWorkingStatus);
+                    node.HubConnection.On<bool>(methodName, isWorking =>
                     {
                         node.IsWorking = isWorking;
                     });
@@ -264,11 +262,20 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             settings.TransactionsSent = transactionsSent;
         }
 
-        private void WaitForNetwork(Simulation simulation, SimulationSettings settings, CancellationToken token)
+        private void WaitForNetwork(Simulation simulation, SimulationSettings settings)
         {
             // Change status and wait
             simulation.Status = SimulationStatuses.WaitingForNetwork;
-            SpinWait.SpinUntil(() => simulation.ServerNodes.Where(n => n.IsConnected == true).All(n => !n.IsWorking));
+            SpinWait.SpinUntil(() =>
+            {
+                var wait = !simulation.ServerNodes.Where(n => n.IsConnected == true).Any(n => n.IsWorking);
+                if (!wait)
+                {
+                    wait = HasSimulationTimeElapsed(simulation, settings);
+                }
+
+                return wait;
+            });
         }
 
         private void ForceMining(Simulation simulation, CancellationToken token)

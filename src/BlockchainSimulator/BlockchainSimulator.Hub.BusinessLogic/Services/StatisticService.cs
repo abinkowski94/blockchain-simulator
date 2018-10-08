@@ -70,6 +70,10 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 var longestBlockchainStatistics =
                     statistics.OrderByDescending(s => s.BlockchainStatistics.TotalTransactionsCount).First();
+                
+                longestBlockchainStatistics.BlockchainStatistics.BlockInfos = statistics
+                    .SelectMany(s => s.BlockchainStatistics.BlockInfos).GroupBy(bi => bi.UniqueId)
+                    .Select(g => g.First()).ToList();
 
                 using (var package = new ExcelPackage())
                 {

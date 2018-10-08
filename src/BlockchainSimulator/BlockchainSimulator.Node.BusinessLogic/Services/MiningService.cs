@@ -1,15 +1,15 @@
-using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
-using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using BlockchainSimulator.Common.Queues;
+using BlockchainSimulator.Node.BusinessLogic.Queues;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
@@ -20,31 +20,29 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IConsensusService _consensusService;
         private readonly IStatisticService _statisticService;
         private readonly IServiceProvider _serviceProvider;
-        private readonly IBackgroundQueue _backgroundQueue;
         private readonly IBlockProvider _blockProvider;
         private readonly IMiningQueue _miningQueue;
+        private readonly IBackgroundQueue _backgroundQueue;
 
         private ITransactionService _transactionService;
 
         public MiningService(IBlockchainConfiguration blockchainConfiguration,
             IBlockchainRepository blockchainRepository, IConsensusService consensusService,
-            IStatisticService statisticService, IServiceProvider serviceProvider,
-            IBackgroundQueue backgroundQueue, IBlockProvider blockProvider, IMiningQueue miningQueue)
+            IStatisticService statisticService, IServiceProvider serviceProvider, IBlockProvider blockProvider,
+            IMiningQueue miningQueue, IBackgroundQueue backgroundQueue)
         {
             _blockchainConfiguration = blockchainConfiguration;
             _blockchainRepository = blockchainRepository;
             _consensusService = consensusService;
             _statisticService = statisticService;
             _serviceProvider = serviceProvider;
-            _backgroundQueue = backgroundQueue;
             _blockProvider = blockProvider;
             _miningQueue = miningQueue;
+            _backgroundQueue = backgroundQueue;
         }
 
         public void MineBlock(HashSet<Transaction> transactions, DateTime enqueueTime, CancellationToken token)
         {
-            _statisticService.RegisterWorkingStatus(true);
-
             if (!token.IsCancellationRequested)
             {
                 _statisticService.RegisterMiningAttempt();
@@ -82,9 +80,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         public void ReMineAndSynchronizeBlocks()
         {
-            _statisticService.RegisterWorkingStatus(true);
-
-            if (!_miningQueue.IsWorking && _backgroundQueue.Length == 0)
+            if (!_miningQueue.IsWorking && !_backgroundQueue.IsWorking)
             {
                 if (_transactionService == null)
                 {
@@ -106,25 +102,17 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
                         if (transactionsToReMine.Any())
                         {
-                            transactionsToReMine.ForEach(t => _transactionService.AddTransaction(t));
+                            _transactionService.AddTransactions(transactionsToReMine);
                         }
                         else
                         {
                             var synchronizationResponse = _consensusService.SynchronizeWithOtherNodes();
-                            if (!synchronizationResponse.IsSuccess || !synchronizationResponse.Result)
-                            {
-                                _statisticService.RegisterWorkingStatus(false);
-                            }
-                            else
+                            if (synchronizationResponse.IsSuccess && synchronizationResponse.Result)
                             {
                                 ReMineAndSynchronizeBlocks();
                             }
                         }
                     }
-                }
-                else
-                {
-                    _statisticService.RegisterWorkingStatus(false);
                 }
             }
         }

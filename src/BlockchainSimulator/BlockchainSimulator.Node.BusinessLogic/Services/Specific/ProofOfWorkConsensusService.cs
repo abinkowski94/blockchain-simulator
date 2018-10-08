@@ -9,7 +9,6 @@ using BlockchainSimulator.Node.DataAccess.Converters;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -29,14 +28,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
         private readonly IHubContext<ConsensusHub, IConsensusClient> _consensusHubContext;
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly IBlockchainValidator _blockchainValidator;
-        private readonly IServiceProvider _serviceProvider;
-
-        private IMiningService _miningService;
 
         public ProofOfWorkConsensusService(IBackgroundQueue backgroundQueue, IConfiguration configuration,
             IBlockchainRepository blockchainRepository, IBlockchainValidator blockchainValidator,
-            IStatisticService statisticService, IServiceProvider serviceProvider,
-            IHubContext<ConsensusHub, IConsensusClient> consensusHubContext)
+            IStatisticService statisticService, IHubContext<ConsensusHub, IConsensusClient> consensusHubContext)
             : base(statisticService, backgroundQueue)
         {
             _encodedBlocksIds = new ConcurrentBag<string>();
@@ -45,7 +40,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             _consensusHubContext = consensusHubContext;
             _blockchainRepository = blockchainRepository;
             _blockchainValidator = blockchainValidator;
-            _serviceProvider = serviceProvider;
         }
 
         public override void AcceptExternalBlock(EncodedBlock encodedBlock)
@@ -65,8 +59,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                         DistributeBlock(encodedBlock);
                     }
                 }
-
-                ReMineAndSynchronizeBlocks();
             }, token));
         }
 
@@ -162,7 +154,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 }
 
                 var mappedParentBlock = LocalMapper.Map<BlockBase>(parentBlock);
-                ((Block)mappedBlock).Parent = mappedParentBlock;
+                ((Block) mappedBlock).Parent = mappedParentBlock;
             }
 
             var duplicatesValidationResult = ValidateTransactionsDuplicates(mappedBlock);
@@ -249,16 +241,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             }
 
             return new ErrorResponse<bool>($"The parent block with id: {block.ParentUniqueId} don't exist!", false);
-        }
-
-        private void ReMineAndSynchronizeBlocks()
-        {
-            if (_miningService == null)
-            {
-                _miningService = _serviceProvider.GetService<IMiningService>();
-            }
-
-            _miningService.ReMineAndSynchronizeBlocks();
         }
     }
 }

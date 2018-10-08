@@ -1,3 +1,4 @@
+using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Common.Services;
 using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
@@ -34,8 +35,9 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
             // Queues and hosted services
             services.AddSingleton<IMiningQueue, MiningQueue>();
             services.AddHostedService<MiningHostedService>();
-            services.AddSingleton<Common.Queues.IBackgroundQueue, Common.Queues.BackgroundQueue>();
-            services.AddHostedService<Common.Queues.QueuedHostedService>();
+            services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
+            services.AddHostedService<QueuedHostedService>();
+            services.AddHostedService<ReMiningHostedService>();
 
             // Services
             services.AddSingleton<ITransactionService, TransactionService>();

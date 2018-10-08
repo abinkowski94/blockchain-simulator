@@ -1,5 +1,4 @@
 using BlockchainSimulator.Common.Extensions;
-using BlockchainSimulator.Node.BusinessLogic.Services;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
@@ -10,12 +9,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
     public class MiningHostedService : BackgroundService
     {
         private readonly IMiningQueue _queue;
-        private readonly IMiningService _miningService;
 
-        public MiningHostedService(IMiningQueue queue, IMiningService miningService)
+        public MiningHostedService(IMiningQueue queue)
         {
             _queue = queue;
-            _miningService = miningService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -38,9 +35,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Queues
                     // Execute task
                     await task;
 
-                    // Set queue working status and re-mine blocks
+                    // Set queue working status
                     _queue.IsWorking = _queue.Length > 0;
-                    _miningService.ReMineAndSynchronizeBlocks();
                 }
                 catch (OperationCanceledException)
                 {

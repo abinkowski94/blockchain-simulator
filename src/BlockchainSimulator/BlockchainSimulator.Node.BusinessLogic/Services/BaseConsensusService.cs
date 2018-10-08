@@ -98,17 +98,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 // Reconnect when connection is closing
                 serverNode.HubConnection.Closed += async error =>
                 {
-                    await Task.Delay(new Random().Next(0, 5) * 1000);
+                    await Task.Delay(new Random().Next(0, 5) * 1000, token);
                     await serverNode.HubConnection.StartAsync(token);
                 };
 
                 // Register action: acceptance of external block
-                var mehtodName = nameof(IConsensusClient.ReceiveBlock);
-                serverNode.HubConnection.On<EncodedBlock>(mehtodName, encodedBlock =>
-                {
-                    StatisticService.RegisterWorkingStatus(true);
-                    AcceptExternalBlock(encodedBlock);
-                });
+                const string methodName = nameof(IConsensusClient.ReceiveBlock);
+                serverNode.HubConnection.On<EncodedBlock>(methodName, AcceptExternalBlock);
 
                 // Start the connection
                 await serverNode.HubConnection.StartAsync(token);

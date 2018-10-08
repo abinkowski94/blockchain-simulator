@@ -14,16 +14,15 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
 {
     public class BaseConsensusServiceTests
     {
-        private readonly Mock<IStatisticService> _statisticServiceMock;
         private readonly Mock<IBackgroundQueue> _backgroundQueueMock;
         private readonly IConsensusService _consensusService;
 
         public BaseConsensusServiceTests()
         {
-            _statisticServiceMock = new Mock<IStatisticService>();
+            var statisticServiceMock = new Mock<IStatisticService>();
             _backgroundQueueMock = new Mock<IBackgroundQueue>();
 
-            _consensusService = new Mock<BaseConsensusService>(_statisticServiceMock.Object, _backgroundQueueMock.Object)
+            _consensusService = new Mock<BaseConsensusService>(statisticServiceMock.Object, _backgroundQueueMock.Object)
             { CallBase = true }.Object;
         }
 

@@ -28,6 +28,12 @@ namespace BlockchainSimulator.Common.Queues
         /// The length of the queue
         /// </summary>
         public int Length => _workItems.Count;
+        
+        /// <inheritdoc />
+        /// <summary>
+        /// Indicates whether the queue is working
+        /// </summary>
+        public bool IsWorking { get; set; }
 
         /// <inheritdoc />
         /// <summary>
