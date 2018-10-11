@@ -70,7 +70,6 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                         WaitForNetwork(simulation, settings);
                         StopAllJobs(simulation, token);
                         WaitForStatistics(simulation, settings, token);
-                        ClearNodes(simulation, token);
                     }
                     catch (Exception e)
                     {
@@ -78,6 +77,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     }
                     finally
                     {
+                        ClearNodes(simulation, token);
                         simulation.Status = SimulationStatuses.ReadyToRun;
                     }
                 }, token));
@@ -143,7 +143,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             Thread.Sleep(_hostingTime);
         }
 
-        private void PingAndConnectWithServers(Simulation simulation, SimulationSettings settings, CancellationToken token)
+        private void PingAndConnectWithServers(Simulation simulation, SimulationSettings settings,
+            CancellationToken token)
         {
             // Ping each node by using info endpoint and connect in order to update status
             simulation.ServerNodes.Where(n => settings.NodesAndTransactions.Keys.Contains(n.Id)).ParallelForEach(node =>
@@ -168,10 +169,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
                     // Register action: change of working status
                     const string methodName = nameof(ISiumlationClient.ChangeWorkingStatus);
-                    node.HubConnection.On<bool>(methodName, isWorking =>
-                    {
-                        node.IsWorking = isWorking;
-                    });
+                    node.HubConnection.On<bool>(methodName, isWorking => { node.IsWorking = isWorking; });
 
                     // Start the connection
                     node.HubConnection.StartAsync(token).Wait(token);
@@ -243,7 +241,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                                 Sender = Guid.NewGuid().ToString(),
                                 Recipient = Guid.NewGuid().ToString(),
                                 Amount = randomGenerator.Next(1, 1000),
-                                Fee = (decimal)randomGenerator.NextDouble()
+                                Fee = (decimal) randomGenerator.NextDouble()
                             });
                         }
                     });
@@ -286,18 +284,26 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
         private void WaitForNetwork(Simulation simulation, SimulationSettings settings)
         {
-            // Change status and wait
-            simulation.Status = SimulationStatuses.WaitingForNetwork;
-            SpinWait.SpinUntil(() =>
+            do
             {
-                var wait = !simulation.ServerNodes.Where(n => n.IsConnected == true).Any(n => n.IsWorking);
-                if (!wait)
+                // Change status and wait
+                simulation.Status = SimulationStatuses.WaitingForNetwork;
+                SpinWait.SpinUntil(() =>
                 {
-                    wait = HasSimulationTimeElapsed(simulation, settings);
-                }
+                    var wait = !simulation.ServerNodes.Where(n => n.IsConnected == true).Any(n => n.IsWorking);
+                    if (!wait)
+                    {
+                        wait = HasSimulationTimeElapsed(simulation, settings);
+                    }
 
-                return wait;
-            });
+                    return wait;
+                });
+
+                // Safe wait for network hiccups
+                Thread.Sleep(TimeSpan.FromSeconds(10));
+
+                // If its still working than wait
+            } while (simulation.ServerNodes.Where(n => n.IsConnected == true).Any(n => n.IsWorking));
         }
 
         private void ForceMining(Simulation simulation, CancellationToken token)
@@ -359,7 +365,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 {
                     if (node.IsConnected == true)
                     {
-                        var response = _httpService.Post($"{node.HttpAddress}/api/info/clear", null, _nodeTimeout, token);
+                        var response = _httpService.Post($"{node.HttpAddress}/api/info/clear", null, _nodeTimeout,
+                            token);
                         if (!response.IsSuccessStatusCode)
                         {
                             Console.WriteLine($"Could not clear the node with id: {node.Id}");
