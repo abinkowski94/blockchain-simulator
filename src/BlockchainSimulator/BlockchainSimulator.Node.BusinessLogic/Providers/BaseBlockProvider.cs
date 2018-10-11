@@ -1,7 +1,7 @@
+using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Services;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +12,15 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
 {
     public abstract class BaseBlockProvider : BaseService, IBlockProvider
     {
+        private readonly IConfigurationService _configurationService;
         private readonly IMerkleTreeProvider _merkleTreeProvider;
-        private readonly string _nodeId;
 
-        protected BaseBlockProvider(IMerkleTreeProvider merkleTreeProvider, IConfiguration configuration)
+        protected BlockchainNodeConfiguration _blockchainNodeConfiguration => _configurationService.GetConfiguration();
+
+        protected BaseBlockProvider(IMerkleTreeProvider merkleTreeProvider, IConfigurationService configurationService)
         {
+            _configurationService = configurationService;
             _merkleTreeProvider = merkleTreeProvider;
-            _nodeId = configuration["Node:Id"];
         }
 
         public async Task<BlockBase> CreateBlock(HashSet<Transaction> transactions, DateTime enqueueTime,
@@ -58,7 +60,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
                 newBlock = new GenesisBlock
                 {
                     Id = Convert.ToString(0, 16),
-                    UniqueId = $"{Guid.NewGuid()}-{_nodeId}",
+                    UniqueId = $"{Guid.NewGuid()}-{_blockchainNodeConfiguration.NodeId}",
                     QueueTime = DateTime.UtcNow - enqueueTime
                 };
             }
@@ -67,7 +69,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
                 newBlock = new Block
                 {
                     Id = Convert.ToString(Convert.ToInt32(parentBlock.Id, 16) + 1, 16),
-                    UniqueId = $"{Guid.NewGuid()}-{_nodeId}",
+                    UniqueId = $"{Guid.NewGuid()}-{_blockchainNodeConfiguration.NodeId}",
                     ParentUniqueId = parentBlock.UniqueId,
                     QueueTime = DateTime.UtcNow - enqueueTime,
                     Depth = parentBlock.Depth + 1,

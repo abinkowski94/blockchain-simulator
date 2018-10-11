@@ -10,7 +10,7 @@ namespace BlockchainSimulator.Common.Models.Statistics
         /// <summary>
         /// The statistics of the blockchain
         /// </summary>
-        [JsonProperty("blockchainStatistics", Order = 6)]
+        [JsonProperty("blockchainStatistics", Order = 7)]
         public BlockchainStatistics BlockchainStatistics { get; set; }
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace BlockchainSimulator.Common.Models.Statistics
         /// <summary>
         /// The statistics of the mining queue
         /// </summary>
-        [JsonProperty("miningQueueStatistics", Order = 5)]
+        [JsonProperty("miningQueueStatistics", Order = 6)]
         public MiningQueueStatistics MiningQueueStatistics { get; set; }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace BlockchainSimulator.Common.Models.Statistics
         /// <summary>
         /// The node Id
         /// </summary>
-        [JsonProperty("nodeId", Order = 7)]
+        [JsonProperty("nodeId", Order = 5)]
         public string NodeId { get; set; }
     }
 }

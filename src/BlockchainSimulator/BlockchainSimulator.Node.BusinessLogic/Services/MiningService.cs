@@ -1,21 +1,20 @@
-using BlockchainSimulator.Node.BusinessLogic.Configurations;
+using BlockchainSimulator.Common.Models;
+using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
+using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using BlockchainSimulator.Common.Queues;
-using BlockchainSimulator.Node.BusinessLogic.Queues;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class MiningService : BaseService, IMiningService
     {
-        private readonly IBlockchainConfiguration _blockchainConfiguration;
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly IConsensusService _consensusService;
         private readonly IStatisticService _statisticService;
@@ -23,15 +22,17 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IBlockProvider _blockProvider;
         private readonly IMiningQueue _miningQueue;
         private readonly IBackgroundQueue _backgroundQueue;
+        private readonly IConfigurationService _configurationService;
 
         private ITransactionService _transactionService;
 
-        public MiningService(IBlockchainConfiguration blockchainConfiguration,
-            IBlockchainRepository blockchainRepository, IConsensusService consensusService,
+        private BlockchainNodeConfiguration _blockchainNodeConfiguration => _configurationService.GetConfiguration();
+
+        public MiningService(IBlockchainRepository blockchainRepository, IConsensusService consensusService,
             IStatisticService statisticService, IServiceProvider serviceProvider, IBlockProvider blockProvider,
-            IMiningQueue miningQueue, IBackgroundQueue backgroundQueue)
+            IMiningQueue miningQueue, IBackgroundQueue backgroundQueue, IConfigurationService configurationService)
         {
-            _blockchainConfiguration = blockchainConfiguration;
+            _configurationService = configurationService;
             _blockchainRepository = blockchainRepository;
             _consensusService = consensusService;
             _statisticService = statisticService;
@@ -88,7 +89,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 }
 
                 var pendingTransactions = _transactionService.GetPendingTransactions().Result;
-                if (pendingTransactions.Count < _blockchainConfiguration.BlockSize)
+                if (pendingTransactions.Count < _blockchainNodeConfiguration.BlockSize)
                 {
                     var longestBlockchainBlocks = _blockchainRepository.GetLongestBlockchain()?.Blocks;
                     if (longestBlockchainBlocks != null)

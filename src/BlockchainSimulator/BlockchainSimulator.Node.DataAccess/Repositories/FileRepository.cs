@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using System.IO;
 
 namespace BlockchainSimulator.Node.DataAccess.Repositories
@@ -8,11 +7,10 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
     {
         private readonly string _directoryPath;
 
-        public FileRepository(IHostingEnvironment environment, IConfiguration configuration)
+        public FileRepository(IHostingEnvironment environment)
         {
             var contentRoot = environment.ContentRootPath ?? Directory.GetCurrentDirectory();
-            var type = configuration["Node:Type"] ?? "PoW";
-            _directoryPath = $"{contentRoot}\\{type}";
+            _directoryPath = $"{contentRoot}\\blockchains";
 
             if (!Directory.Exists(_directoryPath))
             {

@@ -1,4 +1,5 @@
 using BlockchainSimulator.Common.Extensions;
+using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Common.Models.Consensus;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Hubs;
@@ -8,7 +9,6 @@ using BlockchainSimulator.Node.BusinessLogic.Validators;
 using BlockchainSimulator.Node.DataAccess.Converters;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -23,19 +23,21 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
     public class ProofOfWorkConsensusService : BaseConsensusService
     {
         private readonly ConcurrentBag<string> _encodedBlocksIds;
-        private readonly string _nodeId;
 
         private readonly IHubContext<ConsensusHub, IConsensusClient> _consensusHubContext;
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly IBlockchainValidator _blockchainValidator;
+        private readonly IConfigurationService _configurationService;
 
-        public ProofOfWorkConsensusService(IBackgroundQueue backgroundQueue, IConfiguration configuration,
+        private BlockchainNodeConfiguration _blockchainNodeConfiguration => _configurationService.GetConfiguration();
+
+        public ProofOfWorkConsensusService(IBackgroundQueue backgroundQueue, IConfigurationService configurationService,
             IBlockchainRepository blockchainRepository, IBlockchainValidator blockchainValidator,
             IStatisticService statisticService, IHubContext<ConsensusHub, IConsensusClient> consensusHubContext)
             : base(statisticService, backgroundQueue)
         {
             _encodedBlocksIds = new ConcurrentBag<string>();
-            _nodeId = configuration["Node:Id"];
+            _configurationService = configurationService;
 
             _consensusHubContext = consensusHubContext;
             _blockchainRepository = blockchainRepository;
@@ -154,7 +156,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 }
 
                 var mappedParentBlock = LocalMapper.Map<BlockBase>(parentBlock);
-                ((Block) mappedBlock).Parent = mappedParentBlock;
+                ((Block)mappedBlock).Parent = mappedParentBlock;
             }
 
             var duplicatesValidationResult = ValidateTransactionsDuplicates(mappedBlock);
@@ -182,7 +184,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             {
                 Id = Guid.NewGuid().ToString(),
                 Base64Block = base64String,
-                NodeSenderId = _nodeId,
+                NodeSenderId = _blockchainNodeConfiguration.NodeId,
                 NodesAcceptedIds = new List<string>()
             };
 
@@ -191,8 +193,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
         private async void DistributeBlock(EncodedBlock encodedBlock)
         {
-            encodedBlock.NodeSenderId = _nodeId;
-            encodedBlock.NodesAcceptedIds.Add(_nodeId);
+            encodedBlock.NodeSenderId = _blockchainNodeConfiguration.NodeId;
+            encodedBlock.NodesAcceptedIds.Add(_blockchainNodeConfiguration.NodeId);
 
             await _consensusHubContext.Clients.All.ReceiveBlock(encodedBlock);
         }

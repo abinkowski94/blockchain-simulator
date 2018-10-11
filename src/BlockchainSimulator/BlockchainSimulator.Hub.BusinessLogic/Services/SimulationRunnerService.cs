@@ -1,5 +1,6 @@
 using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Common.Hubs;
+using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Common.Models.Statistics;
 using BlockchainSimulator.Common.Models.WebClient;
 using BlockchainSimulator.Common.Queues;
@@ -61,6 +62,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     {
                         SpawnServers(simulation, settings, token);
                         PingAndConnectWithServers(simulation, settings, token);
+                        SetConfigurations(simulation, settings, token);
                         ConnectNodes(simulation, token);
                         SendTransactions(simulation, settings, token);
                         WaitForNetwork(simulation, settings);
@@ -173,6 +175,26 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
                     // Start the connection
                     node.HubConnection.StartAsync(token).Wait();
+                }
+            }, token);
+        }
+
+        private void SetConfigurations(Simulation simulation, SimulationSettings settings, CancellationToken token)
+        {
+            simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
+            {
+                var content = new JsonContent(new BlockchainNodeConfiguration
+                {
+                    BlockSize = Convert.ToInt32(simulation.BlockchainConfiguration.BlockSize),
+                    NodeId = node.Id,
+                    NodeType = simulation.BlockchainConfiguration.Type,
+                    Version = simulation.BlockchainConfiguration.Version,
+                    Target = simulation.BlockchainConfiguration.Target
+                });
+                var response = _httpService.Post($"{node.HttpAddress}/api/info/config", content, _nodeTimeout, token);
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Could not set configuration for with id: {node.Id}");
                 }
             }, token);
         }
@@ -335,6 +357,16 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 try
                 {
+                    if (node.IsConnected == true)
+                    {
+                        var response = _httpService.Post($"{node.HttpAddress}/api/info/clear", null, _nodeTimeout, token);
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            Console.WriteLine($"Could not clear the node with id: {node.Id}");
+                        }
+                    }
+
+                    node.HubConnection?.DisposeAsync();
                     if (node.NodeThread?.CloseMainWindow() != true)
                     {
                         node.NodeThread?.Kill();
@@ -344,6 +376,9 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                 {
                     node.NodeThread?.Dispose();
                     node.NodeThread = null;
+                    node.HubConnection = null;
+                    node.IsWorking = false;
+                    node.IsConnected = null;
                 }
             }, token);
 

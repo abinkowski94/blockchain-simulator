@@ -55,7 +55,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         public BaseResponse<List<ServerNode>> DisconnectFromNetwork()
         {
             var result = ServerNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList();
-            result.ForEach(n => n.IsConnected = false);
+            result.ForEach(n =>
+            {
+                n.HubConnection?.DisposeAsync();
+                n.HubConnection = null;
+                n.IsConnected = false;
+            });
             ServerNodes.Clear();
 
             return new SuccessResponse<List<ServerNode>>("All nodes has been disconnected!", result);

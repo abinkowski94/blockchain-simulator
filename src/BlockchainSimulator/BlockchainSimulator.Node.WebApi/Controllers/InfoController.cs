@@ -1,8 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Common.Models.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.WebApi.Extensions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BlockchainSimulator.Node.WebApi.Controllers
 {
@@ -34,9 +34,20 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         /// </summary>
         /// <returns>Returns OK status</returns>
         [HttpGet]
-        public List<KeyValuePair<string, string>> GetInfo()
+        public BlockchainNodeConfiguration GetConfiguration()
         {
-            return _configurationService.GetConfigurationInfo();
+            return _configurationService.GetConfiguration();
+        }
+
+        /// <summary>
+        /// Changes the configuration of the node and restarts it
+        /// </summary>
+        /// <param name="configuration">The new configuration</param>
+        /// <returns>The response whether the operation succeeded</returns>
+        [HttpPost("config")]
+        public ActionResult<BaseResponse> ClearAndChangeConfiguration([FromBody] BlockchainNodeConfiguration configuration)
+        {
+            return _configurationService.ChangeConfiguration(configuration).GetActionResult<bool, bool>(this);
         }
 
         /// <summary>
@@ -47,6 +58,16 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         public ActionResult<BaseResponse> StopAllJobs()
         {
             return _configurationService.StopAllJobs().GetActionResult<bool, bool>(this);
+        }
+
+        /// <summary>
+        /// Wipes the node blockchain, other nodes connection, etc. completely
+        /// </summary>
+        /// <returns>Response if operation succeeded</returns>
+        [HttpPost("clear")]
+        public ActionResult<BaseResponse> ClearNode()
+        {
+            return _configurationService.ClearNode().GetActionResult<bool, bool>(this);
         }
     }
 }

@@ -1,11 +1,10 @@
-using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
 using BlockchainSimulator.Node.BusinessLogic.Providers.Specific;
+using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.BusinessLogic.Tests.Data;
 using BlockchainSimulator.Node.BusinessLogic.Validators;
 using BlockchainSimulator.Node.BusinessLogic.Validators.Specific;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -17,28 +16,31 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators.Specific
 {
     public class ProofOfWorkValidatorTests
     {
+        private readonly Mock<IConfigurationService> _configurationServiceMock;
         private readonly ProofOfWorkBlockProvider _proofOfWorkBlockProvider;
         private readonly ProofOfWorkValidator _proofOfWorkValidator;
 
         public ProofOfWorkValidatorTests()
         {
-            var configurationMock = new Mock<IBlockchainConfiguration>();
-            configurationMock.Setup(p => p.Target).Returns("0000");
-            configurationMock.Setup(p => p.Version).Returns("PoW-v1");
-            configurationMock.Setup(p => p.BlockSize).Returns(10);
-            var configuration = configurationMock.Object;
+            _configurationServiceMock = new Mock<IConfigurationService>();
+            _configurationServiceMock.Setup(p => p.GetConfiguration())
+                .Returns(new Common.Models.BlockchainNodeConfiguration
+                {
+                    Target = "0000",
+                    Version = "PoW-v1",
+                    BlockSize = 10
+                });
 
             _proofOfWorkValidator = new ProofOfWorkValidator(new MerkleTreeValidator());
-            _proofOfWorkBlockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), configuration,
-                new Mock<IConfiguration>().Object);
+            _proofOfWorkBlockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _configurationServiceMock.Object);
         }
 
         [Fact]
         public async Task Validate_Blockchain_ErrorValidationResult()
         {
             // Arrange
-            var genesisTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.First().First();
-            var blockTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.Last().First();
+            var genesisTransactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.First().First();
+            var blockTransactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.Last().First();
 
             var genesisBlock = await _proofOfWorkBlockProvider.CreateBlock(genesisTransactions, new DateTime(1, 1, 1));
             var blockchain =
@@ -58,8 +60,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators.Specific
         public async Task Validate_Blockchain_SuccessValidationResult()
         {
             // Arrange
-            var genesisTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.First().First();
-            var blockTransactions = (HashSet<Transaction>) TransactionDataSet.TransactionData.Last().First();
+            var genesisTransactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.First().First();
+            var blockTransactions = (HashSet<Transaction>)TransactionDataSet.TransactionData.Last().First();
 
             var genesisBlock = await _proofOfWorkBlockProvider.CreateBlock(genesisTransactions, new DateTime(1, 1, 1));
             var blockchain =

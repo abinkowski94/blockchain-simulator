@@ -1,7 +1,5 @@
-using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Services;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,19 +8,15 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers.Specific
 {
     public class ProofOfWorkBlockProvider : BaseBlockProvider
     {
-        private readonly IBlockchainConfiguration _blockchainConfiguration;
-
         public ProofOfWorkBlockProvider(IMerkleTreeProvider merkleTreeProvider,
-            IBlockchainConfiguration blockchainConfiguration, IConfiguration configuration)
-            : base(merkleTreeProvider, configuration)
+            IConfigurationService configurationService) : base(merkleTreeProvider, configurationService)
         {
-            _blockchainConfiguration = blockchainConfiguration;
         }
 
         protected override async Task<BlockBase> FillBlock(BlockBase currentBlock, CancellationToken token)
         {
-            currentBlock.Header.Version = _blockchainConfiguration.Version;
-            currentBlock.Header.Target = _blockchainConfiguration.Target;
+            currentBlock.Header.Version = _blockchainNodeConfiguration.Version;
+            currentBlock.Header.Target = _blockchainNodeConfiguration.Target;
             currentBlock.Header.Nonce = await GetProofAsync(currentBlock, token);
 
             return currentBlock;

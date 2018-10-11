@@ -18,5 +18,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         void RegisterAbandonedBlock();
 
         void RegisterWorkingStatus(bool isWorking);
+
+        void Clear();
     }
 }

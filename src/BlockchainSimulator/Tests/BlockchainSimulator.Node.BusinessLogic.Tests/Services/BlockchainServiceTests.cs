@@ -1,4 +1,3 @@
-using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Services;
@@ -17,11 +16,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
 
         public BlockchainServiceTests()
         {
-            var configurationMock = new Mock<IBlockchainConfiguration>();
-            configurationMock.Setup(p => p.Target).Returns("0000");
-            configurationMock.Setup(p => p.Version).Returns("PoW-v1");
-            configurationMock.Setup(p => p.BlockSize).Returns(10);
-
             _blockchainRepositoryMock = new Mock<IBlockchainRepository>();
             _blockchainService = new BlockchainService(_blockchainRepositoryMock.Object);
         }

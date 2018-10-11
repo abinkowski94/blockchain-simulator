@@ -30,7 +30,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
                 });
 
             // Act
-            var result = _infoController.GetInfo();
+            var result = _infoController.GetConfiguration();
 
             // Assert
             Assert.NotNull(result);

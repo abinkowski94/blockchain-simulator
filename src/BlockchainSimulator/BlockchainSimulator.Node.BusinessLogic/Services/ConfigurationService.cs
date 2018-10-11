@@ -1,40 +1,86 @@
-using System.Collections.Generic;
-using System.Linq;
+using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Queues;
+using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class ConfigurationService : IConfigurationService
     {
-        private readonly ITransactionService _transactionService;
-        private readonly IConfiguration _configuration;
+        private readonly IBlockchainRepository _blockchainRepository;
         private readonly IBackgroundQueue _queue;
         private readonly IMiningQueue _miningQueue;
+        private readonly IConfiguration _configuration;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly object _padlock = new object();
 
-        public ConfigurationService(IConfiguration configuration, ITransactionService transactionService,
-            IMiningQueue miningQueue, IBackgroundQueue queue)
+        private BlockchainNodeConfiguration _nodeConfiguration;
+        private ITransactionService _transactionService;
+        private IStatisticService _statisticService;
+        private IConsensusService _consensusService;
+
+        public ConfigurationService(IConfiguration configuration, IMiningQueue miningQueue,
+            IBackgroundQueue queue, IServiceProvider serviceProvider, IBlockchainRepository blockchainRepository)
         {
+            _blockchainRepository = blockchainRepository;
             _configuration = configuration;
-            _transactionService = transactionService;
             _miningQueue = miningQueue;
             _queue = queue;
+            _serviceProvider = serviceProvider;
         }
 
-        public List<KeyValuePair<string, string>> GetConfigurationInfo()
+        public BlockchainNodeConfiguration GetConfiguration()
         {
-            return _configuration.AsEnumerable().Where(kv => kv.Value != null).ToList();
+            return _nodeConfiguration ?? (_nodeConfiguration = new BlockchainNodeConfiguration
+            {
+                BlockSize = Convert.ToInt32(_configuration["BlockchainConfiguration:BlockSize"]),
+                Target = _configuration["BlockchainConfiguration:Target"],
+                Version = _configuration["BlockchainConfiguration:Version"],
+                NodeId = _configuration["Node:Id"],
+                NodeType = _configuration["Node:Type"],
+            });
+        }
+
+        public BaseResponse<bool> ClearNode()
+        {
+            lock (_padlock)
+            {
+                _consensusService = _consensusService ?? _serviceProvider.GetService<IConsensusService>();
+                _statisticService = _statisticService ?? _serviceProvider.GetService<IStatisticService>();
+
+                StopAllJobs();
+                _blockchainRepository.Clear();
+                _consensusService.DisconnectFromNetwork();
+                _statisticService.Clear();
+
+                return new SuccessResponse<bool>("The node has been cleared!", true);
+            }
         }
 
         public BaseResponse<bool> StopAllJobs()
         {
-            _transactionService.Clear();
-            _miningQueue.Clear();
-            _queue.Clear();
+            lock (_padlock)
+            {
+                _transactionService = _transactionService ?? _serviceProvider.GetService<ITransactionService>();
 
-            return new SuccessResponse<bool>("The jobs has been stopped!", true);
+                _transactionService.Clear();
+                _miningQueue.Clear();
+                _queue.Clear();
+
+                return new SuccessResponse<bool>("The jobs has been stopped!", true);
+            }
+        }
+
+        public BaseResponse<bool> ChangeConfiguration(BlockchainNodeConfiguration configuration)
+        {
+            _nodeConfiguration = configuration;
+            ClearNode();
+
+            return new SuccessResponse<bool>("The configuration has been changed", true);
         }
     }
 }

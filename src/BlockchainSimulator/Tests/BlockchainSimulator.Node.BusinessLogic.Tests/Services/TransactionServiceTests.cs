@@ -1,4 +1,5 @@
-using BlockchainSimulator.Node.BusinessLogic.Configurations;
+using BlockchainSimulator.Common.Extensions;
+using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
@@ -7,7 +8,6 @@ using BlockchainSimulator.Node.BusinessLogic.Providers.Specific;
 using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.BusinessLogic.Tests.Data;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -20,7 +20,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
 {
     public class TransactionServiceTests
     {
-        private readonly Mock<IBlockchainConfiguration> _blockchainConfigurationMock;
+        private readonly Mock<IConfigurationService> _configurationServiceMock;
         private readonly Mock<IBlockchainService> _blockchainServiceMock;
         private readonly Mock<IMiningQueue> _miningQueueMock;
         private readonly Mock<IMiningService> _miningServiceMock;
@@ -28,13 +28,22 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
 
         public TransactionServiceTests()
         {
+            _configurationServiceMock = new Mock<IConfigurationService>();
             _blockchainServiceMock = new Mock<IBlockchainService>();
-            _blockchainConfigurationMock = new Mock<IBlockchainConfiguration>();
             _miningQueueMock = new Mock<IMiningQueue>();
             _miningServiceMock = new Mock<IMiningService>();
 
+            _configurationServiceMock.Setup(p => p.GetConfiguration())
+                .Returns(new BlockchainNodeConfiguration
+                {
+                    Target = "0000",
+                    Version = "PoW-v1",
+                    BlockSize = 10,
+                    NodeId = "1"
+                });
+
             _transactionService = new TransactionService(_blockchainServiceMock.Object, _miningServiceMock.Object,
-                _blockchainConfigurationMock.Object, _miningQueueMock.Object, new Mock<IConfiguration>().Object);
+                _miningQueueMock.Object, _configurationServiceMock.Object);
         }
 
         [Fact]
@@ -49,13 +58,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
                 Fee = 2
             };
 
-            _blockchainConfigurationMock.Setup(p => p.BlockSize).Returns(10);
-
             // Act
             var result = _transactionService.AddTransaction(transaction) as SuccessResponse<Transaction>;
 
             // Assert
-            _blockchainConfigurationMock.Verify(p => p.BlockSize);
             _miningQueueMock.Verify(p => p.EnqueueTask(It.IsAny<Func<CancellationToken, Task>>()), Times.Never);
 
             Assert.NotNull(result);
@@ -81,9 +87,16 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             var token = new CancellationToken();
             Func<CancellationToken, Task> queueTask = t => Task.Run(() => { }, t);
 
-            _blockchainConfigurationMock.Setup(p => p.BlockSize).Returns(1);
             _miningQueueMock.Setup(p => p.EnqueueTask(It.IsAny<Func<CancellationToken, Task>>()))
                 .Callback((Func<CancellationToken, Task> func) => queueTask = func);
+
+            LinqExtensions.RepeatAction(9, () => _transactionService.AddTransaction(new Transaction
+            {
+                Sender = "4c9395c5-07d9-42c2-9fe9-19478b312acf",
+                Recipient = "75f05331-a972-4fa5-b095-0672a8f2c537",
+                Amount = 100,
+                Fee = 2
+            }));
 
             // Act
             var result = _transactionService.AddTransaction(transaction) as SuccessResponse<Transaction>;
@@ -92,7 +105,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             task.Wait(token);
 
             // Assert
-            _blockchainConfigurationMock.Verify(p => p.BlockSize);
             _miningQueueMock.Verify(p => p.EnqueueTask(It.IsAny<Func<CancellationToken, Task>>()));
             _miningServiceMock.Verify(p => p.MineBlock(It.IsAny<HashSet<Transaction>>(), It.IsAny<DateTime>(),
                 It.IsAny<CancellationToken>()));
@@ -125,7 +137,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
                 Fee = 1
             };
 
-            _blockchainConfigurationMock.Setup(p => p.BlockSize).Returns(10);
             _transactionService.AddTransaction(transactionOne);
             _transactionService.AddTransaction(transactionTwo);
 
@@ -133,8 +144,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             var result = _transactionService.GetPendingTransactions() as SuccessResponse<List<Transaction>>;
 
             // Assert
-            _blockchainConfigurationMock.Verify(p => p.BlockSize);
-
             Assert.NotNull(result);
             Assert.NotNull(result.Message);
             Assert.NotNull(result.Result);
@@ -194,15 +203,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public void GetTransaction_Id_SuccessResponse()
         {
             // Arrange
-            _blockchainConfigurationMock.Setup(p => p.BlockSize).Returns(10);
-            _blockchainConfigurationMock.Setup(p => p.Target).Returns("0000");
-            _blockchainConfigurationMock.Setup(p => p.Version).Returns("PoW-v1");
+            var blockchainProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _configurationServiceMock.Object);
 
-            var blockchainProvider =
-                new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _blockchainConfigurationMock.Object,
-                    new Mock<IConfiguration>().Object);
-
-            var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>) ts.First())
+            var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>)ts.First())
                 .ToList();
 
             transactionSetList[1].First().Id = "111111";

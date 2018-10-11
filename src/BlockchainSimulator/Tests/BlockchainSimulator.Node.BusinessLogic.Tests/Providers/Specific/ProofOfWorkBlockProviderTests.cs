@@ -1,10 +1,10 @@
-using BlockchainSimulator.Node.BusinessLogic.Configurations;
+using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
 using BlockchainSimulator.Node.BusinessLogic.Providers.Specific;
+using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.BusinessLogic.Tests.Data;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -16,21 +16,24 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
 {
     public class ProofOfWorkBlockProviderTests
     {
+        private readonly BlockchainNodeConfiguration _blockchainNodeConfiguration;
+        private readonly Mock<IConfigurationService> _configurationServiceMock;
         private readonly ProofOfWorkBlockProvider _blockProvider;
-        private readonly IBlockchainConfiguration _configuration;
 
         public ProofOfWorkBlockProviderTests()
         {
-            var configurationMock = new Mock<IBlockchainConfiguration>();
-            configurationMock.Setup(p => p.Target).Returns("0000");
-            configurationMock.Setup(p => p.Version).Returns("PoW-v1");
-            configurationMock.Setup(p => p.BlockSize).Returns(10);
-            _configuration = configurationMock.Object;
+            _blockchainNodeConfiguration = new BlockchainNodeConfiguration
+            {
+                Target = "0000",
+                Version = "PoW-v1",
+                BlockSize = 10,
+                NodeId = "1"
+            };
+            _configurationServiceMock = new Mock<IConfigurationService>();
+            _configurationServiceMock.Setup(p => p.GetConfiguration())
+                .Returns(_blockchainNodeConfiguration);
 
-            var configMock = new Mock<IConfiguration>();
-            configMock.Setup(p => p["Node:Id"]).Returns("1");
-
-            _blockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _configuration, configMock.Object);
+            _blockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _configurationServiceMock.Object);
         }
 
         [Fact]
@@ -75,11 +78,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
             Assert.Equal("1", result.Id);
             Assert.NotNull(result.UniqueId);
             Assert.Equal(result.Parent.UniqueId, result.ParentUniqueId);
-            Assert.Equal(_configuration.Version, result.Header.Version);
+            Assert.Equal(_blockchainNodeConfiguration.Version, result.Header.Version);
             Assert.NotNull(result.Header.ParentHash);
             Assert.Equal("5e2da3deb36395f11e6a1115ecda4973ca94424881e104267808f0bc79c1c58f",
                 result.Header.MerkleTreeRootHash);
-            Assert.Equal(_configuration.Target, result.Header.Target);
+            Assert.Equal(_blockchainNodeConfiguration.Target, result.Header.Target);
             Assert.NotNull(result.Header.Nonce);
             Assert.Equal(transactions.Count, result.Body.TransactionCounter);
             Assert.NotNull(result.Body.MerkleTree);
@@ -98,11 +101,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
             Assert.NotNull(result);
             Assert.True(result.IsGenesis);
             Assert.Equal("0", result.Id);
-            Assert.Equal(_configuration.Version, result.Header.Version);
+            Assert.Equal(_blockchainNodeConfiguration.Version, result.Header.Version);
             Assert.Null(result.Header.ParentHash);
             Assert.Equal("5e2da3deb36395f11e6a1115ecda4973ca94424881e104267808f0bc79c1c58f",
                 result.Header.MerkleTreeRootHash);
-            Assert.Equal(_configuration.Target, result.Header.Target);
+            Assert.Equal(_blockchainNodeConfiguration.Target, result.Header.Target);
             Assert.NotNull(result.Header.Nonce);
             Assert.Equal(transactions.Count, result.Body.TransactionCounter);
             Assert.NotNull(result.Body.MerkleTree);

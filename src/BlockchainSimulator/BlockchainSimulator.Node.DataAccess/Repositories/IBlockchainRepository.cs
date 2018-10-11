@@ -6,11 +6,11 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
     public interface IBlockchainRepository
     {
         BlockBase GetBlock(string uniqueId);
-        
+
         BlockBase GetLastBlock();
 
         BlockchainTreeMetadata GetBlockchainMetadata();
-        
+
         BlockchainTree GetBlockchainFromBranch(string uniqueId);
 
         BlockchainTree GetLongestBlockchain();
@@ -20,5 +20,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
         void AddBlock(BlockBase blockBase);
 
         bool BlockExists(string uniqueId);
+
+        void Clear();
     }
 }

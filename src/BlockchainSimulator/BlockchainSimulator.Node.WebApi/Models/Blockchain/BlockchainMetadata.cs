@@ -10,7 +10,7 @@ namespace BlockchainSimulator.Node.WebApi.Models.Blockchain
         /// <summary>
         /// The length of the blockchain
         /// </summary>
-        [JsonProperty("length", Order = 1)]
-        public int Length { get; set; }
+        [JsonProperty("nodes", Order = 1)]
+        public int Nodes { get; set; }
     }
 }

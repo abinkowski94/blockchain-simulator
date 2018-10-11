@@ -1,6 +1,5 @@
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Common.Services;
-using BlockchainSimulator.Node.BusinessLogic.Configurations;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
 using BlockchainSimulator.Node.BusinessLogic.Providers.Specific;
 using BlockchainSimulator.Node.BusinessLogic.Queues;
@@ -44,28 +43,20 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
             services.AddSingleton<IBlockchainService, BlockchainService>();
             services.AddSingleton<IStatisticService, StatisticService>();
             services.AddSingleton<IMiningService, MiningService>();
-            services.AddTransient<IConfigurationService, ConfigurationService>();
+            services.AddSingleton<IConfigurationService, ConfigurationService>();
             services.AddTransient<IHttpService, HttpService>();
 
-            // Specific
-            switch (configuration["Node:Type"])
-            {
-                case "PoW":
-                    // Config
-                    services.AddSingleton<IBlockchainConfiguration, ProofOfWorkConfiguration>();
+            // Specific Proof of Work
+            // Services
+            services.AddSingleton<IConsensusService, ProofOfWorkConsensusService>();
 
-                    // Services
-                    services.AddSingleton<IConsensusService, ProofOfWorkConsensusService>();
+            // Providers
+            services.AddTransient<IMerkleTreeProvider, MerkleTreeProvider>();
+            services.AddTransient<IBlockProvider, ProofOfWorkBlockProvider>();
 
-                    // Providers
-                    services.AddTransient<IMerkleTreeProvider, MerkleTreeProvider>();
-                    services.AddTransient<IBlockProvider, ProofOfWorkBlockProvider>();
-
-                    // Validators
-                    services.AddTransient<IMerkleTreeValidator, MerkleTreeValidator>();
-                    services.AddTransient<IBlockchainValidator, ProofOfWorkValidator>();
-                    break;
-            }
+            // Validators
+            services.AddTransient<IMerkleTreeValidator, MerkleTreeValidator>();
+            services.AddTransient<IBlockchainValidator, ProofOfWorkValidator>();
 
             return services;
         }

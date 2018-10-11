@@ -1,6 +1,6 @@
 using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Common.Hubs;
-using BlockchainSimulator.Node.BusinessLogic.Configurations;
+using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Node.BusinessLogic.Hubs;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Model.Statistics;
@@ -8,7 +8,7 @@ using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Model.Block;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +18,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
     public class StatisticService : IStatisticService
     {
         private readonly IHubContext<SimulationHub, ISiumlationClient> _simulationHubContext;
-        private readonly IBlockchainConfiguration _blockchainConfiguration;
         private readonly IBlockchainRepository _blockchainRepository;
-        private readonly IConfiguration _configuration;
+        private readonly IServiceProvider _serviceProvider;
         private readonly object _padlock = new object();
 
         private int _rejectedIncomingBlockCount;
@@ -31,14 +30,15 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private bool _isWorking;
         private TimeSpan _totalMiningQueueTime;
 
+        private BlockchainNodeConfiguration _blockchainNodeConfiguration =>
+            _serviceProvider.GetService<IConfigurationService>()?.GetConfiguration();
+
         public StatisticService(IHubContext<SimulationHub, ISiumlationClient> simulationHubContext,
-            IBlockchainConfiguration blockchainConfiguration, IBlockchainRepository blockchainRepository,
-            IConfiguration configuration)
+            IBlockchainRepository blockchainRepository, IServiceProvider serviceProvider)
         {
             _simulationHubContext = simulationHubContext;
-            _blockchainConfiguration = blockchainConfiguration;
             _blockchainRepository = blockchainRepository;
-            _configuration = configuration;
+            _serviceProvider = serviceProvider;
         }
 
         public void RegisterMiningAttempt()
@@ -102,8 +102,19 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             }
         }
 
+        public void Clear()
+        {
+            _rejectedIncomingBlockCount = 0;
+            _currentMiningQueueLength = 0;
+            _maxMiningQueueLength = 0;
+            _miningAttemptsCount = 0;
+            _abandonedBlockCount = 0;
+            _isWorking = false;
+            _totalMiningQueueTime = TimeSpan.Zero;
+        }
+
         private static void AddTransactionsStatistics(BlockchainStatistics blockchainStatistics,
-                    BlockchainTree blockchain)
+                            BlockchainTree blockchain)
         {
             blockchainStatistics.TransactionsStatistics = new List<TransactionStatistics>();
 
@@ -167,11 +178,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         private void AddSessionConfiguration(Statistic result)
         {
-            result.BlockSize = _blockchainConfiguration.BlockSize;
-            result.Target = _blockchainConfiguration.Target;
-            result.Version = _blockchainConfiguration.Version;
-            result.NodeType = _configuration["Node:Type"];
-            result.NodeId = _configuration["Node:Id"];
+            result.BlockSize = _blockchainNodeConfiguration.BlockSize;
+            result.Target = _blockchainNodeConfiguration.Target;
+            result.Version = _blockchainNodeConfiguration.Version;
+            result.NodeType = _blockchainNodeConfiguration.NodeType;
+            result.NodeId = _blockchainNodeConfiguration.NodeId;
         }
     }
 }
