@@ -30,7 +30,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private bool _isWorking;
         private TimeSpan _totalMiningQueueTime;
 
-        private BlockchainNodeConfiguration _blockchainNodeConfiguration =>
+        private BlockchainNodeConfiguration BlockchainNodeConfiguration =>
             _serviceProvider.GetService<IConfigurationService>()?.GetConfiguration();
 
         public StatisticService(IHubContext<SimulationHub, ISiumlationClient> simulationHubContext,
@@ -178,11 +178,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         private void AddSessionConfiguration(Statistic result)
         {
-            result.BlockSize = _blockchainNodeConfiguration.BlockSize;
-            result.Target = _blockchainNodeConfiguration.Target;
-            result.Version = _blockchainNodeConfiguration.Version;
-            result.NodeType = _blockchainNodeConfiguration.NodeType;
-            result.NodeId = _blockchainNodeConfiguration.NodeId;
+            result.BlockSize = BlockchainNodeConfiguration.BlockSize;
+            result.Target = BlockchainNodeConfiguration.Target;
+            result.Version = BlockchainNodeConfiguration.Version;
+            result.NodeType = BlockchainNodeConfiguration.NodeType;
+            result.NodeId = BlockchainNodeConfiguration.NodeId;
         }
     }
 }

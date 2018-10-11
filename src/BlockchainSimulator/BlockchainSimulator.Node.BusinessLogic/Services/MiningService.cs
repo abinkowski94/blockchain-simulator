@@ -26,7 +26,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         private ITransactionService _transactionService;
 
-        private BlockchainNodeConfiguration _blockchainNodeConfiguration => _configurationService.GetConfiguration();
+        private BlockchainNodeConfiguration BlockchainNodeConfiguration => _configurationService.GetConfiguration();
 
         public MiningService(IBlockchainRepository blockchainRepository, IConsensusService consensusService,
             IStatisticService statisticService, IServiceProvider serviceProvider, IBlockProvider blockProvider,
@@ -89,7 +89,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 }
 
                 var pendingTransactions = _transactionService.GetPendingTransactions().Result;
-                if (pendingTransactions.Count < _blockchainNodeConfiguration.BlockSize)
+                if (pendingTransactions.Count < BlockchainNodeConfiguration.BlockSize)
                 {
                     var longestBlockchainBlocks = _blockchainRepository.GetLongestBlockchain()?.Blocks;
                     if (longestBlockchainBlocks != null)

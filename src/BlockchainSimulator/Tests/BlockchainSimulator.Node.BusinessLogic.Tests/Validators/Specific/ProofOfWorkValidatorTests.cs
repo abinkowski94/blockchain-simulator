@@ -16,14 +16,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators.Specific
 {
     public class ProofOfWorkValidatorTests
     {
-        private readonly Mock<IConfigurationService> _configurationServiceMock;
         private readonly ProofOfWorkBlockProvider _proofOfWorkBlockProvider;
         private readonly ProofOfWorkValidator _proofOfWorkValidator;
 
         public ProofOfWorkValidatorTests()
         {
-            _configurationServiceMock = new Mock<IConfigurationService>();
-            _configurationServiceMock.Setup(p => p.GetConfiguration())
+            var configurationServiceMock = new Mock<IConfigurationService>();
+            configurationServiceMock.Setup(p => p.GetConfiguration())
                 .Returns(new Common.Models.BlockchainNodeConfiguration
                 {
                     Target = "0000",
@@ -32,7 +31,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Validators.Specific
                 });
 
             _proofOfWorkValidator = new ProofOfWorkValidator(new MerkleTreeValidator());
-            _proofOfWorkBlockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _configurationServiceMock.Object);
+            _proofOfWorkBlockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), configurationServiceMock.Object);
         }
 
         [Fact]

@@ -29,7 +29,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
         private readonly IBlockchainValidator _blockchainValidator;
         private readonly IConfigurationService _configurationService;
 
-        private BlockchainNodeConfiguration _blockchainNodeConfiguration => _configurationService.GetConfiguration();
+        private BlockchainNodeConfiguration BlockchainNodeConfiguration => _configurationService.GetConfiguration();
 
         public ProofOfWorkConsensusService(IBackgroundQueue backgroundQueue, IConfigurationService configurationService,
             IBlockchainRepository blockchainRepository, IBlockchainValidator blockchainValidator,
@@ -184,7 +184,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             {
                 Id = Guid.NewGuid().ToString(),
                 Base64Block = base64String,
-                NodeSenderId = _blockchainNodeConfiguration.NodeId,
+                NodeSenderId = BlockchainNodeConfiguration.NodeId,
                 NodesAcceptedIds = new List<string>()
             };
 
@@ -193,8 +193,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
         private async void DistributeBlock(EncodedBlock encodedBlock)
         {
-            encodedBlock.NodeSenderId = _blockchainNodeConfiguration.NodeId;
-            encodedBlock.NodesAcceptedIds.Add(_blockchainNodeConfiguration.NodeId);
+            encodedBlock.NodeSenderId = BlockchainNodeConfiguration.NodeId;
+            encodedBlock.NodesAcceptedIds.Add(BlockchainNodeConfiguration.NodeId);
 
             await _consensusHubContext.Clients.All.ReceiveBlock(encodedBlock);
         }

@@ -22,7 +22,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         public ConcurrentDictionary<string, Transaction> RegisteredTransactions { get; }
 
-        private BlockchainNodeConfiguration _blockchainNodeConfiguration => _configurationService.GetConfiguration();
+        private BlockchainNodeConfiguration BlockchainNodeConfiguration => _configurationService.GetConfiguration();
 
         public TransactionService(IBlockchainService blockchainService, IMiningService miningService,
             IMiningQueue queue, IConfigurationService configurationService)
@@ -40,7 +40,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         {
             lock (_padlock)
             {
-                transaction.Id = transaction.Id ?? $"{Guid.NewGuid().ToString()}-{_blockchainNodeConfiguration.NodeId}";
+                transaction.Id = transaction.Id ?? $"{Guid.NewGuid().ToString()}-{BlockchainNodeConfiguration.NodeId}";
                 transaction.RegistrationTime = transaction.RegistrationTime ?? DateTime.UtcNow;
                 transaction.TransactionDetails = null;
 
@@ -51,7 +51,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                         $"Could not add the transaction: {transaction.Id} to the pending list", transaction);
                 }
 
-                if (_pendingTransactions.Count % _blockchainNodeConfiguration.BlockSize != 0)
+                if (_pendingTransactions.Count % BlockchainNodeConfiguration.BlockSize != 0)
                 {
                     return new SuccessResponse<Transaction>("The transaction has been added to pending list",
                         transaction);
@@ -81,7 +81,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         {
             var result = _pendingTransactions.Values.OrderByDescending(t => t.Fee).ToList();
             var message =
-                $"Pending transactions count: {_pendingTransactions.Count}/{_blockchainNodeConfiguration.BlockSize}";
+                $"Pending transactions count: {_pendingTransactions.Count}/{BlockchainNodeConfiguration.BlockSize}";
 
             return new SuccessResponse<List<Transaction>>(message, result);
         }
@@ -140,7 +140,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _queue.EnqueueTask(token => new Task(() =>
             {
                 var transactions = _pendingTransactions.Values.OrderByDescending(t => t.Fee)
-                    .Take(_blockchainNodeConfiguration.BlockSize).ToList();
+                    .Take(BlockchainNodeConfiguration.BlockSize).ToList();
                 transactions.ForEach(t => _pendingTransactions.TryRemove(t.Id, out _));
                 _miningService.MineBlock(transactions.ToHashSet(), enqueueTime, token);
             }, token));

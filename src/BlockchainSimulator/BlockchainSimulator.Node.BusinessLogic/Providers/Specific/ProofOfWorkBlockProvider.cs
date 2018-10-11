@@ -15,8 +15,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers.Specific
 
         protected override async Task<BlockBase> FillBlock(BlockBase currentBlock, CancellationToken token)
         {
-            currentBlock.Header.Version = _blockchainNodeConfiguration.Version;
-            currentBlock.Header.Target = _blockchainNodeConfiguration.Target;
+            currentBlock.Header.Version = BlockchainNodeConfiguration.Version;
+            currentBlock.Header.Target = BlockchainNodeConfiguration.Target;
             currentBlock.Header.Nonce = await GetProofAsync(currentBlock, token);
 
             return currentBlock;

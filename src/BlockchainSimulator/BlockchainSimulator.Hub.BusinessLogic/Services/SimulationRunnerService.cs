@@ -62,7 +62,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     {
                         SpawnServers(simulation, settings, token);
                         PingAndConnectWithServers(simulation, settings, token);
-                        SetConfigurations(simulation, settings, token);
+                        SetConfigurations(simulation, token);
                         ConnectNodes(simulation, token);
                         SendTransactions(simulation, settings, token);
                         WaitForNetwork(simulation, settings);
@@ -162,7 +162,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     // Reconnect when connection is closing
                     node.HubConnection.Closed += async error =>
                     {
-                        await Task.Delay(new Random().Next(0, 5) * 1000);
+                        await Task.Delay(new Random().Next(0, 5) * 1000, token);
                         await node.HubConnection.StartAsync(token);
                     };
 
@@ -174,12 +174,12 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     });
 
                     // Start the connection
-                    node.HubConnection.StartAsync(token).Wait();
+                    node.HubConnection.StartAsync(token).Wait(token);
                 }
             }, token);
         }
 
-        private void SetConfigurations(Simulation simulation, SimulationSettings settings, CancellationToken token)
+        private void SetConfigurations(Simulation simulation, CancellationToken token)
         {
             simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
             {

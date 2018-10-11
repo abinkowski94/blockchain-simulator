@@ -15,7 +15,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
         private readonly IConfigurationService _configurationService;
         private readonly IMerkleTreeProvider _merkleTreeProvider;
 
-        protected BlockchainNodeConfiguration _blockchainNodeConfiguration => _configurationService.GetConfiguration();
+        protected BlockchainNodeConfiguration BlockchainNodeConfiguration => _configurationService.GetConfiguration();
 
         protected BaseBlockProvider(IMerkleTreeProvider merkleTreeProvider, IConfigurationService configurationService)
         {
@@ -60,7 +60,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
                 newBlock = new GenesisBlock
                 {
                     Id = Convert.ToString(0, 16),
-                    UniqueId = $"{Guid.NewGuid()}-{_blockchainNodeConfiguration.NodeId}",
+                    UniqueId = $"{Guid.NewGuid()}-{BlockchainNodeConfiguration.NodeId}",
                     QueueTime = DateTime.UtcNow - enqueueTime
                 };
             }
@@ -69,7 +69,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
                 newBlock = new Block
                 {
                     Id = Convert.ToString(Convert.ToInt32(parentBlock.Id, 16) + 1, 16),
-                    UniqueId = $"{Guid.NewGuid()}-{_blockchainNodeConfiguration.NodeId}",
+                    UniqueId = $"{Guid.NewGuid()}-{BlockchainNodeConfiguration.NodeId}",
                     ParentUniqueId = parentBlock.UniqueId,
                     QueueTime = DateTime.UtcNow - enqueueTime,
                     Depth = parentBlock.Depth + 1,

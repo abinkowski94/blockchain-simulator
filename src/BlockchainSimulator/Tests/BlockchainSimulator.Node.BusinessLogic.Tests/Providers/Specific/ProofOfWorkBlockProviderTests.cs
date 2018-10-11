@@ -17,7 +17,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
     public class ProofOfWorkBlockProviderTests
     {
         private readonly BlockchainNodeConfiguration _blockchainNodeConfiguration;
-        private readonly Mock<IConfigurationService> _configurationServiceMock;
         private readonly ProofOfWorkBlockProvider _blockProvider;
 
         public ProofOfWorkBlockProviderTests()
@@ -29,11 +28,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Providers.Specific
                 BlockSize = 10,
                 NodeId = "1"
             };
-            _configurationServiceMock = new Mock<IConfigurationService>();
-            _configurationServiceMock.Setup(p => p.GetConfiguration())
+            
+            var configurationServiceMock = new Mock<IConfigurationService>();
+            configurationServiceMock.Setup(p => p.GetConfiguration())
                 .Returns(_blockchainNodeConfiguration);
 
-            _blockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _configurationServiceMock.Object);
+            _blockProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), configurationServiceMock.Object);
         }
 
         [Fact]
