@@ -26,7 +26,7 @@
                     "delay": 0,
                     "httpAddress": "https://localhost:5001",
                     "id": "1",
-                    "isConnected": true,
+                    "isConnected": null,
                     "needsSpawn": true
                 },
                 {
@@ -36,7 +36,7 @@
                     "delay": 0,
                     "httpAddress": "https://localhost:5002",
                     "id": "2",
-                    "isConnected": true,
+                    "isConnected": null,
                     "needsSpawn": true
                 },
                 {
@@ -47,7 +47,7 @@
                     "delay": 0,
                     "httpAddress": "https://localhost:5003",
                     "id": "3",
-                    "isConnected": true,
+                    "isConnected": null,
                     "needsSpawn": true
                 },
                 {
@@ -58,7 +58,7 @@
                     "delay": 0,
                     "httpAddress": "https://localhost:5004",
                     "id": "4",
-                    "isConnected": true,
+                    "isConnected": null,
                     "needsSpawn": true
                 },
                 {
@@ -68,7 +68,7 @@
                     "delay": 0,
                     "httpAddress": "https://localhost:5005",
                     "id": "5",
-                    "isConnected": true,
+                    "isConnected": null,
                     "needsSpawn": true
                 },
                 {
@@ -78,7 +78,7 @@
                     "delay": 0,
                     "httpAddress": "https://localhost:5006",
                     "id": "6",
-                    "isConnected": true,
+                    "isConnected": null,
                     "needsSpawn": true
                 },
                 {
@@ -88,7 +88,7 @@
                     "delay": 0,
                     "httpAddress": "https://localhost:5007",
                     "id": "7",
-                    "isConnected": true,
+                    "isConnected": null,
                     "needsSpawn": true
                 },
                 {
@@ -100,7 +100,7 @@
                     "delay": 0,
                     "httpAddress": "https://localhost:5008",
                     "id": "8",
-                    "isConnected": true,
+                    "isConnected": null,
                     "needsSpawn": true
                 },
                 {
@@ -111,7 +111,7 @@
                     "delay": 0,
                     "httpAddress": "https://localhost:5009",
                     "id": "9",
-                    "isConnected": true,
+                    "isConnected": null,
                     "needsSpawn": true
                 },
                 {
@@ -123,7 +123,56 @@
                     "delay": 0,
                     "httpAddress": "https://localhost:5010",
                     "id": "10",
-                    "isConnected": true,
+                    "isConnected": null,
+                    "needsSpawn": true
+                }
+            ]
+        }
+    },
+    {
+        "createDate": "2018-09-01T16:46:34.753039Z",
+        "id": "bb0a3fed-b2a5-4b7d-970d-730329f138ae",
+        "modificationDate": null,
+        "name": "three-nodes-scenario",
+        "simulation": {
+            "blockchainConfiguration": {
+                "blockSize": "5",
+                "target": "00",
+                "type": "PoW",
+                "version": "PoW-v1"
+            },
+            "lastRunTime": null,
+            "scenarioId": "bb0a3fed-b2a5-4b7d-970d-730329f138ae",
+            "serverNodes": [
+                {
+                    "connectedTo": [
+                        "3",
+                        "2"
+                    ],
+                    "delay": 0,
+                    "httpAddress": "https://localhost:5001",
+                    "id": "1",
+                    "isConnected": null,
+                    "needsSpawn": true
+                },
+                {
+                    "connectedTo": [
+                        "1"
+                    ],
+                    "delay": 0,
+                    "httpAddress": "https://localhost:5002",
+                    "id": "2",
+                    "isConnected": null,
+                    "needsSpawn": true
+                },
+                {
+                    "connectedTo": [
+                        "1"
+                    ],
+                    "delay": 0,
+                    "httpAddress": "https://localhost:5003",
+                    "id": "3",
+                    "isConnected": null,
                     "needsSpawn": true
                 }
             ]
@@ -176,55 +225,6 @@
                     "id": "3",
                     "isConnected": null,
                     "needsSpawn": false
-                }
-            ]
-        }
-    },
-    {
-        "createDate": "2018-09-01T16:46:34.753039Z",
-        "id": "bb0a3fed-b2a5-4b7d-970d-730329f138ae",
-        "modificationDate": null,
-        "name": "test-scenario",
-        "simulation": {
-            "blockchainConfiguration": {
-                "blockSize": "5",
-                "target": "0000",
-                "type": "PoW",
-                "version": "PoW-v1"
-            },
-            "lastRunTime": null,
-            "scenarioId": "bb0a3fed-b2a5-4b7d-970d-730329f138ae",
-            "serverNodes": [
-                {
-                    "connectedTo": [
-                        "3",
-                        "2"
-                    ],
-                    "delay": 0,
-                    "httpAddress": "https://localhost:5001",
-                    "id": "1",
-                    "isConnected": null,
-                    "needsSpawn": true
-                },
-                {
-                    "connectedTo": [
-                        "1"
-                    ],
-                    "delay": 0,
-                    "httpAddress": "https://localhost:5002",
-                    "id": "2",
-                    "isConnected": null,
-                    "needsSpawn": true
-                },
-                {
-                    "connectedTo": [
-                        "1"
-                    ],
-                    "delay": 0,
-                    "httpAddress": "https://localhost:5003",
-                    "id": "3",
-                    "isConnected": null,
-                    "needsSpawn": true
                 }
             ]
         }
