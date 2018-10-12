@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore;
 
 namespace BlockchainSimulator.Node.WebApi
 {
@@ -12,19 +13,25 @@ namespace BlockchainSimulator.Node.WebApi
     public static class Program
     {
         /// <summary>
+        /// The web-host builder
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public static IWebHost BuildWebHost(string[] args) =>
+            WebHost.CreateDefaultBuilder(args)
+                .UseStartup<Startup>()
+                .UseSetting("detailedErrors", "true")
+                .Build();
+
+        /// <summary>
         /// The entry point
         /// </summary>
         /// <param name="args">Arguments for the program</param>
         public static void Main(string[] args)
         {
-            var config = new ConfigurationBuilder()
-                .AddJsonFiles(new[]
-                {
 #if DEBUG
-                    "hosting.json",
-#endif
-                    "appsettings.json"
-                }, false, args)
+            var config = new ConfigurationBuilder()
+                .AddJsonFiles(new[] {"hosting.json", "appsettings.json"}, false, args)
                 .Build();
 
             var host = new WebHostBuilder()
@@ -34,6 +41,9 @@ namespace BlockchainSimulator.Node.WebApi
                 .Build();
 
             host.Run();
+#else
+            BuildWebHost(args).Run();
+#endif
         }
     }
 }
