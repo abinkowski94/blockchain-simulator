@@ -1,11 +1,12 @@
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
+using BlockchainSimulator.Node.BusinessLogic.Model.Statistics;
 using System;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public interface IStatisticService
     {
-        BaseResponse<Model.Statistics.Statistic> GetStatistics();
+        BaseResponse<Statistic> GetStatistics();
 
         void RegisterMiningAttempt();
 

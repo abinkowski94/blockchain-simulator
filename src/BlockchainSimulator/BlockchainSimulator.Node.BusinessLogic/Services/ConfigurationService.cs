@@ -6,11 +6,14 @@ using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using BlockchainSimulator.Node.BusinessLogic.Storage;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class ConfigurationService : IConfigurationService
     {
+        private readonly IEncodedBlocksStorage _encodedBlocksStorage;
+        private readonly ITransactionStorage _transactionStorage;
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly IBackgroundQueue _queue;
         private readonly IMiningQueue _miningQueue;
@@ -19,14 +22,16 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly object _padlock = new object();
 
         private BlockchainNodeConfiguration _nodeConfiguration;
-        private ITransactionService _transactionService;
         private IStatisticService _statisticService;
         private IConsensusService _consensusService;
 
         public ConfigurationService(IConfiguration configuration, IMiningQueue miningQueue,
-            IBackgroundQueue queue, IServiceProvider serviceProvider, IBlockchainRepository blockchainRepository)
+            IBackgroundQueue queue, IServiceProvider serviceProvider, IBlockchainRepository blockchainRepository,
+            ITransactionStorage transactionStorage, IEncodedBlocksStorage encodedBlocksStorage)
         {
             _blockchainRepository = blockchainRepository;
+            _transactionStorage = transactionStorage;
+            _encodedBlocksStorage = encodedBlocksStorage;
             _configuration = configuration;
             _miningQueue = miningQueue;
             _queue = queue;
@@ -41,7 +46,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 Target = _configuration["BlockchainConfiguration:Target"],
                 Version = _configuration["BlockchainConfiguration:Version"],
                 NodeId = _configuration["Node:Id"],
-                NodeType = _configuration["Node:Type"],
+                NodeType = _configuration["Node:Type"]
             });
         }
 
@@ -65,9 +70,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         {
             lock (_padlock)
             {
-                _transactionService = _transactionService ?? _serviceProvider.GetService<ITransactionService>();
-
-                _transactionService.Clear();
+                _transactionStorage.Clear();
+                _encodedBlocksStorage.Clear();
                 _miningQueue.Clear();
                 _queue.Clear();
 

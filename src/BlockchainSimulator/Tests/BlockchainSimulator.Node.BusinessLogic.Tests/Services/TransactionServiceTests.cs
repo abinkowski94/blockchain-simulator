@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BlockchainSimulator.Node.BusinessLogic.Storage;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
@@ -42,8 +43,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
                     NodeId = "1"
                 });
 
-            _transactionService = new TransactionService(_blockchainServiceMock.Object, _miningServiceMock.Object,
-                _miningQueueMock.Object, _configurationServiceMock.Object);
+            _transactionService = new TransactionService(_configurationServiceMock.Object,
+                _blockchainServiceMock.Object, _miningServiceMock.Object, _miningQueueMock.Object,
+                new TransactionStorage());
         }
 
         [Fact]
@@ -203,9 +205,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public void GetTransaction_Id_SuccessResponse()
         {
             // Arrange
-            var blockchainProvider = new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _configurationServiceMock.Object);
+            var blockchainProvider =
+                new ProofOfWorkBlockProvider(new MerkleTreeProvider(), _configurationServiceMock.Object);
 
-            var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>)ts.First())
+            var transactionSetList = TransactionDataSet.TransactionData.Select(ts => (HashSet<Transaction>) ts.First())
                 .ToList();
 
             transactionSetList[1].First().Id = "111111";

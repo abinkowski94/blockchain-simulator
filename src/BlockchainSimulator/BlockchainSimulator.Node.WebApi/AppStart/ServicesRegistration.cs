@@ -5,6 +5,7 @@ using BlockchainSimulator.Node.BusinessLogic.Providers.Specific;
 using BlockchainSimulator.Node.BusinessLogic.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.BusinessLogic.Services.Specific;
+using BlockchainSimulator.Node.BusinessLogic.Storage;
 using BlockchainSimulator.Node.BusinessLogic.Validators;
 using BlockchainSimulator.Node.BusinessLogic.Validators.Specific;
 using BlockchainSimulator.Node.DataAccess.Repositories;
@@ -33,30 +34,41 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
 
             // Queues and hosted services
             services.AddSingleton<IMiningQueue, MiningQueue>();
-            services.AddHostedService<MiningHostedService>();
             services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
+            
+            services.AddHostedService<MiningHostedService>();
             services.AddHostedService<QueuedHostedService>();
             services.AddHostedService<ReMiningHostedService>();
 
-            // Services
-            services.AddSingleton<ITransactionService, TransactionService>();
-            services.AddSingleton<IBlockchainService, BlockchainService>();
-            services.AddSingleton<IStatisticService, StatisticService>();
-            services.AddSingleton<IMiningService, MiningService>();
+            // Services and storage
+            services.AddSingleton<IServerNodesStorage, ServerNodesStorage>();
             services.AddSingleton<IConfigurationService, ConfigurationService>();
+            services.AddSingleton<IStatisticService, StatisticService>();
+            
+            services.AddTransient<ITransactionService, TransactionService>();
+            services.AddTransient<IBlockchainService, BlockchainService>();
+            services.AddTransient<IMiningService, MiningService>();
             services.AddTransient<IHttpService, HttpService>();
 
-            // Specific Proof of Work
-            // Services
-            services.AddSingleton<IConsensusService, ProofOfWorkConsensusService>();
+            // Storage
+            services.AddSingleton<ITransactionStorage, TransactionStorage>();
 
-            // Providers
-            services.AddTransient<IMerkleTreeProvider, MerkleTreeProvider>();
-            services.AddTransient<IBlockProvider, ProofOfWorkBlockProvider>();
+            switch (configuration["Node:Type"])
+            {
+                case "PoW":
+                    // Services
+                    services.AddSingleton<IEncodedBlocksStorage, EncodedBlocksStorage>();
+                    services.AddTransient<IConsensusService, ProofOfWorkConsensusService>();
 
-            // Validators
-            services.AddTransient<IMerkleTreeValidator, MerkleTreeValidator>();
-            services.AddTransient<IBlockchainValidator, ProofOfWorkValidator>();
+                    // Providers
+                    services.AddTransient<IMerkleTreeProvider, MerkleTreeProvider>();
+                    services.AddTransient<IBlockProvider, ProofOfWorkBlockProvider>();
+
+                    // Validators
+                    services.AddTransient<IMerkleTreeValidator, MerkleTreeValidator>();
+                    services.AddTransient<IBlockchainValidator, ProofOfWorkValidator>();
+                    break;
+            }
 
             return services;
         }

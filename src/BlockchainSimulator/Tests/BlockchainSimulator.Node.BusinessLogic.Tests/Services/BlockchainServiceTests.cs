@@ -17,7 +17,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public BlockchainServiceTests()
         {
             _blockchainRepositoryMock = new Mock<IBlockchainRepository>();
-            _blockchainService = new BlockchainService(_blockchainRepositoryMock.Object);
+            _blockchainService = new BlockchainService(new Mock<IConfigurationService>().Object,
+                _blockchainRepositoryMock.Object);
         }
 
         [Theory]

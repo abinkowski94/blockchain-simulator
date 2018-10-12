@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BlockchainSimulator.Node.BusinessLogic.Storage;
 using Xunit;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
@@ -22,8 +23,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             var statisticServiceMock = new Mock<IStatisticService>();
             _backgroundQueueMock = new Mock<IBackgroundQueue>();
 
-            _consensusService = new Mock<BaseConsensusService>(statisticServiceMock.Object, _backgroundQueueMock.Object)
-            { CallBase = true }.Object;
+            _consensusService = new Mock<BaseConsensusService>(new Mock<IConfigurationService>().Object,
+                statisticServiceMock.Object, _backgroundQueueMock.Object, new ServerNodesStorage()) {CallBase = true}.Object;
         }
 
         [Fact]
@@ -50,10 +51,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public void ConnectNode_Node_ErrorResponseAlreadyExists()
         {
             // Arrange
-            _consensusService.ConnectNode(new ServerNode { Id = "1", HttpAddress = "http://test:4200" });
+            _consensusService.ConnectNode(new ServerNode {Id = "1", HttpAddress = "http://test:4200"});
 
             // Act
-            var response = _consensusService.ConnectNode(new ServerNode { Id = "1", HttpAddress = "http://test:4200" })
+            var response = _consensusService.ConnectNode(new ServerNode {Id = "1", HttpAddress = "http://test:4200"})
                 as ErrorResponse<ServerNode>;
 
             // Assert
@@ -71,7 +72,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public void ConnectNode_Node_SuccessResponse()
         {
             // Arrange
-            var serverNode = new ServerNode { Id = "1", HttpAddress = "http://test:4200" };
+            var serverNode = new ServerNode {Id = "1", HttpAddress = "http://test:4200"};
 
             // Act
             var response = _consensusService.ConnectNode(serverNode) as SuccessResponse<ServerNode>;
@@ -107,8 +108,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public void DisconnectFromNetwork_Empty_SuccessResponse()
         {
             // Arrange
-            _consensusService.ConnectNode(new ServerNode { Id = "1", HttpAddress = "http://test:4200" });
-            _consensusService.ConnectNode(new ServerNode { Id = "2", HttpAddress = "http://test:4200" });
+            _consensusService.ConnectNode(new ServerNode {Id = "1", HttpAddress = "http://test:4200"});
+            _consensusService.ConnectNode(new ServerNode {Id = "2", HttpAddress = "http://test:4200"});
 
             // Act
             var result = _consensusService.DisconnectFromNetwork() as SuccessResponse<List<ServerNode>>;
@@ -142,7 +143,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         {
             // Arrange
             const string id = "1";
-            _consensusService.ConnectNode(new ServerNode { Id = id, HttpAddress = "http://test:4200" });
+            _consensusService.ConnectNode(new ServerNode {Id = id, HttpAddress = "http://test:4200"});
 
             // Act
             var result = _consensusService.DisconnectNode(id) as SuccessResponse<ServerNode>;
@@ -159,8 +160,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         public void GetNodes_Empty_SuccessResponseWithNodes()
         {
             // Arrange
-            _consensusService.ConnectNode(new ServerNode { Id = "1", HttpAddress = "https://test:4200", Delay = 100 });
-            _consensusService.ConnectNode(new ServerNode { Id = "2", HttpAddress = "https://test:4200", Delay = 1000 });
+            _consensusService.ConnectNode(new ServerNode {Id = "1", HttpAddress = "https://test:4200", Delay = 100});
+            _consensusService.ConnectNode(new ServerNode {Id = "2", HttpAddress = "https://test:4200", Delay = 1000});
 
             // Act
             var result = _consensusService.GetNodes() as SuccessResponse<List<ServerNode>>;

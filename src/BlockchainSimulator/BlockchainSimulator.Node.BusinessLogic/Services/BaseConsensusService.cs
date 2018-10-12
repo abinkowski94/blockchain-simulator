@@ -1,4 +1,3 @@
-using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Common.Models.Consensus;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Hubs;
@@ -10,21 +9,25 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlockchainSimulator.Node.BusinessLogic.Storage;
 using ServerNode = BlockchainSimulator.Node.BusinessLogic.Model.Consensus.ServerNode;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
-    public abstract class BaseConsensusService : BaseService, IConsensusService, IDisposable
+    public abstract class BaseConsensusService : BaseService, IConsensusService
     {
-        protected readonly ConcurrentDictionary<string, ServerNode> ServerNodes;
-        protected readonly IStatisticService StatisticService;
-        protected readonly IBackgroundQueue BackgroundQueue;
+        private readonly IServerNodesStorage _serverNodesStorage;
+        protected ConcurrentDictionary<string, ServerNode> ServerNodes => _serverNodesStorage.ServerNodes;
 
-        protected BaseConsensusService(IStatisticService statisticService, IBackgroundQueue backgroundQueue)
+        protected readonly IStatisticService _statisticService;
+        protected readonly IBackgroundQueue _backgroundQueue;
+
+        protected BaseConsensusService(IConfigurationService configurationService, IStatisticService statisticService,
+            IBackgroundQueue backgroundQueue, IServerNodesStorage serverNodesStorage) : base(configurationService)
         {
-            ServerNodes = new ConcurrentDictionary<string, ServerNode>();
-            StatisticService = statisticService;
-            BackgroundQueue = backgroundQueue;
+            _serverNodesStorage = serverNodesStorage;
+            _statisticService = statisticService;
+            _backgroundQueue = backgroundQueue;
         }
 
         public abstract void AcceptExternalBlock(EncodedBlock encodedBlock);
@@ -44,7 +47,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             serverNode.IsConnected = null;
             CreateNodeConnection(serverNode);
 
-            if (!ServerNodes.TryAdd(serverNode.Id, serverNode))
+            if (!_serverNodesStorage.ServerNodes.TryAdd(serverNode.Id, serverNode))
             {
                 return new ErrorResponse<ServerNode>($"Could not add a node with id: {serverNode.Id}", serverNode);
             }
@@ -84,18 +87,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 ServerNodes.Select(kv => kv.Value).OrderBy(n => n.Delay).ToList());
         }
 
-        public void Dispose()
-        {
-            ServerNodes.Values.ForEach(async n =>
-            {
-                await n.HubConnection.StopAsync();
-                await n.HubConnection.DisposeAsync();
-            });
-        }
-
         private void CreateNodeConnection(ServerNode serverNode)
         {
-            BackgroundQueue.Enqueue(async token =>
+            _backgroundQueue.Enqueue(async token =>
             {
                 var url = $"{serverNode.HttpAddress}/consensusHub";
                 serverNode.HubConnection = new HubConnectionBuilder().WithUrl(url).Build();

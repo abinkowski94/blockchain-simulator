@@ -1,4 +1,3 @@
-using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Services;
@@ -12,14 +11,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers
 {
     public abstract class BaseBlockProvider : BaseService, IBlockProvider
     {
-        private readonly IConfigurationService _configurationService;
         private readonly IMerkleTreeProvider _merkleTreeProvider;
 
-        protected BlockchainNodeConfiguration BlockchainNodeConfiguration => _configurationService.GetConfiguration();
-
         protected BaseBlockProvider(IMerkleTreeProvider merkleTreeProvider, IConfigurationService configurationService)
+            : base(configurationService)
         {
-            _configurationService = configurationService;
             _merkleTreeProvider = merkleTreeProvider;
         }
 

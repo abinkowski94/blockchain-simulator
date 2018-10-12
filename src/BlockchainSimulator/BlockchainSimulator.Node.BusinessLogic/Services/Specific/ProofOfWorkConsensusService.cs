@@ -1,5 +1,4 @@
 using BlockchainSimulator.Common.Extensions;
-using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Common.Models.Consensus;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Hubs;
@@ -16,41 +15,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BlockchainSimulator.Node.BusinessLogic.Storage;
 using DAM = BlockchainSimulator.Node.DataAccess.Model;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 {
     public class ProofOfWorkConsensusService : BaseConsensusService
     {
-        private readonly ConcurrentBag<string> _encodedBlocksIds;
-
+        private readonly IEncodedBlocksStorage _encodedBlocksStorage;
         private readonly IHubContext<ConsensusHub, IConsensusClient> _consensusHubContext;
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly IBlockchainValidator _blockchainValidator;
-        private readonly IConfigurationService _configurationService;
-
-        private BlockchainNodeConfiguration BlockchainNodeConfiguration => _configurationService.GetConfiguration();
 
         public ProofOfWorkConsensusService(IBackgroundQueue backgroundQueue, IConfigurationService configurationService,
             IBlockchainRepository blockchainRepository, IBlockchainValidator blockchainValidator,
-            IStatisticService statisticService, IHubContext<ConsensusHub, IConsensusClient> consensusHubContext)
-            : base(statisticService, backgroundQueue)
+            IStatisticService statisticService, IHubContext<ConsensusHub, IConsensusClient> consensusHubContext,
+            IServerNodesStorage serverNodesStorage, IEncodedBlocksStorage encodedBlocksStorage)
+            : base(configurationService, statisticService, backgroundQueue, serverNodesStorage)
         {
-            _encodedBlocksIds = new ConcurrentBag<string>();
-            _configurationService = configurationService;
-
             _consensusHubContext = consensusHubContext;
+            _encodedBlocksStorage = encodedBlocksStorage;
             _blockchainRepository = blockchainRepository;
             _blockchainValidator = blockchainValidator;
         }
 
         public override void AcceptExternalBlock(EncodedBlock encodedBlock)
         {
-            BackgroundQueue.Enqueue(token => new Task(() =>
+            _backgroundQueue.Enqueue(token => new Task(() =>
             {
-                if (encodedBlock?.Base64Block != null && !_encodedBlocksIds.Contains(encodedBlock.Id))
+                if (encodedBlock?.Base64Block != null &&
+                    !_encodedBlocksStorage.EncodedBlocksIds.Contains(encodedBlock.Id))
                 {
-                    _encodedBlocksIds.Add(encodedBlock.Id);
+                    _encodedBlocksStorage.EncodedBlocksIds.Add(encodedBlock.Id);
 
                     var blockchainJson = Encoding.UTF8.GetString(Convert.FromBase64String(encodedBlock.Base64Block));
                     var incomingBlock = BlockchainConverter.DeserializeBlock(blockchainJson);
@@ -134,7 +130,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
             if (_blockchainRepository.BlockExists(incomingBlock.UniqueId))
             {
-                StatisticService.RegisterRejectedBlock();
+                _statisticService.RegisterRejectedBlock();
                 return new ErrorResponse<bool>("The block already exists!", false);
             }
 
@@ -144,19 +140,19 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 var parentBlockValidationResult = ValidateParentBlock(block, senderNodeId);
                 if (!parentBlockValidationResult.IsSuccess)
                 {
-                    StatisticService.RegisterRejectedBlock();
+                    _statisticService.RegisterRejectedBlock();
                     return parentBlockValidationResult;
                 }
 
                 var parentBlock = _blockchainRepository.GetBlock(block.ParentUniqueId);
                 if (parentBlock == null || parentBlock.Depth + 1 != mappedBlock.Depth)
                 {
-                    StatisticService.RegisterRejectedBlock();
+                    _statisticService.RegisterRejectedBlock();
                     return new ErrorResponse<bool>("The depth of incoming block is incorrect!", false);
                 }
 
                 var mappedParentBlock = LocalMapper.Map<BlockBase>(parentBlock);
-                ((Block)mappedBlock).Parent = mappedParentBlock;
+                ((Block) mappedBlock).Parent = mappedParentBlock;
             }
 
             var duplicatesValidationResult = ValidateTransactionsDuplicates(mappedBlock);
@@ -168,7 +164,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             var validationResult = _blockchainValidator.Validate(mappedBlock);
             if (!validationResult.IsSuccess)
             {
-                StatisticService.RegisterRejectedBlock();
+                _statisticService.RegisterRejectedBlock();
                 return new ErrorResponse<bool>("The validation for the block failed!", false, validationResult.Errors);
             }
 
@@ -230,7 +226,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                     $"Could not find the server for parent block with id: {block.ParentUniqueId} don't exist!", false);
             }
 
-            var methodName = nameof(ConsensusHub.GetBlocksFromBranchJson);
+            const string methodName = nameof(ConsensusHub.GetBlocksFromBranchJson);
             var json = serverNode.HubConnection.Invoke<string>(methodName, block.ParentUniqueId);
             if (json != null)
             {

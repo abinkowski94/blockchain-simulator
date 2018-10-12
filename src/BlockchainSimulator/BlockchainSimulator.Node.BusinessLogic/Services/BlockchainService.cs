@@ -9,7 +9,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
     {
         private readonly IBlockchainRepository _blockchainRepository;
 
-        public BlockchainService(IBlockchainRepository blockchainRepository)
+        public BlockchainService(IConfigurationService configurationService, IBlockchainRepository blockchainRepository)
+            : base(configurationService)
         {
             _blockchainRepository = blockchainRepository;
         }

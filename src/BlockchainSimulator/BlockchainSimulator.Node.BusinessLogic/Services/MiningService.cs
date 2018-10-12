@@ -1,4 +1,3 @@
-using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
@@ -10,11 +9,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using BlockchainSimulator.Node.BusinessLogic.Storage;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class MiningService : BaseService, IMiningService
     {
+        private readonly ITransactionStorage _transactionStorage;
         private readonly IBlockchainRepository _blockchainRepository;
         private readonly IConsensusService _consensusService;
         private readonly IStatisticService _statisticService;
@@ -22,17 +23,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IBlockProvider _blockProvider;
         private readonly IMiningQueue _miningQueue;
         private readonly IBackgroundQueue _backgroundQueue;
-        private readonly IConfigurationService _configurationService;
 
         private ITransactionService _transactionService;
 
-        private BlockchainNodeConfiguration BlockchainNodeConfiguration => _configurationService.GetConfiguration();
-
         public MiningService(IBlockchainRepository blockchainRepository, IConsensusService consensusService,
             IStatisticService statisticService, IServiceProvider serviceProvider, IBlockProvider blockProvider,
-            IMiningQueue miningQueue, IBackgroundQueue backgroundQueue, IConfigurationService configurationService)
+            IMiningQueue miningQueue, IBackgroundQueue backgroundQueue, IConfigurationService configurationService,
+            ITransactionStorage transactionStorage) : base(configurationService)
         {
-            _configurationService = configurationService;
             _blockchainRepository = blockchainRepository;
             _consensusService = consensusService;
             _statisticService = statisticService;
@@ -40,6 +38,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _blockProvider = blockProvider;
             _miningQueue = miningQueue;
             _backgroundQueue = backgroundQueue;
+            _transactionStorage = transactionStorage;
         }
 
         public void MineBlock(HashSet<Transaction> transactions, DateTime enqueueTime, CancellationToken token)
@@ -53,7 +52,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 var newBlockTask = _blockProvider.CreateBlock(transactions, enqueueTime, lastBlock,
                     cancellationTokenSource.Token);
 
-                while (!newBlockTask.IsCompleted || (newBlockTask.IsCompleted && newBlockTask.IsCanceled))
+                while (!newBlockTask.IsCompleted || newBlockTask.IsCompleted && newBlockTask.IsCanceled)
                 {
                     if (lastBlock?.UniqueId != _blockchainRepository.GetLastBlock()?.UniqueId)
                     {
@@ -83,12 +82,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         {
             if (!_miningQueue.IsWorking && !_backgroundQueue.IsWorking)
             {
-                if (_transactionService == null)
-                {
-                    _transactionService = _serviceProvider.GetService<ITransactionService>();
-                }
-
-                var pendingTransactions = _transactionService.GetPendingTransactions().Result;
+                var pendingTransactions = _transactionStorage.PendingTransactions;
                 if (pendingTransactions.Count < BlockchainNodeConfiguration.BlockSize)
                 {
                     var longestBlockchainBlocks = _blockchainRepository.GetLongestBlockchain()?.Blocks;
@@ -97,12 +91,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                         var longestBlockchainTransactionsIds = longestBlockchainBlocks
                             .SelectMany(b => b.Body.Transactions).Select(t => t.Id).ToList();
 
-                        var transactionsToReMine = _transactionService.RegisteredTransactions.Values
+                        var transactionsToReMine = _transactionStorage.RegisteredTransactions.Values
                             .Where(t => !longestBlockchainTransactionsIds.Contains(t.Id))
-                            .Where(t => pendingTransactions.All(pt => pt.Id != t.Id)).ToList();
+                            .Where(t => pendingTransactions.All(pt => pt.Key != t.Id)).ToList();
 
                         if (transactionsToReMine.Any())
                         {
+                            _transactionService =
+                                _transactionService ?? _serviceProvider.GetService<ITransactionService>();
                             _transactionService.AddTransactions(transactionsToReMine);
                         }
                         else
