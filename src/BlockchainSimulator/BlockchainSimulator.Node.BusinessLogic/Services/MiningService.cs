@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using BlockchainSimulator.Common.Extensions;
 using BlockchainSimulator.Node.BusinessLogic.Storage;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
@@ -90,6 +91,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                     {
                         var longestBlockchainTransactionsIds = longestBlockchainBlocks
                             .SelectMany(b => b.Body.Transactions).Select(t => t.Id).ToList();
+
+                        var treeTransactions = _blockchainRepository.GetBlockchainTree().Blocks
+                            .SelectMany(b => b.Body.Transactions).Select(t => LocalMapper.Map<Transaction>(t));
+
+                        treeTransactions.ForEach(t => _transactionStorage.RegisteredTransactions.TryAdd(t.Id, t));
 
                         var transactionsToReMine = _transactionStorage.RegisteredTransactions.Values
                             .Where(t => !longestBlockchainTransactionsIds.Contains(t.Id))
