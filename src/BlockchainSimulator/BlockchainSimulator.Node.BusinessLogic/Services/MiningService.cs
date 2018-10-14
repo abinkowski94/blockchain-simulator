@@ -53,11 +53,19 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 var newBlockTask = _blockProvider.CreateBlock(transactions, enqueueTime, lastBlock,
                     cancellationTokenSource.Token);
 
+                var reject = false;
                 while (!newBlockTask.IsCompleted || newBlockTask.IsCompleted && newBlockTask.IsCanceled)
                 {
-                    if (lastBlock?.UniqueId != _blockchainRepository.GetLastBlock()?.UniqueId)
+                    var recentLastBlock = _blockchainRepository.GetLastBlock();
+                    if (lastBlock?.UniqueId != recentLastBlock?.UniqueId)
                     {
                         cancellationTokenSource.Cancel();
+                        if (recentLastBlock?.Body?.Transactions?.Any(rbt => transactions.Any(t => t.Id == rbt.Id)) ??
+                            false)
+                        {
+                            reject = true;
+                            break;
+                        }
                     }
 
                     if (newBlockTask.IsCanceled)
@@ -69,6 +77,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
                         _statisticService.RegisterAbandonedBlock();
                     }
+                }
+
+                if (reject)
+                {
+                    _statisticService.RegisterAbandonedBlock();
+                    return;
                 }
 
                 var result = _consensusService.AcceptBlock(newBlockTask.Result);
