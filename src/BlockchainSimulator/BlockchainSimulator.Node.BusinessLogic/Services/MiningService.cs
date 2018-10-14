@@ -46,6 +46,18 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         {
             if (!token.IsCancellationRequested)
             {
+                var longestBlockchain = _blockchainRepository.GetLongestBlockchain();
+                if (longestBlockchain?.Blocks != null)
+                {
+                    var longestBlockchainTransactionsIds = longestBlockchain.Blocks.SelectMany(b => b.Body.Transactions)
+                        .Select(t => t.Id);
+
+                    if (transactions.Any(t => longestBlockchainTransactionsIds.Contains(t.Id)))
+                    {
+                        return;
+                    }
+                }
+                
                 _statisticService.RegisterMiningAttempt();
 
                 var cancellationTokenSource = new CancellationTokenSource();
