@@ -1,5 +1,5 @@
+using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.DataAccess.Model.Block;
-using BlockchainSimulator.Node.DataAccess.Repositories;
 using BlockchainSimulator.Node.WebApi.Controllers;
 using Moq;
 using Xunit;
@@ -9,12 +9,12 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
     public class BlockchainControllerTests
     {
         private readonly BlockchainController _blockchainController;
-        private readonly Mock<IBlockchainRepository> _blockchainRepositoryMock;
+        private readonly Mock<IBlockchainService> _blockchainServiceMock;
 
         public BlockchainControllerTests()
         {
-            _blockchainRepositoryMock = new Mock<IBlockchainRepository>();
-            _blockchainController = new BlockchainController(_blockchainRepositoryMock.Object);
+            _blockchainServiceMock = new Mock<IBlockchainService>();
+            _blockchainController = new BlockchainController(_blockchainServiceMock.Object);
         }
 
         [Fact]
@@ -24,7 +24,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
             const string id = "1";
             var block = new Block { Id = id };
 
-            _blockchainRepositoryMock.Setup(p => p.GetBlock(id))
+            _blockchainServiceMock.Setup(p => p.GetBlock(id))
                 .Returns(block);
 
             // Act
@@ -32,7 +32,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
             var blockResult = result.Value as Block;
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlock(id));
+            _blockchainServiceMock.Verify(p => p.GetBlock(id));
 
             Assert.NotNull(result);
             Assert.NotNull(blockResult);
@@ -46,7 +46,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
             // Arrange
             const string id = "1";
 
-            _blockchainRepositoryMock.Setup(p => p.GetBlock(id))
+            _blockchainServiceMock.Setup(p => p.GetBlock(id))
                 .Returns((BlockBase)null);
 
             // Act
@@ -54,7 +54,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.Controllers
             var blockResult = result.Value as Block;
 
             // Assert
-            _blockchainRepositoryMock.Verify(p => p.GetBlock(id));
+            _blockchainServiceMock.Verify(p => p.GetBlock(id));
 
             Assert.NotNull(result);
             Assert.Null(blockResult);

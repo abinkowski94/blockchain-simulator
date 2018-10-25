@@ -3,7 +3,6 @@ using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Transaction;
 using BlockchainSimulator.Node.BusinessLogic.Providers;
 using BlockchainSimulator.Node.BusinessLogic.Queues;
-using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -17,7 +16,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
     public class MiningService : BaseService, IMiningService
     {
         private readonly ITransactionStorage _transactionStorage;
-        private readonly IBlockchainRepository _blockchainRepository;
+        private readonly IBlockchainService _blockchainService;
         private readonly IConsensusService _consensusService;
         private readonly IStatisticService _statisticService;
         private readonly IServiceProvider _serviceProvider;
@@ -27,12 +26,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         private ITransactionService _transactionService;
 
-        public MiningService(IBlockchainRepository blockchainRepository, IConsensusService consensusService,
+        public MiningService(IBlockchainService blockchainService, IConsensusService consensusService,
             IStatisticService statisticService, IServiceProvider serviceProvider, IBlockProvider blockProvider,
             IMiningQueue miningQueue, IBackgroundQueue backgroundQueue, IConfigurationService configurationService,
             ITransactionStorage transactionStorage) : base(configurationService)
         {
-            _blockchainRepository = blockchainRepository;
+            _blockchainService = blockchainService;
             _consensusService = consensusService;
             _statisticService = statisticService;
             _serviceProvider = serviceProvider;
@@ -48,7 +47,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             {
                 SpinWait.SpinUntil(() => !_backgroundQueue.IsWorking);
                 
-                var longestBlockchain = _blockchainRepository.GetLongestBlockchain();
+                var longestBlockchain = _blockchainService.GetLongestBlockchain();
                 if (longestBlockchain?.Blocks != null)
                 {
                     var longestBlockchainTransactionsIds = longestBlockchain.Blocks.SelectMany(b => b.Body.Transactions)
@@ -63,14 +62,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 _statisticService.RegisterMiningAttempt();
 
                 var cancellationTokenSource = new CancellationTokenSource();
-                var lastBlock = LocalMapper.Map<BlockBase>(_blockchainRepository.GetLastBlock());
+                var lastBlock = LocalMapper.Map<BlockBase>(_blockchainService.GetLastBlock());
                 var newBlockTask = _blockProvider.CreateBlock(transactions, enqueueTime, lastBlock,
                     cancellationTokenSource.Token);
 
                 var reject = false;
                 while (!newBlockTask.IsCompleted || newBlockTask.IsCompleted && newBlockTask.IsCanceled)
                 {
-                    var recentLastBlock = _blockchainRepository.GetLastBlock();
+                    var recentLastBlock = _blockchainService.GetLastBlock();
                     if (lastBlock?.UniqueId != recentLastBlock?.UniqueId)
                     {
                         cancellationTokenSource.Cancel();
@@ -85,7 +84,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                     if (newBlockTask.IsCanceled)
                     {
                         cancellationTokenSource = new CancellationTokenSource();
-                        lastBlock = LocalMapper.Map<BlockBase>(_blockchainRepository.GetLastBlock());
+                        lastBlock = LocalMapper.Map<BlockBase>(_blockchainService.GetLastBlock());
                         newBlockTask = _blockProvider.CreateBlock(transactions, enqueueTime, lastBlock,
                             cancellationTokenSource.Token);
 
@@ -114,13 +113,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 var pendingTransactions = _transactionStorage.PendingTransactions;
                 if (pendingTransactions.Count < BlockchainNodeConfiguration.BlockSize)
                 {
-                    var longestBlockchainBlocks = _blockchainRepository.GetLongestBlockchain()?.Blocks;
+                    var longestBlockchainBlocks = _blockchainService.GetLongestBlockchain()?.Blocks;
                     if (longestBlockchainBlocks != null)
                     {
                         var longestBlockchainTransactionsIds = longestBlockchainBlocks
                             .SelectMany(b => b.Body.Transactions).Select(t => t.Id).ToList();
 
-                        var treeTransactions = _blockchainRepository.GetBlockchainTree().Blocks
+                        var treeTransactions = _blockchainService.GetBlockchainTree().Blocks
                             .SelectMany(b => b.Body.Transactions).Select(t => LocalMapper.Map<Transaction>(t));
 
                         treeTransactions.ForEach(t => _transactionStorage.RegisteredTransactions.TryAdd(t.Id, t));

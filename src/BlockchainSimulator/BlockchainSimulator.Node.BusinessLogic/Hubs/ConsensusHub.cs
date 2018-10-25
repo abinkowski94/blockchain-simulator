@@ -1,4 +1,4 @@
-﻿using BlockchainSimulator.Node.DataAccess.Repositories;
+﻿using BlockchainSimulator.Node.BusinessLogic.Services;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 
@@ -6,21 +6,21 @@ namespace BlockchainSimulator.Node.BusinessLogic.Hubs
 {
     public class ConsensusHub : Hub<IConsensusClient>
     {
-        private readonly IBlockchainRepository _blockchainRepository;
+        private readonly IBlockchainService _blockchainService;
 
-        public ConsensusHub(IBlockchainRepository blockchainRepository)
+        public ConsensusHub(IBlockchainService blockchainService)
         {
-            _blockchainRepository = blockchainRepository;
+            _blockchainService = blockchainService;
         }
 
         public string GetBlocksFromBranchJson(string uniqueId)
         {
-            return JsonConvert.SerializeObject(_blockchainRepository.GetBlockchainFromBranch(uniqueId).Blocks);
+            return JsonConvert.SerializeObject(_blockchainService.GetBlockchainFromBranch(uniqueId).Blocks);
         }
 
         public string GetLastBlockJson()
         {
-            return JsonConvert.SerializeObject(_blockchainRepository.GetLastBlock());
+            return JsonConvert.SerializeObject(_blockchainService.GetLastBlock());
         }
     }
 }

@@ -2,11 +2,11 @@ using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Common.Queues;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Queues;
-using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using BlockchainSimulator.Node.BusinessLogic.Storage;
+using BlockchainSimulator.Node.DataAccess.Repositories;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
@@ -14,9 +14,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
     {
         private readonly IEncodedBlocksStorage _encodedBlocksStorage;
         private readonly ITransactionStorage _transactionStorage;
-        private readonly IBlockchainRepository _blockchainRepository;
         private readonly IBackgroundQueue _queue;
-        private readonly IMiningQueue _miningQueue;
+        private readonly IBlockchainRepository _blockchainRepository;
+
         private readonly IConfiguration _configuration;
         private readonly IServiceProvider _serviceProvider;
         private readonly object _padlock = new object();
@@ -24,16 +24,17 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private BlockchainNodeConfiguration _nodeConfiguration;
         private IStatisticService _statisticService;
         private IConsensusService _consensusService;
+        private IMiningQueue _miningQueue;
+        private IBlockchainService _blockchainService;
 
-        public ConfigurationService(IConfiguration configuration, IMiningQueue miningQueue,
-            IBackgroundQueue queue, IServiceProvider serviceProvider, IBlockchainRepository blockchainRepository,
-            ITransactionStorage transactionStorage, IEncodedBlocksStorage encodedBlocksStorage)
+        public ConfigurationService(IConfiguration configuration, IBackgroundQueue queue,
+            IServiceProvider serviceProvider, ITransactionStorage transactionStorage,
+            IEncodedBlocksStorage encodedBlocksStorage, IBlockchainRepository blockchainRepository)
         {
-            _blockchainRepository = blockchainRepository;
             _transactionStorage = transactionStorage;
             _encodedBlocksStorage = encodedBlocksStorage;
+            _blockchainRepository = blockchainRepository;
             _configuration = configuration;
-            _miningQueue = miningQueue;
             _queue = queue;
             _serviceProvider = serviceProvider;
         }
@@ -56,9 +57,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             {
                 _consensusService = _consensusService ?? _serviceProvider.GetService<IConsensusService>();
                 _statisticService = _statisticService ?? _serviceProvider.GetService<IStatisticService>();
+                _blockchainService = _blockchainService ?? _serviceProvider.GetService<IBlockchainService>();
 
                 StopAllJobs();
-                _blockchainRepository.Clear();
+                _blockchainService.Clear();
                 _consensusService.DisconnectFromNetwork();
                 _statisticService.Clear();
 
@@ -70,6 +72,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         {
             lock (_padlock)
             {
+                _miningQueue = _miningQueue ?? _serviceProvider.GetService<IMiningQueue>();
+
                 _transactionStorage.Clear();
                 _encodedBlocksStorage.Clear();
                 _miningQueue.Clear();
@@ -83,6 +87,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         {
             _nodeConfiguration = configuration;
             ClearNode();
+            _blockchainRepository.CreateGenesisBlock(_configuration);
 
             return new SuccessResponse<bool>("The configuration has been changed", true);
         }

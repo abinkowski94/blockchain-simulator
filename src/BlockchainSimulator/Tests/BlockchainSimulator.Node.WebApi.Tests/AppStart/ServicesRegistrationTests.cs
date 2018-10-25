@@ -21,7 +21,7 @@ namespace BlockchainSimulator.Node.WebApi.Tests.AppStart
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(18, result.Count);
+            Assert.Equal(21, result.Count);
         }
     }
 }

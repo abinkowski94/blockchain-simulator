@@ -221,15 +221,15 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
 
         private static List<NodeModel> GetTreeNodes(IEnumerable<BlockInfo> mainTreeInfos, bool compressed = false)
         {
-            var root = new NodeModel { Id = "R", Content = "R", ParentId = string.Empty };
             var treeNodes = mainTreeInfos.Select(i => new NodeModel
             {
                 Id = i.UniqueId,
                 Content = Convert.ToInt64(i.Id, 16).ToString(),
-                ParentId = i.ParentUniqueId ?? "R"
+                ParentId = i.ParentUniqueId ?? string.Empty
             }).ToList();
+            var root = treeNodes.First(n => n.Id == Guid.Empty.ToString());
+            root.Content = "G";
 
-            treeNodes.Add(root);
             treeNodes.ForEach(n =>
             {
                 n.Parent = treeNodes.FirstOrDefault(node => node.Id == n.ParentId);

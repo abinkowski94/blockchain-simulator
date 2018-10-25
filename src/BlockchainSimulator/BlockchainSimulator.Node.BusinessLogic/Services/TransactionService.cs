@@ -74,7 +74,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         public BaseResponse<Transaction> GetTransaction(string id)
         {
-            var blockchainResponse = _blockchainService.GetBlockchainTree();
+            var blockchainResponse = _blockchainService.GetBlockchainTreeLinked();
             if (!blockchainResponse.IsSuccess)
             {
                 return new ErrorResponse<Transaction>("An error occurred while reading blockchain from local storage!",

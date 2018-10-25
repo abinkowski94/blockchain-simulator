@@ -65,6 +65,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators
 
         private static ValidationResult ValidateParentHash(Block blockchain)
         {
+            if (blockchain.Parent.IsGenesis)
+            {
+                return new ValidationResult(true);
+            }
+            
             var parentHash = EncryptionService.GetSha256Hash(blockchain.Parent.BlockJson);
             return parentHash != blockchain.Header.ParentHash
                 ? new ValidationResult(false, $"The parent hash is invalid for block with id: {blockchain.Id}")

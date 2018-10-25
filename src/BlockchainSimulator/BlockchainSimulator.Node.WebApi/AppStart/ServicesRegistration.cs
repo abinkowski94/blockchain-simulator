@@ -46,7 +46,6 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
             services.AddSingleton<IStatisticService, StatisticService>();
             
             services.AddTransient<ITransactionService, TransactionService>();
-            services.AddTransient<IBlockchainService, BlockchainService>();
             services.AddTransient<IMiningService, MiningService>();
             services.AddTransient<IHttpService, HttpService>();
 
@@ -58,6 +57,7 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
                 case "PoW":
                     // Services
                     services.AddSingleton<IEncodedBlocksStorage, EncodedBlocksStorage>();
+                    services.AddTransient<IBlockchainService, ProofOfWorkBlockchainService>();
                     services.AddTransient<IConsensusService, ProofOfWorkConsensusService>();
 
                     // Providers

@@ -6,7 +6,6 @@ using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Validators;
 using BlockchainSimulator.Node.DataAccess.Converters;
-using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using System;
@@ -24,18 +23,18 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
     {
         private readonly IEncodedBlocksStorage _encodedBlocksStorage;
         private readonly IHubContext<ConsensusHub, IConsensusClient> _consensusHubContext;
-        private readonly IBlockchainRepository _blockchainRepository;
+        private readonly IBlockchainService _blockchainService;
         private readonly IBlockchainValidator _blockchainValidator;
 
         public ProofOfWorkConsensusService(IBackgroundQueue backgroundQueue, IConfigurationService configurationService,
-            IBlockchainRepository blockchainRepository, IBlockchainValidator blockchainValidator,
+            IBlockchainService blockchainService, IBlockchainValidator blockchainValidator,
             IStatisticService statisticService, IHubContext<ConsensusHub, IConsensusClient> consensusHubContext,
             IServerNodesStorage serverNodesStorage, IEncodedBlocksStorage encodedBlocksStorage)
             : base(configurationService, statisticService, backgroundQueue, serverNodesStorage)
         {
             _consensusHubContext = consensusHubContext;
             _encodedBlocksStorage = encodedBlocksStorage;
-            _blockchainRepository = blockchainRepository;
+            _blockchainService = blockchainService;
             _blockchainValidator = blockchainValidator;
         }
 
@@ -67,7 +66,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 return new ErrorResponse<bool>("The block can not be null!", false);
             }
 
-            var lastBlock = _blockchainRepository.GetLastBlock();
+            var lastBlock = _blockchainService.GetLastBlock();
             if (blockBase is Block block && block.ParentUniqueId != lastBlock.UniqueId)
             {
                 return new ErrorResponse<bool>("The blockchain head has changed!", false);
@@ -80,7 +79,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             }
 
             var mappedBlock = LocalMapper.Map<DAM.Block.BlockBase>(blockBase);
-            _blockchainRepository.AddBlock(mappedBlock);
+            _blockchainService.AddBlock(mappedBlock);
             DistributeBlock(mappedBlock);
 
             return new SuccessResponse<bool>("The block has been accepted and appended!", true);
@@ -98,7 +97,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 }
             });
 
-            var currentLastBlock = _blockchainRepository.GetLastBlock();
+            var currentLastBlock = _blockchainService.GetLastBlock();
             if (blocks.IsEmpty && currentLastBlock == null)
             {
                 return new ErrorResponse<bool>(
@@ -128,7 +127,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 return new ErrorResponse<bool>("The incoming block cannot be null!", false);
             }
 
-            if (_blockchainRepository.BlockExists(incomingBlock.UniqueId))
+            if (_blockchainService.BlockExists(incomingBlock.UniqueId))
             {
                 _statisticService.RegisterRejectedBlock();
                 return new ErrorResponse<bool>("The block already exists!", false);
@@ -144,7 +143,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                     return parentBlockValidationResult;
                 }
 
-                var parentBlock = _blockchainRepository.GetBlock(block.ParentUniqueId);
+                var parentBlock = _blockchainService.GetBlock(block.ParentUniqueId);
                 if (parentBlock == null || parentBlock.Depth + 1 != mappedBlock.Depth)
                 {
                     _statisticService.RegisterRejectedBlock();
@@ -168,7 +167,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 return new ErrorResponse<bool>("The validation for the block failed!", false, validationResult.Errors);
             }
 
-            _blockchainRepository.AddBlock(incomingBlock);
+            _blockchainService.AddBlock(incomingBlock);
             return new SuccessResponse<bool>("The block has been accepted and appended!", true);
         }
 
@@ -197,7 +196,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
         private BaseResponse<bool> ValidateTransactionsDuplicates(BlockBase blockBase)
         {
-            var blockchainBranch = _blockchainRepository.GetBlockchainFromBranch((blockBase as Block)?.ParentUniqueId);
+            var blockchainBranch = _blockchainService.GetBlockchainFromBranch((blockBase as Block)?.ParentUniqueId);
             if (blockchainBranch != null)
             {
                 var transactionsIds = blockchainBranch.Blocks.SelectMany(b => b.Body.Transactions).Select(t => t.Id)
@@ -214,7 +213,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
         private BaseResponse<bool> ValidateParentBlock(DAM.Block.Block block, string senderNodeId)
         {
-            if (_blockchainRepository.BlockExists(block.ParentUniqueId))
+            if (_blockchainService.BlockExists(block.ParentUniqueId))
             {
                 return new SuccessResponse<bool>("The parent block exists!", true);
             }

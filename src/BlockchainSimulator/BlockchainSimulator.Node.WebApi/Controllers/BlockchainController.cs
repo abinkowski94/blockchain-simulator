@@ -1,4 +1,4 @@
-using BlockchainSimulator.Node.DataAccess.Repositories;
+using BlockchainSimulator.Node.BusinessLogic.Services;
 using BlockchainSimulator.Node.WebApi.Models.Blockchain;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,16 +12,16 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
     [ApiController]
     public class BlockchainController : BaseController
     {
-        private readonly IBlockchainRepository _blockchainRepository;
+        private readonly IBlockchainService _blockchainService;
 
         /// <inheritdoc />
         /// <summary>
         /// The constructor
         /// </summary>
-        /// <param name="blockchainRepository">The blockchain repository</param>
-        public BlockchainController(IBlockchainRepository blockchainRepository)
+        /// <param name="blockchainService">The blockchain repository</param>
+        public BlockchainController(IBlockchainService blockchainService)
         {
-            _blockchainRepository = blockchainRepository;
+            _blockchainService = blockchainService;
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         [HttpGet]
         public ActionResult<object> GetLongestBlockchain()
         {
-            return _blockchainRepository.GetLongestBlockchain();
+            return _blockchainService.GetLongestBlockchain();
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         [HttpGet("tree")]
         public ActionResult<object> GetBlockchainTree()
         {
-            return _blockchainRepository.GetBlockchainTree();
+            return _blockchainService.GetBlockchainTree();
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         [HttpGet("last-block")]
         public ActionResult<object> GetLastBlock()
         {
-            return _blockchainRepository.GetLastBlock();
+            return _blockchainService.GetLastBlock();
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         [HttpGet("{id}")]
         public ActionResult<object> GetBlock(string id)
         {
-            return _blockchainRepository.GetBlock(id);
+            return _blockchainService.GetBlock(id);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace BlockchainSimulator.Node.WebApi.Controllers
         [HttpGet("meta-data")]
         public ActionResult<BlockchainMetadata> GetBlockchainMetadata()
         {
-            var metadata = _blockchainRepository.GetBlockchainMetadata();
+            var metadata = _blockchainService.GetBlockchainMetadata();
             return LocalMapper.Map<BlockchainMetadata>(metadata);
         }
     }

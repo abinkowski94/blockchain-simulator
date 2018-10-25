@@ -1,3 +1,4 @@
+using System;
 using BlockchainSimulator.Node.DataAccess.Converters;
 using BlockchainSimulator.Node.DataAccess.Converters.Specific;
 using BlockchainSimulator.Node.DataAccess.Model;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using BlockchainSimulator.Node.DataAccess.Model.Transaction;
 
 namespace BlockchainSimulator.Node.DataAccess.Repositories
 {
@@ -24,9 +26,42 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
         public BlockchainRepository(IFileRepository fileRepository, IMemoryCache cache, IConfiguration configuration)
         {
             _fileRepository = fileRepository;
-            _serializer = new JsonSerializer { Converters = { new BlockConverter(), new NodeConverter() } };
+            _serializer = new JsonSerializer {Converters = {new BlockConverter(), new NodeConverter()}};
             _cache = cache;
             _blockchainFileName = $"blockchainTree-{configuration["Node:Id"]}.json";
+
+            CreateGenesisBlock(configuration);
+        }
+
+        public void CreateGenesisBlock(IConfiguration configuration)
+        {
+            var metaData = GetBlockchainMetadata();
+            if (metaData.Nodes < 1)
+            {
+                SaveBlockchain(new BlockchainTree
+                {
+                    Blocks = new List<BlockBase>
+                    {
+                        new GenesisBlock
+                        {
+                            Id = "0",
+                            UniqueId = Guid.Empty.ToString(),
+                            QueueTime = TimeSpan.Zero,
+                            Depth = 0,
+                            Header = new Header
+                            {
+                                Nonce = Guid.Empty.ToString().Replace("-", ""),
+                                Target = Guid.Empty.ToString().Replace("-", ""),
+                                Version = configuration["Node:Version"],
+                                ParentHash = null,
+                                TimeStamp = DateTime.MinValue,
+                                MerkleTreeRootHash = null
+                            },
+                            Body = new Body {Transactions = new HashSet<Transaction>(), MerkleTree = null}
+                        }
+                    }
+                });
+            }
         }
 
         public BlockBase GetBlock(string uniqueId)
@@ -67,7 +102,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                     return null;
                 }
 
-                var blockchain = new BlockchainTree { Blocks = new List<BlockBase>() };
+                var blockchain = new BlockchainTree {Blocks = new List<BlockBase>()};
                 BlockBase block = null;
                 do
                 {
@@ -96,7 +131,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                     return null;
                 }
 
-                var blockchain = new BlockchainTree { Blocks = new List<BlockBase>() };
+                var blockchain = new BlockchainTree {Blocks = new List<BlockBase>()};
                 BlockBase block = null;
                 do
                 {
@@ -130,7 +165,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                 }
             })?.Blocks?.ToList();
 
-            return new BlockchainTree { Blocks = blocks };
+            return new BlockchainTree {Blocks = blocks};
         }
 
         public bool BlockExists(string uniqueId)
@@ -150,7 +185,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                         throw new DataException("The blockchain tree is empty and the provided block is not genesis!");
                     }
 
-                    SaveBlockchain(new BlockchainTree { Blocks = new List<BlockBase> { blockBase } });
+                    SaveBlockchain(new BlockchainTree {Blocks = new List<BlockBase> {blockBase}});
                 }
                 else
                 {
@@ -165,7 +200,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
         {
             lock (_padlock)
             {
-                SaveBlockchain(new BlockchainTree { Blocks = new List<BlockBase>() });
+                SaveBlockchain(new BlockchainTree {Blocks = new List<BlockBase>()});
             }
         }
 

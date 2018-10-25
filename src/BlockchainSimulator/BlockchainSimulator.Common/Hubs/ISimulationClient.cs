@@ -5,7 +5,7 @@ namespace BlockchainSimulator.Common.Hubs
     /// <summary>
     /// The simulation client contract
     /// </summary>
-    public interface ISiumlationClient
+    public interface ISimulationClient
     {
         /// <summary>
         /// Changes working status of the node

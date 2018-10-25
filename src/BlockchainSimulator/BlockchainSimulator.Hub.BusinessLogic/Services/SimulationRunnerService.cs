@@ -168,7 +168,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     };
 
                     // Register action: change of working status
-                    const string methodName = nameof(ISiumlationClient.ChangeWorkingStatus);
+                    const string methodName = nameof(ISimulationClient.ChangeWorkingStatus);
                     node.HubConnection.On<bool>(methodName, isWorking => { node.IsWorking = isWorking; });
 
                     // Start the connection

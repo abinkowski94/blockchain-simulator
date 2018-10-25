@@ -162,14 +162,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             // Arrange
             const string id = "17fea80a-efa4-4357-be00-a7e0c670ef53";
 
-            _blockchainServiceMock.Setup(p => p.GetBlockchainTree())
+            _blockchainServiceMock.Setup(p => p.GetBlockchainTreeLinked())
                 .Returns(new SuccessResponse<BlockBase>("The blockchain!", null));
 
             // Act
             var result = _transactionService.GetTransaction(id) as ErrorResponse<Transaction>;
 
             // Assert
-            _blockchainServiceMock.Verify(p => p.GetBlockchainTree());
+            _blockchainServiceMock.Verify(p => p.GetBlockchainTreeLinked());
 
             Assert.NotNull(result);
             Assert.Null(result.Result);
@@ -184,14 +184,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             // Arrange
             const string id = "17fea80a-efa4-4357-be00-a7e0c670ef53";
 
-            _blockchainServiceMock.Setup(p => p.GetBlockchainTree())
+            _blockchainServiceMock.Setup(p => p.GetBlockchainTreeLinked())
                 .Returns(new ErrorResponse<BlockBase>("File not found!", null));
 
             // Act
             var result = _transactionService.GetTransaction(id) as ErrorResponse<Transaction>;
 
             // Assert
-            _blockchainServiceMock.Verify(p => p.GetBlockchainTree());
+            _blockchainServiceMock.Verify(p => p.GetBlockchainTreeLinked());
 
             Assert.NotNull(result);
             Assert.Null(result.Result);
@@ -217,7 +217,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             transactionSetList.ForEach(ts =>
                 block = blockchainProvider.CreateBlock(ts, new DateTime(1, 1, 1), block).Result);
 
-            _blockchainServiceMock.Setup(p => p.GetBlockchainTree())
+            _blockchainServiceMock.Setup(p => p.GetBlockchainTreeLinked())
                 .Returns(new SuccessResponse<BlockBase>("The blockchain!", block));
 
             const string id = "111111";
@@ -226,7 +226,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
             var result = _transactionService.GetTransaction(id) as SuccessResponse<Transaction>;
 
             // Assert
-            _blockchainServiceMock.Verify(p => p.GetBlockchainTree());
+            _blockchainServiceMock.Verify(p => p.GetBlockchainTreeLinked());
 
             Assert.NotNull(result);
             Assert.NotNull(result.Result);

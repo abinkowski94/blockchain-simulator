@@ -6,7 +6,6 @@ using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Model.Statistics;
 using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Model.Block;
-using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -17,8 +16,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public class StatisticService : IStatisticService
     {
-        private readonly IHubContext<SimulationHub, ISiumlationClient> _simulationHubContext;
-        private readonly IBlockchainRepository _blockchainRepository;
+        private readonly IHubContext<SimulationHub, ISimulationClient> _simulationHubContext;
+        private readonly IBlockchainService _blockchainService;
         private readonly IServiceProvider _serviceProvider;
         private readonly object _padlock = new object();
 
@@ -33,11 +32,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private BlockchainNodeConfiguration BlockchainNodeConfiguration =>
             _serviceProvider.GetService<IConfigurationService>()?.GetConfiguration();
 
-        public StatisticService(IHubContext<SimulationHub, ISiumlationClient> simulationHubContext,
-            IBlockchainRepository blockchainRepository, IServiceProvider serviceProvider)
+        public StatisticService(IHubContext<SimulationHub, ISimulationClient> simulationHubContext,
+            IBlockchainService blockchainService, IServiceProvider serviceProvider)
         {
             _simulationHubContext = simulationHubContext;
-            _blockchainRepository = blockchainRepository;
+            _blockchainService = blockchainService;
             _serviceProvider = serviceProvider;
         }
 
@@ -73,14 +72,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         public BaseResponse<Statistic> GetStatistics()
         {
-            var blockchainTree = _blockchainRepository.GetBlockchainTree();
+            var blockchainTree = _blockchainService.GetBlockchainTree();
             if (blockchainTree?.Blocks == null || !blockchainTree.Blocks.Any())
             {
                 return new ErrorResponse<Statistic>("Could not retrieve statistics because blockchain tree is empty",
                     null);
             }
 
-            var blockchain = _blockchainRepository.GetLongestBlockchain();
+            var blockchain = _blockchainService.GetLongestBlockchain();
             var result = new Statistic();
 
             AddSessionConfiguration(result);

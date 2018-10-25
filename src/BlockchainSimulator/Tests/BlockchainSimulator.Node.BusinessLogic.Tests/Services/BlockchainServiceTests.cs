@@ -1,6 +1,7 @@
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
 using BlockchainSimulator.Node.BusinessLogic.Services;
+using BlockchainSimulator.Node.BusinessLogic.Services.Specific;
 using BlockchainSimulator.Node.BusinessLogic.Tests.Data;
 using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Repositories;
@@ -12,12 +13,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
     public class BlockchainServiceTests
     {
         private readonly Mock<IBlockchainRepository> _blockchainRepositoryMock;
-        private readonly BlockchainService _blockchainService;
+        private readonly ProofOfWorkBlockchainService _proofOfWorkBlockchainService;
 
         public BlockchainServiceTests()
         {
             _blockchainRepositoryMock = new Mock<IBlockchainRepository>();
-            _blockchainService = new BlockchainService(new Mock<IConfigurationService>().Object,
+            _proofOfWorkBlockchainService = new ProofOfWorkBlockchainService(new Mock<IConfigurationService>().Object,
                 _blockchainRepositoryMock.Object);
         }
 
@@ -30,7 +31,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
                 .Returns(blockchainTree);
 
             // Act
-            var result = _blockchainService.GetBlockchainTree();
+            var result = _proofOfWorkBlockchainService.GetBlockchainTree();
 
             // Assert
             _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
@@ -39,14 +40,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Tests.Services
         }
 
         [Fact]
-        public void GetBlockchain_NoParams_ErrorResponseNoBlocks()
+        public void GetBlockchainTreeLinked_NoParams_ErrorResponseNoBlocks()
         {
             // Arrange
             _blockchainRepositoryMock.Setup(p => p.GetBlockchainTree())
                 .Returns(new BlockchainTree());
 
             // Act
-            var result = _blockchainService.GetBlockchainTree() as ErrorResponse<BlockBase>;
+            var result = _proofOfWorkBlockchainService.GetBlockchainTreeLinked() as ErrorResponse<BlockBase>;
 
             // Assert
             _blockchainRepositoryMock.Verify(p => p.GetBlockchainTree());
