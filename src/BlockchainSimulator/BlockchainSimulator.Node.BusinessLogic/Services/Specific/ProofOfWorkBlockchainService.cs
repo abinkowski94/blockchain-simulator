@@ -33,12 +33,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             return _blockchainRepository.GetBlockchainTree();
         }
 
-        public BlockchainTree GetLongestBlockchain()
+        public virtual BlockchainTree GetLongestBlockchain()
         {
             return _blockchainRepository.GetLongestBlockchain();
         }
 
-        public DataAccess.Model.Block.BlockBase GetLastBlock()
+        public virtual DataAccess.Model.Block.BlockBase GetLastBlock()
         {
             return _blockchainRepository.GetLastBlock();
         }

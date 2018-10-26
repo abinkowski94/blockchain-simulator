@@ -41,32 +41,40 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
             services.AddHostedService<ReMiningHostedService>();
 
             // Services and storage
-            services.AddSingleton<IServerNodesStorage, ServerNodesStorage>();
             services.AddSingleton<IConfigurationService, ConfigurationService>();
             services.AddSingleton<IStatisticService, StatisticService>();
             
+            services.AddSingleton<IEncodedBlocksStorage, EncodedBlocksStorage>();
+            services.AddSingleton<IServerNodesStorage, ServerNodesStorage>();
+            services.AddSingleton<ITransactionStorage, TransactionStorage>();
+            
             services.AddTransient<ITransactionService, TransactionService>();
+            services.AddTransient<IConsensusService, ConsensusService>();
             services.AddTransient<IMiningService, MiningService>();
             services.AddTransient<IHttpService, HttpService>();
-
-            // Storage
-            services.AddSingleton<ITransactionStorage, TransactionStorage>();
+            
+            // Providers
+            services.AddTransient<IMerkleTreeProvider, MerkleTreeProvider>();
+            
+            // Validators
+            services.AddTransient<IMerkleTreeValidator, MerkleTreeValidator>();
 
             switch (configuration["Node:Type"])
             {
                 case "PoW":
                     // Services
-                    services.AddSingleton<IEncodedBlocksStorage, EncodedBlocksStorage>();
                     services.AddTransient<IBlockchainService, ProofOfWorkBlockchainService>();
-                    services.AddTransient<IConsensusService, ProofOfWorkConsensusService>();
 
                     // Providers
-                    services.AddTransient<IMerkleTreeProvider, MerkleTreeProvider>();
                     services.AddTransient<IBlockProvider, ProofOfWorkBlockProvider>();
 
                     // Validators
-                    services.AddTransient<IMerkleTreeValidator, MerkleTreeValidator>();
                     services.AddTransient<IBlockchainValidator, ProofOfWorkValidator>();
+                    
+                    break;
+                case "PoS":
+                    // Services
+                    services.AddTransient<IBlockchainService, ProofOfStakeBlockchainService>();
                     break;
             }
 
