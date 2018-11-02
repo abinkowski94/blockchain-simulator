@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using BlockchainSimulator.Node.BusinessLogic.Model.Block;
 using BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles;
 using BlockchainSimulator.Node.BusinessLogic.Model.Responses;
@@ -10,10 +12,39 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
     {
         private readonly IBlockchainRepository _blockchainRepository;
 
-        public ProofOfWorkBlockchainService(IConfigurationService configurationService, IBlockchainRepository blockchainRepository)
-            : base(configurationService)
+        public ProofOfWorkBlockchainService(IConfigurationService configurationService,
+            IBlockchainRepository blockchainRepository) : base(configurationService)
         {
             _blockchainRepository = blockchainRepository;
+        }
+
+        public virtual void CreateGenesisBlock()
+        {
+            var metaData = GetBlockchainMetadata();
+            if (metaData.Nodes < 1)
+            {
+                var genesisBlock =
+                    new DataAccess.Model.Block.GenesisBlock
+                    {
+                        Id = "0",
+                        UniqueId = Guid.Empty.ToString(),
+                        QueueTime = TimeSpan.Zero,
+                        Depth = 0,
+                        Header = new DataAccess.Model.Block.Header
+                        {
+                            Nonce = Guid.Empty.ToString().Replace("-", ""),
+                            Target = Guid.Empty.ToString().Replace("-", ""),
+                            Version = BlockchainNodeConfiguration.Version,
+                            ParentHash = null,
+                            TimeStamp = DateTime.MinValue,
+                            MerkleTreeRootHash = null
+                        },
+                        Body = new DataAccess.Model.Block.Body
+                            {Transactions = new HashSet<DataAccess.Model.Transaction.Transaction>(), MerkleTree = null}
+                    };
+
+                _blockchainRepository.AddBlock(genesisBlock);
+            }
         }
 
         public BaseResponse<BlockBase> GetBlockchainTreeLinked()

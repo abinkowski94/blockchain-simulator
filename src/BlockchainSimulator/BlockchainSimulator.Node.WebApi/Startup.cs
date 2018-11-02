@@ -43,6 +43,7 @@ namespace BlockchainSimulator.Node.WebApi
                 routes.MapHub<ConsensusHub>("/consensusHub");
                 routes.MapHub<SimulationHub>("/simulationHub");
             });
+            app.UseOnStartUp();
         }
 
         /// <summary>

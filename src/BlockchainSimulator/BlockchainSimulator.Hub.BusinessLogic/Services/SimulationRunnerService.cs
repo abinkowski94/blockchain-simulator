@@ -19,6 +19,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {
@@ -35,12 +36,11 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
         private readonly IHttpService _httpService;
 
         public SimulationRunnerService(IStatisticService statisticService, IBackgroundQueue queue,
-            IHttpService httpService, IHostingEnvironment environment)
+            IHttpService httpService, IHostingEnvironment environment, IConfiguration configuration)
         {
-            //TODO: Add times to global configuration
-            _nodeTimeout = TimeSpan.FromSeconds(10);
-            _hostingTime = TimeSpan.FromSeconds(10);
-            _hostingRetryCount = 5;
+            _nodeTimeout = TimeSpan.Parse(configuration["SimulationRunner:NodeTimeout"]);
+            _hostingTime = TimeSpan.Parse(configuration["SimulationRunner:HostingTime"]);
+            _hostingRetryCount = int.Parse(configuration["SimulationRunner:HostingRetryCount"]);
 
             _directoryPath = environment.ContentRootPath ?? Directory.GetCurrentDirectory();
             _statisticService = statisticService;
@@ -101,10 +101,14 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             simulation.Status = SimulationStatuses.Preparing;
 
             // Create temporary directory for noes storage
-            if (Directory.Exists($@"{_directoryPath}\nodes"))
+            var nodesPath = $@"{_directoryPath}\nodes";
+
+            if (Directory.Exists(nodesPath))
             {
-                Directory.Delete($@"{_directoryPath}\nodes", true);
+                Directory.Delete(nodesPath, true);
             }
+
+            Directory.CreateDirectory(nodesPath);
 
             // Find the external dynamic link library for nodes to spawn
             var pathToFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
@@ -119,16 +123,13 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             simulation.ServerNodes.Where(n => n.NeedsSpawn && settings.NodesAndTransactions.Keys.Contains(n.Id))
                 .ParallelForEach(node =>
                 {
-                    var pathToDirectory = $@"{_directoryPath}\nodes\{node.Id}";
-                    Directory.CreateDirectory(pathToDirectory);
-
                     node.NodeThread = Process.Start(new ProcessStartInfo
                     {
                         ArgumentList =
                         {
                             pathToLibrary,
                             $"urls|-|{node.HttpAddress}",
-                            $@"contentRoot|-|{pathToDirectory}",
+                            $@"contentRoot|-|{nodesPath}",
                             $"Node:Id|-|{node.Id}",
                             $"Node:Type|-|{simulation.BlockchainConfiguration.Type}",
                             $"BlockchainConfiguration:Version|-|{simulation.BlockchainConfiguration.Version}",

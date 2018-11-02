@@ -1,4 +1,3 @@
-using System;
 using BlockchainSimulator.Node.DataAccess.Converters;
 using BlockchainSimulator.Node.DataAccess.Converters.Specific;
 using BlockchainSimulator.Node.DataAccess.Model;
@@ -10,7 +9,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using BlockchainSimulator.Node.DataAccess.Model.Transaction;
 
 namespace BlockchainSimulator.Node.DataAccess.Repositories
 {
@@ -28,40 +26,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
             _fileRepository = fileRepository;
             _serializer = new JsonSerializer {Converters = {new BlockConverter(), new NodeConverter()}};
             _cache = cache;
-            _blockchainFileName = $"blockchainTree-{configuration["Node:Id"]}.json";
-
-            CreateGenesisBlock(configuration);
-        }
-
-        public void CreateGenesisBlock(IConfiguration configuration)
-        {
-            var metaData = GetBlockchainMetadata();
-            if (metaData.Nodes < 1)
-            {
-                SaveBlockchain(new BlockchainTree
-                {
-                    Blocks = new List<BlockBase>
-                    {
-                        new GenesisBlock
-                        {
-                            Id = "0",
-                            UniqueId = Guid.Empty.ToString(),
-                            QueueTime = TimeSpan.Zero,
-                            Depth = 0,
-                            Header = new Header
-                            {
-                                Nonce = Guid.Empty.ToString().Replace("-", ""),
-                                Target = Guid.Empty.ToString().Replace("-", ""),
-                                Version = configuration["Node:Version"],
-                                ParentHash = null,
-                                TimeStamp = DateTime.MinValue,
-                                MerkleTreeRootHash = null
-                            },
-                            Body = new Body {Transactions = new HashSet<Transaction>(), MerkleTree = null}
-                        }
-                    }
-                });
-            }
+            _blockchainFileName = $"blockchainTree-{configuration["Node:Id"]}.json";           
         }
 
         public BlockBase GetBlock(string uniqueId)

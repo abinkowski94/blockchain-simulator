@@ -1,11 +1,10 @@
-using BlockchainSimulator.Common.Queues;
-using BlockchainSimulator.Hub.BusinessLogic.Storage;
+using System;
+using BlockchainSimulator.Node.BusinessLogic.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
-namespace BlockchainSimulator.Hub.WebApi.AppStart
+namespace BlockchainSimulator.Node.WebApi.AppStart
 {
     /// <summary>
     /// The application lifetime extensions
@@ -13,25 +12,23 @@ namespace BlockchainSimulator.Hub.WebApi.AppStart
     public static class ApplicationLifetimeExtensions
     {
         /// <summary>
-        /// Register on shutdown action
+        /// Register on startup actions
         /// </summary>
         /// <param name="app">The application builder</param>
-        public static void UseOnShutdownCleanup(this IApplicationBuilder app)
+        public static void UseOnStartUp(this IApplicationBuilder app)
         {
             var applicationLifetime = app.ApplicationServices.GetRequiredService<IApplicationLifetime>();
-            applicationLifetime.ApplicationStopping.Register(() => OnShutdown(app.ApplicationServices));
+            applicationLifetime.ApplicationStarted.Register(() => OnStartUp(app.ApplicationServices));
         }
 
         /// <summary>
         /// Cleans the remaining processes
         /// </summary>
         /// <param name="services">The service provider</param>
-        private static void OnShutdown(IServiceProvider services)
+        private static void OnStartUp(IServiceProvider services)
         {
-            services.GetService<QueuedHostedService>()?.Dispose();
-            services.GetService<IScenarioStorage>()?.Dispose();
-
-            Console.WriteLine("Cleanup complete!");
+            var blockchainService = services.GetService<IBlockchainService>();
+            blockchainService?.CreateGenesisBlock();
         }
     }
 }

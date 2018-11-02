@@ -37,7 +37,6 @@ namespace BlockchainSimulator.Hub.WebApi
         {
             app.UseDefaultConfiguration(env);
             app.UseSwagger("Blockchain simulator (Hub API)");
-            app.UseOnShutdownCleanup();
         }
 
         /// <summary>
