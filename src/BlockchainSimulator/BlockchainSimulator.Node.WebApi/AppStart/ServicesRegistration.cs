@@ -35,7 +35,7 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
             // Queues and hosted services
             services.AddSingleton<IMiningQueue, MiningQueue>();
             services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
-            
+
             services.AddHostedService<MiningHostedService>();
             services.AddHostedService<QueuedHostedService>();
             services.AddHostedService<ReMiningHostedService>();
@@ -43,19 +43,19 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
             // Services and storage
             services.AddSingleton<IConfigurationService, ConfigurationService>();
             services.AddSingleton<IStatisticService, StatisticService>();
-            
+
             services.AddSingleton<IEncodedBlocksStorage, EncodedBlocksStorage>();
             services.AddSingleton<IServerNodesStorage, ServerNodesStorage>();
             services.AddSingleton<ITransactionStorage, TransactionStorage>();
-            
+
             services.AddTransient<ITransactionService, TransactionService>();
             services.AddTransient<IConsensusService, ConsensusService>();
             services.AddTransient<IMiningService, MiningService>();
             services.AddTransient<IHttpService, HttpService>();
-            
+
             // Providers
             services.AddTransient<IMerkleTreeProvider, MerkleTreeProvider>();
-            
+
             // Validators
             services.AddTransient<IMerkleTreeValidator, MerkleTreeValidator>();
 
@@ -70,11 +70,18 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
 
                     // Validators
                     services.AddTransient<IBlockchainValidator, ProofOfWorkValidator>();
-                    
+
                     break;
                 case "PoS":
                     // Services
                     services.AddTransient<IBlockchainService, ProofOfStakeBlockchainService>();
+
+                    // Providers
+                    services.AddTransient<IBlockProvider, ProofOfStakeBlockProvider>();
+
+                    // Validators
+                    services.AddTransient<IBlockchainValidator, ProofOfStakeValidator>();
+
                     break;
             }
 

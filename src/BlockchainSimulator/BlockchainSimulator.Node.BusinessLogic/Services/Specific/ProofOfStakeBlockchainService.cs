@@ -17,6 +17,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             throw new NotImplementedException();
         }
 
+        public override void AddBlock(BlockBase block)
+        {
+            throw new NotImplementedException();
+        }
+
         public override BlockBase GetLastBlock()
         {
             throw new NotImplementedException();

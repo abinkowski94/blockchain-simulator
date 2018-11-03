@@ -1,16 +1,16 @@
-﻿using BlockchainSimulator.Node.DataAccess.Model.Transaction;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using BlockchainSimulator.Node.DataAccess.Model.Block;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Diagnostics.CodeAnalysis;
 
-namespace BlockchainSimulator.Node.DataAccess.Converters.Specific
+namespace BlockchainSimulator.Node.DataAccess.Converters
 {
-    public class NodeConverter : JsonConverter
+    public class BlockConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(MerkleNode);
+            return objectType == typeof(BlockBase);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
@@ -19,12 +19,11 @@ namespace BlockchainSimulator.Node.DataAccess.Converters.Specific
             try
             {
                 var jObject = JObject.Load(reader);
-                if (jObject["transactionId"]?.Value<string>() != null)
-                {
-                    return jObject.ToObject<Leaf>(serializer);
-                }
+                var isGenesis = jObject["isGenesis"].Value<bool>();
 
-                return jObject.ToObject<Model.Transaction.Node>(serializer);
+                return isGenesis
+                    ? jObject.ToObject<GenesisBlock>(serializer)
+                    : (BlockBase) jObject.ToObject<Block>(serializer);
             }
             catch (JsonReaderException)
             {

@@ -47,6 +47,21 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             }
         }
 
+        public virtual void AddBlock(DataAccess.Model.Block.BlockBase block)
+        {
+            _blockchainRepository.AddBlock(block);
+        }
+
+        public virtual BlockchainTree GetLongestBlockchain()
+        {
+            return _blockchainRepository.GetLongestBlockchain();
+        }
+
+        public virtual DataAccess.Model.Block.BlockBase GetLastBlock()
+        {
+            return _blockchainRepository.GetLastBlock();
+        }
+
         public BaseResponse<BlockBase> GetBlockchainTreeLinked()
         {
             var blockchain = _blockchainRepository.GetBlockchainTree();
@@ -64,16 +79,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             return _blockchainRepository.GetBlockchainTree();
         }
 
-        public virtual BlockchainTree GetLongestBlockchain()
-        {
-            return _blockchainRepository.GetLongestBlockchain();
-        }
-
-        public virtual DataAccess.Model.Block.BlockBase GetLastBlock()
-        {
-            return _blockchainRepository.GetLastBlock();
-        }
-
         public DataAccess.Model.Block.BlockBase GetBlock(string uniqueId)
         {
             return _blockchainRepository.GetBlock(uniqueId);
@@ -89,19 +94,14 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             return _blockchainRepository.GetBlockchainFromBranch(uniqueId);
         }
 
-        public void Clear()
-        {
-            _blockchainRepository.Clear();
-        }
-
-        public void AddBlock(DataAccess.Model.Block.BlockBase block)
-        {
-            _blockchainRepository.AddBlock(block);
-        }
-
         public bool BlockExists(string blockUniqueId)
         {
             return _blockchainRepository.BlockExists(blockUniqueId);
+        }
+
+        public void Clear()
+        {
+            _blockchainRepository.Clear();
         }
     }
 }

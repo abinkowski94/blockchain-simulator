@@ -1,4 +1,3 @@
-using BlockchainSimulator.Node.DataAccess.Converters.Specific;
 using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Model.Block;
 using Newtonsoft.Json;
@@ -8,36 +7,30 @@ namespace BlockchainSimulator.Node.DataAccess.Converters
 {
     public static class BlockchainConverter
     {
+        private static readonly JsonSerializer JsonSerializer;
+        private static readonly JsonSerializerSettings JsonSerializerSettings;
+
+        static BlockchainConverter()
+        {
+            JsonSerializerSettings = new JsonSerializerSettings
+                {Converters = {new BlockConverter(), new NodeConverter(), new MessageConverter()}};
+            JsonSerializer = new JsonSerializer
+                {Converters = {new BlockConverter(), new NodeConverter(), new MessageConverter()}};
+        }
+
         public static BlockchainTree DeserializeBlockchain(JsonTextReader reader)
         {
-            return new JsonSerializer { Converters = { new BlockConverter(), new NodeConverter() } }
-                .Deserialize<BlockchainTree>(reader);
+            return JsonSerializer.Deserialize<BlockchainTree>(reader);
         }
 
         public static BlockBase DeserializeBlock(string json)
         {
-            if (json == null)
-            {
-                return null;
-            }
-
-            return JsonConvert.DeserializeObject<BlockBase>(json, new JsonSerializerSettings
-            {
-                Converters = { new BlockConverter(), new NodeConverter() }
-            });
+            return json == null ? null : JsonConvert.DeserializeObject<BlockBase>(json, JsonSerializerSettings);
         }
 
-        public static List<BlockBase> DeserializeBlocks(string json)
+        public static IEnumerable<BlockBase> DeserializeBlocks(string json)
         {
-            if (json == null)
-            {
-                return null;
-            }
-
-            return JsonConvert.DeserializeObject<List<BlockBase>>(json, new JsonSerializerSettings
-            {
-                Converters = { new BlockConverter(), new NodeConverter() }
-            });
+            return json == null ? null : JsonConvert.DeserializeObject<List<BlockBase>>(json, JsonSerializerSettings);
         }
     }
 }

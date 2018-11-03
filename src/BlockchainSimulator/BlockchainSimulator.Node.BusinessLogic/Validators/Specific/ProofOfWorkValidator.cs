@@ -16,7 +16,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Validators.Specific
             {
                 return new ValidationResult(true);
             }
-            
+
             var hash = EncryptionService.GetSha256Hash(blockchain.BlockJson);
             if (hash.StartsWith(blockchain.Header.Target))
             {
