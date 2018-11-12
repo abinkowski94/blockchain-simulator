@@ -28,7 +28,7 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
         private static void OnStartUp(IServiceProvider services)
         {
             var blockchainService = services.GetService<IBlockchainService>();
-            blockchainService?.CreateGenesisBlock();
+            blockchainService?.CreateGenesisBlockIfNotExist();
         }
     }
 }

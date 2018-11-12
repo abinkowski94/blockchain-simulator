@@ -5,7 +5,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
     public interface IBlockchainService
     {
-        void CreateGenesisBlock();
+        void CreateGenesisBlockIfNotExist();
         
         BaseResponse<BlockBase> GetBlockchainTreeLinked();
 

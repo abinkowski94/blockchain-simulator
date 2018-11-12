@@ -14,18 +14,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Providers.Specific
 
         protected override Task<BlockBase> FillBlock(BlockBase currentBlock, CancellationToken token)
         {
-            return Task.Run(() =>
-            {
-                token.ThrowIfCancellationRequested();
+            token.ThrowIfCancellationRequested();
 
-                currentBlock.Header.Version = BlockchainNodeConfiguration.Version;
-                currentBlock.Header.Target = null;
-                currentBlock.Header.Nonce = null;
-                
-                
+            currentBlock.Header.Version = BlockchainNodeConfiguration.Version;
+            currentBlock.Header.Target = null;
+            currentBlock.Header.Nonce = null;
 
-                return currentBlock;
-            }, token);
+            return Task.FromResult(currentBlock);
         }
     }
 }

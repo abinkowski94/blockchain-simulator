@@ -119,7 +119,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             var enqueueTime = DateTime.UtcNow;
             _queue.EnqueueTask(token => new Task(() =>
             {
-                var transactions = _transactionStorage.PendingTransactions.Values.OrderByDescending(t => t.Fee)
+                var transactions = _transactionStorage.PendingTransactions.Values
+                    .OrderBy(t => t.TransactionMessage != null ? 0 : 1).ThenByDescending(t => t.Fee)
                     .Take(BlockchainNodeConfiguration.BlockSize).ToList();
                 transactions.ForEach(t => _transactionStorage.PendingTransactions.TryRemove(t.Id, out _));
                 _miningService.MineBlock(transactions.ToHashSet(), enqueueTime, token);

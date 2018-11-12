@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System;
+using BlockchainSimulator.Node.BusinessLogic.Model.Messages;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Model.Transaction
 {
@@ -23,6 +24,9 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Transaction
         [JsonProperty("sender")]
         public string Sender { get; set; }
 
+        [JsonProperty("transactionMessage")]
+        public TransactionMessage TransactionMessage { get; set; }
+        
         [JsonIgnore]
         public TransactionDetails TransactionDetails { get; set; }
 

@@ -48,7 +48,7 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
             services.AddSingleton<IServerNodesStorage, ServerNodesStorage>();
             services.AddSingleton<ITransactionStorage, TransactionStorage>();
 
-            services.AddTransient<ITransactionService, TransactionService>();
+            services.AddScoped<ITransactionService, TransactionService>();
             services.AddTransient<IConsensusService, ConsensusService>();
             services.AddTransient<IMiningService, MiningService>();
             services.AddTransient<IHttpService, HttpService>();
@@ -73,8 +73,10 @@ namespace BlockchainSimulator.Node.WebApi.AppStart
 
                     break;
                 case "PoS":
-                    // Services
+                    // Services and storage
                     services.AddTransient<IBlockchainService, ProofOfStakeBlockchainService>();
+
+                    services.AddSingleton<IStakingStorage, StakingStorage>();
 
                     // Providers
                     services.AddTransient<IBlockProvider, ProofOfStakeBlockProvider>();

@@ -5,7 +5,9 @@ using BlockchainSimulator.Node.BusinessLogic.Queues;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using BlockchainSimulator.Node.BusinessLogic.Storage;
+using Newtonsoft.Json;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
@@ -37,13 +39,41 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
         public BlockchainNodeConfiguration GetConfiguration()
         {
+            var nodeId = _configuration["Node:Id"] ??
+                         throw new ApplicationException("The id of the node must be known value");
+            var nodeType = _configuration["Node:Type"] ??
+                           throw new ApplicationException("The algorithm type must be known");
+
+            if (!int.TryParse(_configuration["BlockchainConfiguration:BlockSize"], out var blockSize))
+            {
+                blockSize = 5;
+            }
+
+            if (!int.TryParse(_configuration["BlockchainConfiguration:EpochSize"], out var epochSize))
+            {
+                epochSize = 10;
+            }
+
+            if (!bool.TryParse(_configuration["Node:IsValidator"], out var nodeIsValidator))
+            {
+                nodeIsValidator = true;
+            }
+
+            var target = _configuration["BlockchainConfiguration:Target"] ?? "000";
+            var version = _configuration["BlockchainConfiguration:Version"] ?? "PoW-v1";
+            var startupValidatorsString = _configuration["BlockchainConfiguration:StartupValidators"] ?? "{}";
+            var startupValidators = JsonConvert.DeserializeObject<Dictionary<string, int>>(startupValidatorsString);
+
             return _nodeConfiguration ?? (_nodeConfiguration = new BlockchainNodeConfiguration
             {
-                BlockSize = Convert.ToInt32(_configuration["BlockchainConfiguration:BlockSize"]),
-                Target = _configuration["BlockchainConfiguration:Target"],
-                Version = _configuration["BlockchainConfiguration:Version"],
-                NodeId = _configuration["Node:Id"],
-                NodeType = _configuration["Node:Type"]
+                BlockSize = blockSize,
+                Target = target,
+                Version = version,
+                EpochSize = epochSize,
+                StartupValidatorsWithStakes = startupValidators,
+                NodeId = nodeId,
+                NodeType = nodeType,
+                NodeIsValidator = nodeIsValidator
             });
         }
 
@@ -59,7 +89,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                 _consensusService.DisconnectFromNetwork();
                 _statisticService.Clear();
                 _blockchainService.Clear();
-                _blockchainService.CreateGenesisBlock();
+                _blockchainService.CreateGenesisBlockIfNotExist();
 
                 return new SuccessResponse<bool>("The node has been cleared!", true);
             }

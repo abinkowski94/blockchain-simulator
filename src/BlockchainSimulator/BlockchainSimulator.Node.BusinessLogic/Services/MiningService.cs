@@ -46,7 +46,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             if (!token.IsCancellationRequested)
             {
                 SpinWait.SpinUntil(() => !_backgroundQueue.IsWorking);
-                
+
                 var longestBlockchain = _blockchainService.GetLongestBlockchain();
                 if (longestBlockchain?.Blocks != null)
                 {
@@ -58,7 +58,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
                         return;
                     }
                 }
-                
+
                 _statisticService.RegisterMiningAttempt();
 
                 var cancellationTokenSource = new CancellationTokenSource();
@@ -124,9 +124,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
 
                         treeTransactions.ForEach(t => _transactionStorage.RegisteredTransactions.TryAdd(t.Id, t));
 
+                        // Do not re-mine messaged transactions
                         var transactionsToReMine = _transactionStorage.RegisteredTransactions.Values
                             .Where(t => !longestBlockchainTransactionsIds.Contains(t.Id))
-                            .Where(t => pendingTransactions.All(pt => pt.Key != t.Id)).ToList();
+                            .Where(t => pendingTransactions.All(pt => pt.Key != t.Id))
+                            .Where(t => t.TransactionMessage == null).ToList();
 
                         if (transactionsToReMine.Any())
                         {

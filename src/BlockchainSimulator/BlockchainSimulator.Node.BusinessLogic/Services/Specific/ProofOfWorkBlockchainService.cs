@@ -10,7 +10,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 {
     public class ProofOfWorkBlockchainService : BaseService, IBlockchainService
     {
-        private readonly IBlockchainRepository _blockchainRepository;
+        protected readonly IBlockchainRepository _blockchainRepository;
 
         public ProofOfWorkBlockchainService(IConfigurationService configurationService,
             IBlockchainRepository blockchainRepository) : base(configurationService)
@@ -18,7 +18,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             _blockchainRepository = blockchainRepository;
         }
 
-        public virtual void CreateGenesisBlock()
+        public virtual void CreateGenesisBlockIfNotExist()
         {
             var metaData = GetBlockchainMetadata();
             if (metaData.Nodes < 1)

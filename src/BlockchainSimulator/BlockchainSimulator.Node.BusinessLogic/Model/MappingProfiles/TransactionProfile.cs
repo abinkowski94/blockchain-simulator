@@ -14,6 +14,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
                 .ForMember(dst => dst.Amount, opt => opt.MapFrom(src => src.Amount))
                 .ForMember(dst => dst.Fee, opt => opt.MapFrom(src => src.Fee))
                 .ForMember(dst => dst.RegistrationTime, opt => opt.MapFrom(src => src.RegistrationTime))
+                .ForMember(dst => dst.TransactionMessage, opt => opt.MapFrom(src => src.TransactionMessage))
                 .ForAllOtherMembers(dst => dst.Ignore());
 
             CreateMap<Transaction.Transaction, DataAccess.Model.Transaction.Transaction>()
@@ -23,6 +24,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.MappingProfiles
                 .ForMember(dst => dst.Amount, opt => opt.MapFrom(src => src.Amount))
                 .ForMember(dst => dst.Fee, opt => opt.MapFrom(src => src.Fee))
                 .ForMember(dst => dst.RegistrationTime, opt => opt.MapFrom(src => src.RegistrationTime))
+                .ForMember(dst => dst.TransactionMessage, opt => opt.MapFrom(src => src.TransactionMessage))
                 .ForAllOtherMembers(dst => dst.Ignore());
 
             CreateMap<MerkleNode, Transaction.MerkleNode>()

@@ -16,15 +16,21 @@ namespace BlockchainSimulator.Hub.WebApi.Model.Scenarios
         public Dictionary<string, int> NodesAndTransactions { get; set; }
 
         /// <summary>
+        /// The startup validators
+        /// </summary>
+        [JsonProperty("startupValidators", Order = 2)]
+        public List<string> StartupValidators { get; set; }
+
+        /// <summary>
         /// Sends all transactions in one request
         /// </summary>
-        [JsonProperty("sendTransactionsTogether", Order = 2)]
+        [JsonProperty("sendTransactionsTogether", Order = 3)]
         public bool SendTransactionsTogether { get; set; }
 
         /// <summary>
         /// Ends the simulation after given time
         /// </summary>
-        [JsonProperty("forceEndAfter", Order = 3)]
+        [JsonProperty("forceEndAfter", Order = 4)]
         public TimeSpan? ForceEndAfter { get; set; }
     }
 }

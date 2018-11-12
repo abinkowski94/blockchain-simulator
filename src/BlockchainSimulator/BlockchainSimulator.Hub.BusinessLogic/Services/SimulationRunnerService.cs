@@ -62,7 +62,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     {
                         SpawnServers(simulation, settings, token);
                         PingAndConnectWithServers(simulation, settings, token);
-                        SetConfigurations(simulation, token);
+                        SetConfigurations(simulation, settings, token);
                         ConnectNodes(simulation, token);
                         SendTransactions(simulation, settings, token);
                         WaitForNetwork(simulation, settings);
@@ -119,6 +119,11 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     "Could not find the library \"BlockchainSimulator.Node.WebApi.dll\" in order to spawn hubs!");
             }
 
+            // Startup validators
+            var random = new Random();
+            settings.StartupValidatorsWithStakes =
+                settings.StartupValidators.ToDictionary(k => k, k => random.Next(100, 1000));
+
             // Spawn nodes
             simulation.ServerNodes.Where(n => n.NeedsSpawn && settings.NodesAndTransactions.Keys.Contains(n.Id))
                 .ParallelForEach(node =>
@@ -134,7 +139,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                             $"Node:Type|-|{simulation.BlockchainConfiguration.Type}",
                             $"BlockchainConfiguration:Version|-|{simulation.BlockchainConfiguration.Version}",
                             $"BlockchainConfiguration:Target|-|{simulation.BlockchainConfiguration.Target}",
-                            $"BlockchainConfiguration:BlockSize|-|{simulation.BlockchainConfiguration.BlockSize}"
+                            $"BlockchainConfiguration:BlockSize|-|{simulation.BlockchainConfiguration.BlockSize}",
+                            $"BlockchainConfiguration:StartupValidators|-|{settings.StartupValidatorsWithStakes}"
                         },
                         FileName = "dotnet"
                     });
@@ -178,7 +184,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             }, token);
         }
 
-        private void SetConfigurations(Simulation simulation, CancellationToken token)
+        private void SetConfigurations(Simulation simulation, SimulationSettings settings, CancellationToken token)
         {
             simulation.ServerNodes.Where(n => n.IsConnected == true).ParallelForEach(node =>
             {
@@ -188,7 +194,8 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     NodeId = node.Id,
                     NodeType = simulation.BlockchainConfiguration.Type,
                     Version = simulation.BlockchainConfiguration.Version,
-                    Target = simulation.BlockchainConfiguration.Target
+                    Target = simulation.BlockchainConfiguration.Target,
+                    StartupValidatorsWithStakes = settings.StartupValidatorsWithStakes
                 });
                 var response = _httpService.Post($"{node.HttpAddress}/api/info/config", content, _nodeTimeout, token);
                 if (!response.IsSuccessStatusCode)

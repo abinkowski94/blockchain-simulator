@@ -21,8 +21,19 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios
         public bool SendTransactionsTogether { get; set; }
 
         /// <summary>
+        /// The startup validators
+        /// </summary>
+        public List<string> StartupValidators { get; set; }
+
+        /// <summary>
         /// Dictionary of nodes and number of transactions to be sent
         /// </summary>
         public Dictionary<string, int> NodesAndTransactions { get; set; }
+        
+        /// <summary>
+        /// The startup validators with stakes
+        /// </summary>
+
+        public Dictionary<string, int> StartupValidatorsWithStakes { get; set; }
     }
 }
