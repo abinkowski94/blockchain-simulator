@@ -1,16 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using BlockchainSimulator.Node.BusinessLogic.Model.Staking;
 using BlockchainSimulator.Node.BusinessLogic.Storage;
 using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Model.Block;
 using BlockchainSimulator.Node.DataAccess.Model.Messages;
-using BlockchainSimulator.Node.DataAccess.Model.Transaction;
 using BlockchainSimulator.Node.DataAccess.Repositories;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
+using Transaction = BlockchainSimulator.Node.DataAccess.Model.Transaction.Transaction;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 {
@@ -18,10 +16,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
     {
         private const decimal TwoThird = 0.666_666_666_666_666_666_666_666_666M;
         private readonly int _epochSize;
+        private readonly string _nodeId;
         private readonly bool _isValidator;
         private readonly Dictionary<string, int> _startupValidators;
         private readonly IStakingStorage _stakingStorage;
         private readonly IServiceProvider _serviceProvider;
+        private ITransactionService _transactionService;
 
         public ProofOfStakeBlockchainService(IConfigurationService configurationService,
             IBlockchainRepository blockchainRepository, IStakingStorage stakingStorage,
@@ -29,6 +29,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
         {
             var configuration = configurationService.GetConfiguration();
             _epochSize = configuration.EpochSize;
+            _nodeId = configuration.NodeId;
             _isValidator = configuration.NodeIsValidator;
             _startupValidators = configuration.StartupValidatorsWithStakes;
 
@@ -63,24 +64,46 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 AddVotingTransactions();
             }
 
-            //TODO: only for debug
-            File.WriteAllText(
-                @"D:\Dokumenty\Prace\Projekty\blockchain-simulator\src\BlockchainSimulator\BlockchainSimulator.Hub.WebApi\bin\Debug\netcoreapp2.1\wwwroot\test.json",
-                JsonConvert.SerializeObject(_stakingStorage.Epochs));
+//            //TODO: only for debug
+//            File.WriteAllText(
+//                @"D:\Dokumenty\Prace\Projekty\blockchain-simulator\src\BlockchainSimulator\BlockchainSimulator.Hub.WebApi\bin\Debug\netcoreapp2.1\wwwroot\test.json",
+//                JsonConvert.SerializeObject(_stakingStorage.Epochs));
         }
 
         public override BlockBase GetLastBlock()
         {
-            //TODO override
-            var result = base.GetLastBlock();
-            return result;
+            return GetLongestBlockchain()?.Blocks?.LastOrDefault();
         }
 
         public override BlockchainTree GetLongestBlockchain()
         {
-            //TODO override
-            var result = base.GetLongestBlockchain();
-            return result;
+            var lastPreparedBlock = _stakingStorage.Epochs.Values.LastOrDefault(e => e.HasPrepared);
+            if (lastPreparedBlock == null)
+            {
+                return new BlockchainTree {Blocks = new List<BlockBase>()};
+            }
+            
+            var blockchainTree = _blockchainRepository.GetBlockchainTree();
+            var longestBlockchainStart =
+                _blockchainRepository.GetBlockchainFromBranch(lastPreparedBlock.PreparedBlockId);
+                
+//                var block = longestBlockchainStart.Blocks.LastOrDefault();
+//                if (block != null)
+//                {
+//                    do
+//                    {
+//                        block = blockchainTree.Blocks.FirstOrDefault(b =>
+//                            block is Block current && b.UniqueId == current.ParentUniqueId);
+//
+//                        if (block != null)
+//                        {
+//                            blockchain.Blocks.Add(block);
+//                        }
+//                    } while (block != null);
+//                }
+
+            return longestBlockchainStart;
+
         }
 
         private GenesisBlock CreateGenesisBlock()
@@ -152,6 +175,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
             var genesisEpochTransactions = genesisEpoch.Transactions;
             allMessagedTransactions.ForEach(t => genesisEpochTransactions.TryAdd(t.Id, t));
+            genesisEpoch.CheckpointsWithCommitStakes.TryAdd(block.UniqueId, genesisEpoch.TotalStake);
             genesisEpoch.CheckpointsWithPrepareStakes.TryAdd(block.UniqueId, genesisEpoch.TotalStake);
         }
 
@@ -182,7 +206,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                         targetEpoch.CheckpointsWithPrepareStakes.AddOrUpdate(tm.Message.IdTarget, stakeForValidator,
                             (key, oldValue) => oldValue + stakeForValidator);
                     }
-                    
+
                     // Update prepared
                     var maxStakedCheckpoint = targetEpoch.CheckpointsWithPrepareStakes
                         .OrderByDescending(pair => pair.Value).FirstOrDefault();
@@ -210,7 +234,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                         targetEpoch.CheckpointsWithCommitStakes.AddOrUpdate(tm.Message.IdTarget, stakeForValidator,
                             (key, oldValue) => oldValue + stakeForValidator);
                     }
-                    
+
                     // Update prepared
                     var maxStakedCheckpoint = targetEpoch.CheckpointsWithCommitStakes
                         .OrderByDescending(pair => pair.Value).FirstOrDefault();
@@ -224,18 +248,85 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
         private void AddVotingTransactions()
         {
+            _transactionService = _transactionService ?? _serviceProvider.GetService<ITransactionService>();
+
             var nonFinalizedCheckpointsWithEpochs = _blockchainRepository.GetBlockchainTree().Blocks
                 .Where(b => b.Depth > 0 && b.Depth % _epochSize == 0)
-                .Select(b => new {Block = b, Epoch = _stakingStorage.Epochs[b.Depth / (_epochSize + 1) + 1]})
+                .Select(b => new
+                {
+                    Block = b,
+                    Epoch = _stakingStorage.Epochs.TryGetValue(b.Depth / (_epochSize + 1) + 1, out var epoch)
+                        ? epoch
+                        : null
+                })
+                .Where(pair => pair.Epoch != null)
                 .Where(pair => !pair.Epoch.HasFinalized).ToList();
 
-            var preparedNonFinalizedCheckpoints = nonFinalizedCheckpointsWithEpochs
-                .Where(pair => pair.Epoch.HasPrepared && pair.Epoch.PreviousEpoch.HasFinalized).ToList();
+            var preparedNonFinalizedCheckpoint = nonFinalizedCheckpointsWithEpochs
+                .Where(pair => pair.Epoch.HasPrepared && pair.Epoch.PreviousEpoch.HasFinalized)
+                .Where(pair => !_stakingStorage.NodesVotes.Contains($"{pair.Block.UniqueId}-COMMIT-{_nodeId}"))
+                .OrderByDescending(pair =>
+                    pair.Epoch.CheckpointsWithCommitStakes.TryGetValue(pair.Block.UniqueId, out var result)
+                        ? result
+                        : 0)
+                .ThenByDescending(pair =>
+                    pair.Epoch.CheckpointsWithPrepareStakes.TryGetValue(pair.Block.UniqueId, out var result)
+                        ? result
+                        : 0)
+                .FirstOrDefault();
 
-            var nonPreparedCheckpointsWithPreparedParents = nonFinalizedCheckpointsWithEpochs
-                .Where(pair => !pair.Epoch.HasPrepared && pair.Epoch.PreviousEpoch.HasPrepared).ToList();
+            var nonPreparedCheckpointsWithPreparedParent = nonFinalizedCheckpointsWithEpochs
+                .Where(pair => !pair.Epoch.HasPrepared && pair.Epoch.PreviousEpoch.HasPrepared)
+                .Where(pair => !_stakingStorage.NodesVotes.Contains($"{pair.Block.UniqueId}-PREPARE-{_nodeId}"))
+                .OrderByDescending(pair =>
+                    pair.Epoch.CheckpointsWithCommitStakes.TryGetValue(pair.Block.UniqueId, out var result)
+                        ? result
+                        : 0)
+                .ThenByDescending(pair =>
+                    pair.Epoch.CheckpointsWithPrepareStakes.TryGetValue(pair.Block.UniqueId, out var result)
+                        ? result
+                        : 0)
+                .FirstOrDefault();
 
-            var transactionService = _serviceProvider.GetService<ITransactionService>();
+            if (preparedNonFinalizedCheckpoint != null)
+            {
+                _stakingStorage.NodesVotes.Add($"{preparedNonFinalizedCheckpoint.Block.UniqueId}-COMMIT-{_nodeId}");
+
+                _transactionService.AddTransaction(new Model.Transaction.Transaction
+                {
+                    Amount = 0,
+                    Fee = 0,
+                    Recipient = Guid.Empty.ToString(),
+                    Sender = _nodeId,
+                    TransactionMessage = new Model.Messages.CommitMessage
+                    {
+                        EpochTarget = preparedNonFinalizedCheckpoint.Epoch.Number,
+                        IdTarget = preparedNonFinalizedCheckpoint.Block.UniqueId,
+                        MessageType = Model.Messages.TransactionMessageTypes.Commit
+                    }
+                });
+            }
+            else if (nonPreparedCheckpointsWithPreparedParent != null)
+            {
+                _stakingStorage.NodesVotes.Add(
+                    $"{nonPreparedCheckpointsWithPreparedParent.Block.UniqueId}-PREPARE-{_nodeId}");
+
+                _transactionService.AddTransaction(new Model.Transaction.Transaction
+                {
+                    Amount = 0,
+                    Fee = 0,
+                    Recipient = Guid.Empty.ToString(),
+                    Sender = _nodeId,
+                    TransactionMessage = new Model.Messages.PrepareMessage
+                    {
+                        IdTarget = nonPreparedCheckpointsWithPreparedParent.Block.UniqueId,
+                        EpochTarget = nonPreparedCheckpointsWithPreparedParent.Epoch.Number,
+                        IdSource = nonPreparedCheckpointsWithPreparedParent.Epoch.PreviousEpoch.PreparedBlockId,
+                        EpochSource = nonPreparedCheckpointsWithPreparedParent.Epoch.PreviousEpoch.Number,
+                        MessageType = Model.Messages.TransactionMessageTypes.Prepare
+                    }
+                });
+            }
         }
     }
 }
