@@ -81,6 +81,7 @@ namespace BlockchainSimulator.Node.DataAccess.Repositories
                     }
                 } while (block != null);
 
+                blockchain.Blocks = blockchain.Blocks.OrderBy(b => b.Depth).ToList();
                 return blockchain;
             }
         }

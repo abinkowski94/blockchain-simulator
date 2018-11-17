@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Node.BusinessLogic.Model.Staking;
 using BlockchainSimulator.Node.BusinessLogic.Storage;
 using BlockchainSimulator.Node.DataAccess.Model;
@@ -82,28 +83,19 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             {
                 return new BlockchainTree {Blocks = new List<BlockBase>()};
             }
-            
+
             var blockchainTree = _blockchainRepository.GetBlockchainTree();
             var longestBlockchainStart =
                 _blockchainRepository.GetBlockchainFromBranch(lastPreparedBlock.PreparedBlockId);
-                
-//                var block = longestBlockchainStart.Blocks.LastOrDefault();
-//                if (block != null)
-//                {
-//                    do
-//                    {
-//                        block = blockchainTree.Blocks.FirstOrDefault(b =>
-//                            block is Block current && b.UniqueId == current.ParentUniqueId);
-//
-//                        if (block != null)
-//                        {
-//                            blockchain.Blocks.Add(block);
-//                        }
-//                    } while (block != null);
-//                }
+            var block = longestBlockchainStart.Blocks.LastOrDefault();
+
+            if (block != null)
+            {
+                var blockchainTreeTail = GetTreeTail(block, blockchainTree.Blocks);
+                longestBlockchainStart.Blocks.AddRange(blockchainTreeTail);
+            }
 
             return longestBlockchainStart;
-
         }
 
         private GenesisBlock CreateGenesisBlock()
@@ -327,6 +319,37 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                     }
                 });
             }
+        }
+
+        private static List<BlockBase> GetTreeTail(BlockBase rootBlock, List<BlockBase> blockchainTreeBlocks)
+        {
+            var treeItems = blockchainTreeBlocks.Select(b => new TreeItem<BlockBase> {Item = b}).ToList();
+
+            treeItems.ForEach(treeItem =>
+            {
+                treeItem.Children = treeItems.Where(childTreeItem => childTreeItem.Item is Block blockWithChildren &&
+                                                                     blockWithChildren.ParentUniqueId ==
+                                                                     treeItem.Item.UniqueId).ToList();
+                treeItem.Children.ForEach(child => child.Parent = treeItem);
+            });
+
+            var result = new List<BlockBase>();
+
+            var children = treeItems.FirstOrDefault(treeItem => treeItem.Item.UniqueId == rootBlock.UniqueId)?.Children;
+            if (children != null)
+            {
+                do
+                {
+                    var child = children.OrderByDescending(c => c.Height).FirstOrDefault();
+                    if (child != null)
+                    {
+                        result.Add(child.Item);
+                        children = child.Children;
+                    }
+                } while (children.Any());
+            }
+
+            return result;
         }
     }
 }
