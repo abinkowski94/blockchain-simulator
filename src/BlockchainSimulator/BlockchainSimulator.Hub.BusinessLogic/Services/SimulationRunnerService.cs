@@ -20,6 +20,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 
 namespace BlockchainSimulator.Hub.BusinessLogic.Services
 {
@@ -137,10 +138,11 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                             $@"contentRoot|-|{nodesPath}",
                             $"Node:Id|-|{node.Id}",
                             $"Node:Type|-|{simulation.BlockchainConfiguration.Type}",
+                            $"Node:IsValidator|-|{settings.StartupValidators.Contains(node.Id)}",
                             $"BlockchainConfiguration:Version|-|{simulation.BlockchainConfiguration.Version}",
                             $"BlockchainConfiguration:Target|-|{simulation.BlockchainConfiguration.Target}",
                             $"BlockchainConfiguration:BlockSize|-|{simulation.BlockchainConfiguration.BlockSize}",
-                            $"BlockchainConfiguration:StartupValidators|-|{settings.StartupValidatorsWithStakes}"
+                            $"BlockchainConfiguration:StartupValidators|-|{JsonConvert.SerializeObject(settings.StartupValidatorsWithStakes)}"
                         },
                         FileName = "dotnet"
                     });
@@ -195,7 +197,9 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
                     NodeType = simulation.BlockchainConfiguration.Type,
                     Version = simulation.BlockchainConfiguration.Version,
                     Target = simulation.BlockchainConfiguration.Target,
-                    StartupValidatorsWithStakes = settings.StartupValidatorsWithStakes
+                    StartupValidatorsWithStakes = settings.StartupValidatorsWithStakes,
+                    EpochSize = simulation.BlockchainConfiguration.EpochSize,
+                    NodeIsValidator = settings.StartupValidators.Contains(node.Id)
                 });
                 var response = _httpService.Post($"{node.HttpAddress}/api/info/config", content, _nodeTimeout, token);
                 if (!response.IsSuccessStatusCode)

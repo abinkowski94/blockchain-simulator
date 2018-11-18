@@ -99,7 +99,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             return _blockchainRepository.BlockExists(blockUniqueId);
         }
 
-        public void Clear()
+        public virtual void Clear()
         {
             _blockchainRepository.Clear();
         }

@@ -13,5 +13,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Storage
             Epochs = new ConcurrentDictionary<int, Epoch>();
             NodesVotes = new ConcurrentBag<string>();
         }
+
+        public void Clear()
+        {
+            Epochs.Clear();
+            NodesVotes.Clear();
+        }
     }
 }

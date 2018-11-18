@@ -30,5 +30,11 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Model.Scenarios
         /// </summary>
         [JsonProperty("version")]
         public string Version { get; set; }
+        
+        /// <summary>
+        /// The epoch size
+        /// </summary>
+        [JsonProperty("epochSize")]
+        public int EpochSize { get; set; }
     }
 }

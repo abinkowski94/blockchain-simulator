@@ -1,13 +1,31 @@
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BlockchainSimulator.Common.Models
 {
+    /// <summary>
+    /// The tree item
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class TreeItem<T>
     {
+        /// <summary>
+        /// Inner item
+        /// </summary>
         public T Item { get; set; }
-        public int Height => (Children != null ? Children.Any() ? Children.Max(c => c.Height) : 0 : 0) + 1;
+        
+        /// <summary>
+        /// Height of the tree
+        /// </summary>
+        public int Height { get; set; }
+        
+        /// <summary>
+        /// The parent of the tree
+        /// </summary>
         public TreeItem<T> Parent { get; set; }
+        
+        /// <summary>
+        /// The children of te tree
+        /// </summary>
         public List<TreeItem<T>> Children { get; set; }
     }
 }

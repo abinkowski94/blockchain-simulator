@@ -1,8 +1,8 @@
-using System;
-using System.Diagnostics.CodeAnalysis;
 using BlockchainSimulator.Node.DataAccess.Model.Messages;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BlockchainSimulator.Node.DataAccess.Converters
 {
@@ -19,16 +19,24 @@ namespace BlockchainSimulator.Node.DataAccess.Converters
             try
             {
                 var jObject = JObject.Load(reader);
-                var transactionType = jObject["messageType"].Value<TransactionMessageTypes>();
+                if (jObject["messageType"] == null)
+                {
+                    return new TransactionMessage { MessageType = TransactionMessageTypes.None };
+                }
+
+                var transactionTypeInt = jObject["messageType"].Value<int>();
+                var transactionType = (TransactionMessageTypes)transactionTypeInt;
 
                 switch (transactionType)
                 {
                     case TransactionMessageTypes.Commit:
-                        return jObject.ToObject<CommitMessage>(serializer);
+                        return JsonConvert.DeserializeObject<CommitMessage>(jObject.ToString());
+
                     case TransactionMessageTypes.Prepare:
-                        return jObject.ToObject<PrepareMessage>(serializer);
+                        return JsonConvert.DeserializeObject<PrepareMessage>(jObject.ToString());
+
                     default:
-                        return jObject.ToObject<TransactionMessage>(serializer);
+                        return JsonConvert.DeserializeObject<TransactionMessage>(jObject.ToString());
                 }
             }
             catch (JsonReaderException)

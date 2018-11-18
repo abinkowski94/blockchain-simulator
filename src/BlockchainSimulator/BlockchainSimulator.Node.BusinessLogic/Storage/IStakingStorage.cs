@@ -7,5 +7,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Storage
     {
         ConcurrentDictionary<int, Epoch> Epochs { get; }
         ConcurrentBag<string> NodesVotes { get; }
+        void Clear();
     }
 }
