@@ -45,9 +45,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         {
             if (!token.IsCancellationRequested)
             {
-                SpinWait.SpinUntil(() => !_backgroundQueue.IsWorking);
-
-                var longestBlockchain = _blockchainService.GetLongestBlockchain();
+               var longestBlockchain = _blockchainService.GetLongestBlockchain();
                 if (longestBlockchain?.Blocks != null)
                 {
                     var longestBlockchainTransactionsIds = longestBlockchain.Blocks.SelectMany(b => b.Body.Transactions)
