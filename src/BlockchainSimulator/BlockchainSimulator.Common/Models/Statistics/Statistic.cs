@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace BlockchainSimulator.Common.Models.Statistics
@@ -48,5 +49,11 @@ namespace BlockchainSimulator.Common.Models.Statistics
         /// </summary>
         [JsonProperty("nodeId", Order = 5)]
         public string NodeId { get; set; }
+       
+        /// <summary>
+        /// The epoch statistics
+        /// </summary>
+        [JsonProperty("epochs", Order = 8)]
+        public List<Epoch> Epochs { get; set; }
     }
 }

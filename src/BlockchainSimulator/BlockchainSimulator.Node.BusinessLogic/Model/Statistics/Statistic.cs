@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using BlockchainSimulator.Node.BusinessLogic.Model.Staking;
+
 namespace BlockchainSimulator.Node.BusinessLogic.Model.Statistics
 {
     public class Statistic
@@ -15,5 +18,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Model.Statistics
         public string Version { get; set; }
 
         public string NodeId { get; set; }
+
+        public List<Epoch> Epochs { get; set; }
     }
 }

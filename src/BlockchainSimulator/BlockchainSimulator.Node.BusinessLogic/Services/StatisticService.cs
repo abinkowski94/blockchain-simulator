@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BlockchainSimulator.Node.BusinessLogic.Storage;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services
 {
@@ -19,6 +20,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
         private readonly IHubContext<SimulationHub, ISimulationClient> _simulationHubContext;
         private readonly IBlockchainService _blockchainService;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IStakingStorage _stakingStorage;
         private readonly object _padlock = new object();
 
         private int _rejectedIncomingBlockCount;
@@ -33,11 +35,12 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             _serviceProvider.GetService<IConfigurationService>()?.GetConfiguration();
 
         public StatisticService(IHubContext<SimulationHub, ISimulationClient> simulationHubContext,
-            IBlockchainService blockchainService, IServiceProvider serviceProvider)
+            IBlockchainService blockchainService, IServiceProvider serviceProvider, IStakingStorage stakingStorage)
         {
             _simulationHubContext = simulationHubContext;
             _blockchainService = blockchainService;
             _serviceProvider = serviceProvider;
+            _stakingStorage = stakingStorage;
         }
 
         public void RegisterMiningAttempt()
@@ -80,7 +83,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services
             }
 
             var blockchain = _blockchainService.GetLongestBlockchain();
-            var result = new Statistic();
+            var result = new Statistic
+            {
+                Epochs = _stakingStorage.Epochs.Values.ToList()
+            };
 
             AddSessionConfiguration(result);
             AddMiningQueueStatistics(result);

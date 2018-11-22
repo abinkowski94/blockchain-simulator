@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using BlockchainSimulator.Common.Models;
 using BlockchainSimulator.Node.BusinessLogic.Model.Staking;
@@ -9,9 +8,7 @@ using BlockchainSimulator.Node.DataAccess.Model;
 using BlockchainSimulator.Node.DataAccess.Model.Block;
 using BlockchainSimulator.Node.DataAccess.Model.Messages;
 using BlockchainSimulator.Node.DataAccess.Repositories;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using Transaction = BlockchainSimulator.Node.DataAccess.Model.Transaction.Transaction;
 
 namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
@@ -22,7 +19,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
         private readonly int _epochSize;
         private readonly string _nodeId;
         private readonly bool _isValidator;
-        private readonly string _directoryPath;
         private readonly Dictionary<string, int> _startupValidators;
         private readonly IStakingStorage _stakingStorage;
         private readonly IServiceProvider _serviceProvider;
@@ -30,8 +26,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
         public ProofOfStakeBlockchainService(IConfigurationService configurationService,
             IBlockchainRepository blockchainRepository, IStakingStorage stakingStorage,
-            IServiceProvider serviceProvider, IHostingEnvironment environment) : base(configurationService,
-            blockchainRepository)
+            IServiceProvider serviceProvider) : base(configurationService, blockchainRepository)
         {
             var configuration = configurationService.GetConfiguration();
             _epochSize = configuration.EpochSize;
@@ -41,14 +36,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
             _stakingStorage = stakingStorage;
             _serviceProvider = serviceProvider;
-
-            var contentRoot = environment.ContentRootPath ?? Directory.GetCurrentDirectory();
-            _directoryPath = $"{contentRoot}\\staking-storage";
-
-            if (!Directory.Exists(_directoryPath))
-            {
-                Directory.CreateDirectory(_directoryPath);
-            }
         }
 
         public override void Clear()
@@ -82,12 +69,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             if (_isValidator)
             {
                 AddVotingTransactions();
-            }
-
-            if (block.Depth % _epochSize == 0)
-            {
-                File.WriteAllText($@"{_directoryPath}\epochs-{_nodeId}.json",
-                    JsonConvert.SerializeObject(_stakingStorage.Epochs));
             }
         }
 
@@ -336,7 +317,8 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                     {
                         IdTarget = nonPreparedCheckpointsWithPreparedParent.Block.UniqueId,
                         EpochTarget = nonPreparedCheckpointsWithPreparedParent.Epoch.Number,
-                        IdSource = GetFinalizedEpochAncestor(nonPreparedCheckpointsWithPreparedParent.Epoch).PreparedBlockId,
+                        IdSource = GetFinalizedEpochAncestor(nonPreparedCheckpointsWithPreparedParent.Epoch)
+                            .PreparedBlockId,
                         EpochSource = GetFinalizedEpochAncestor(nonPreparedCheckpointsWithPreparedParent.Epoch).Number,
                         MessageType = Model.Messages.TransactionMessageTypes.Prepare
                     }
@@ -386,13 +368,13 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 {
                     return ancestor;
                 }
-                
+
                 ancestor = ancestor.PreviousEpoch;
             }
 
             return null;
         }
-        
+
         private static Epoch GetPreparedEpochAncestor(Epoch epoch)
         {
             var ancestor = epoch.PreviousEpoch;
@@ -402,7 +384,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 {
                     return ancestor;
                 }
-                
+
                 ancestor = ancestor.PreviousEpoch;
             }
 

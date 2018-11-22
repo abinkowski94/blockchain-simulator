@@ -39,6 +39,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 Console.WriteLine(e);
             }
+
             try
             {
                 CreateExcelFile(directoryPath, statistics, settings);
@@ -47,6 +48,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 Console.WriteLine(e);
             }
+
             try
             {
                 CreateBlockchainTrees(statistics, directoryPath);
@@ -70,7 +72,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             {
                 var longestBlockchainStatistics =
                     statistics.OrderByDescending(s => s.BlockchainStatistics.TotalTransactionsCount).First();
-                
+
                 longestBlockchainStatistics.BlockchainStatistics.BlockInfos = statistics
                     .SelectMany(s => s.BlockchainStatistics.BlockInfos).GroupBy(bi => bi.UniqueId)
                     .Select(g => g.First()).ToList();
@@ -136,6 +138,25 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             simulationResultsSheet.Cells[++row, 1].Value = "Blockchain tree nodes count";
             simulationResultsSheet.Cells[row, 2].Value =
                 longestBlockchainStatistics.BlockchainStatistics.BlockInfos.Count;
+            simulationResultsSheet.Cells[++row, 1].Value = "Efficiency";
+            simulationResultsSheet.Cells[row, 2].Value =
+                longestBlockchainStatistics.BlockchainStatistics.BlocksCount /
+                (decimal) longestBlockchainStatistics.BlockchainStatistics.BlockInfos.Count;
+            simulationResultsSheet.Cells[++row, 1].Value = "Average transaction confirmation";
+            simulationResultsSheet.Cells[row, 2].Value =
+                longestBlockchainStatistics.BlockchainStatistics.TransactionsStatistics
+                    .Select(t => t.TransactionConfirmationTime.TotalSeconds).Average();
+            row += 2;
+
+            simulationResultsSheet.Cells[++row, 1].Value = "Proof of stake section:";
+            simulationResultsSheet.Cells[row, 1].Style.Font.Bold = true;
+
+            simulationResultsSheet.Cells[++row, 1].Value = "Epochs count:";
+            simulationResultsSheet.Cells[row, 2].Value = longestBlockchainStatistics.Epochs.Count;
+            simulationResultsSheet.Cells[++row, 1].Value = "Prepared epochs count:";
+            simulationResultsSheet.Cells[row, 2].Value = longestBlockchainStatistics.Epochs.Count(e => e.HasPrepared);
+            simulationResultsSheet.Cells[++row, 1].Value = "Finalized epochs count:";
+            simulationResultsSheet.Cells[row, 2].Value = longestBlockchainStatistics.Epochs.Count(e => e.HasFinalized);
             row += 2;
 
             simulationResultsSheet.Cells[++row, 1].Value = "Transactions statistics";
@@ -302,7 +323,7 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
         {
             if (result == null)
             {
-                result = new List<NodeModel> { root };
+                result = new List<NodeModel> {root};
             }
             else
             {
