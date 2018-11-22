@@ -16,10 +16,10 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
     public class ProofOfStakeBlockchainService : ProofOfWorkBlockchainService
     {
         private const decimal TwoThird = 0.666_666_666_666_666_666_666_666_666M;
-        private readonly int _epochSize;
-        private readonly string _nodeId;
-        private readonly bool _isValidator;
-        private readonly Dictionary<string, int> _startupValidators;
+        private int EpochSize => BlockchainNodeConfiguration.EpochSize;
+        private string NodeId => BlockchainNodeConfiguration.NodeId;
+        private bool IsValidator => BlockchainNodeConfiguration.NodeIsValidator;
+        private Dictionary<string, int> StartupValidators => BlockchainNodeConfiguration.StartupValidatorsWithStakes;
         private readonly IStakingStorage _stakingStorage;
         private readonly IServiceProvider _serviceProvider;
         private ITransactionService _transactionService;
@@ -28,12 +28,6 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             IBlockchainRepository blockchainRepository, IStakingStorage stakingStorage,
             IServiceProvider serviceProvider) : base(configurationService, blockchainRepository)
         {
-            var configuration = configurationService.GetConfiguration();
-            _epochSize = configuration.EpochSize;
-            _nodeId = configuration.NodeId;
-            _isValidator = configuration.NodeIsValidator;
-            _startupValidators = configuration.StartupValidatorsWithStakes;
-
             _stakingStorage = stakingStorage;
             _serviceProvider = serviceProvider;
         }
@@ -66,7 +60,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             AddOrUpdateEpoch(block);
 
             // Add voting transactions if node is validator
-            if (_isValidator)
+            if (IsValidator)
             {
                 AddVotingTransactions();
             }
@@ -118,7 +112,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                 },
                 Body = new Body
                 {
-                    Transactions = _startupValidators.Select((v, index) => new Transaction
+                    Transactions = StartupValidators.Select((v, index) => new Transaction
                     {
                         Id = $"{Guid.Empty}-{index}",
                         Sender = v.Key,
@@ -174,7 +168,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
 
         private void CreateOrUpdateEpoch(BlockBase block, List<Transaction> allMessagedTransactions)
         {
-            var epochNumber = block.Depth / (_epochSize + 1) + 1;
+            var epochNumber = block.Depth / (EpochSize + 1) + 1;
             if (_stakingStorage.Epochs.TryGetValue(epochNumber - 1, out var previousEpoch))
             {
                 var currentEpoch = _stakingStorage.Epochs.GetOrAdd(epochNumber, new Epoch(previousEpoch, epochNumber));
@@ -248,11 +242,11 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
             _transactionService = _transactionService ?? _serviceProvider.GetService<ITransactionService>();
 
             var nonFinalizedCheckpointsWithEpochs = _blockchainRepository.GetBlockchainTree().Blocks
-                .Where(b => b.Depth > 0 && b.Depth % _epochSize == 0)
+                .Where(b => b.Depth > 0 && b.Depth % EpochSize == 0)
                 .Select(b => new
                 {
                     Block = b,
-                    Epoch = _stakingStorage.Epochs.TryGetValue(b.Depth / (_epochSize + 1) + 1, out var epoch)
+                    Epoch = _stakingStorage.Epochs.TryGetValue(b.Depth / (EpochSize + 1) + 1, out var epoch)
                         ? epoch
                         : null
                 })
@@ -294,7 +288,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                     Amount = 0,
                     Fee = 0,
                     Recipient = Guid.Empty.ToString(),
-                    Sender = _nodeId,
+                    Sender = NodeId,
                     TransactionMessage = new Model.Messages.CommitMessage
                     {
                         EpochTarget = preparedNonFinalizedCheckpoint.Epoch.Number,
@@ -312,7 +306,7 @@ namespace BlockchainSimulator.Node.BusinessLogic.Services.Specific
                     Amount = 0,
                     Fee = 0,
                     Recipient = Guid.Empty.ToString(),
-                    Sender = _nodeId,
+                    Sender = NodeId,
                     TransactionMessage = new Model.Messages.PrepareMessage
                     {
                         IdTarget = nonPreparedCheckpointsWithPreparedParent.Block.UniqueId,
