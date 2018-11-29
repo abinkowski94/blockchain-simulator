@@ -155,8 +155,16 @@ namespace BlockchainSimulator.Hub.BusinessLogic.Services
             simulationResultsSheet.Cells[row, 2].Value = longestBlockchainStatistics.Epochs.Count;
             simulationResultsSheet.Cells[++row, 1].Value = "Prepared epochs count:";
             simulationResultsSheet.Cells[row, 2].Value = longestBlockchainStatistics.Epochs.Count(e => e.HasPrepared);
+            simulationResultsSheet.Cells[row, 3].Value = longestBlockchainStatistics.Epochs.Count(e => e.HasPrepared) /
+                                                         (decimal)(longestBlockchainStatistics.Epochs.Count == 0
+                                                             ? 1
+                                                             : longestBlockchainStatistics.Epochs.Count);
             simulationResultsSheet.Cells[++row, 1].Value = "Finalized epochs count:";
             simulationResultsSheet.Cells[row, 2].Value = longestBlockchainStatistics.Epochs.Count(e => e.HasFinalized);
+            simulationResultsSheet.Cells[row, 3].Value = longestBlockchainStatistics.Epochs.Count(e => e.HasFinalized) /
+                                                         (decimal)(longestBlockchainStatistics.Epochs.Count == 0
+                                                             ? 1
+                                                             : longestBlockchainStatistics.Epochs.Count);
             row += 2;
 
             simulationResultsSheet.Cells[++row, 1].Value = "Transactions statistics";
